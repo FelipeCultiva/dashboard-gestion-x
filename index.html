@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DASHBOARD GESTIÓN X - MCM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #090e17;
+      --surface: #111927;
+      --card-bg: #1a2333;
+      --border: #263346;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.15);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    #loginScreen {
+      display: flex; min-height: 100vh; align-items: center; justify-content: center;
+      padding: 16px; background: radial-gradient(circle at top, #1e293b 0%, #090e17 100%);
+    }
+    .login-box {
+      width: 100%; max-width: 400px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.6);
+    }
+    .login-brand { text-align: center; margin-bottom: 24px; }
+    .login-logo {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 12px; background: var(--primary);
+      color: #fff; font-size: 22px; font-weight: 800; margin-bottom: 12px;
+    }
+    .login-brand h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .login-brand p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .input-login {
+      background: #090e17; border: 1px solid var(--border); color: #fff;
+      padding: 11px 14px; border-radius: 10px; font-size: 13px; outline: none;
+    }
+    .input-login:focus { border-color: var(--primary); }
+
+    .btn-login {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .btn-login:hover { background: var(--primary-hover); }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 12px;
+      margin-bottom: 14px; display: none; text-align: center;
+    }
+    .login-footer-info {
+      margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);
+      text-align: center; font-size: 11px; color: var(--text-muted);
+    }
+    .login-footer-info a { color: #38bdf8; text-decoration: none; font-weight: 600; }
+
+    #dashboardApp { display: none; padding: 14px; }
+
+    .app-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 10px;
+    }
+    .app-title h1 { font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .badge-scope { font-size: 10px; background: rgba(37,99,235,0.25); color: #93c5fd; padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(59,130,246,0.4); text-transform: uppercase; }
+    .app-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .user-panel { display: flex; align-items: center; gap: 10px; }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px; background: var(--card-bg);
+      border: 1px solid var(--border); padding: 6px 12px; border-radius: 99px;
+    }
+    .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; }
+    .user-info { display: flex; flex-direction: column; text-align: left; }
+    .user-name { font-size: 11px; font-weight: 700; color: #fff; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 9px; color: #38bdf8; font-weight: 700; text-transform: uppercase; }
+    .btn-logout {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+      cursor: pointer;
+    }
+
+    .restricted-banner {
+      background: rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.3);
+      padding: 8px 12px; border-radius: 10px; font-size: 11px; margin-bottom: 14px;
+    }
+
+    .filter-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+    }
+    .filters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .filters-header span { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .filters-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .filter-item { display: flex; flex-direction: column; gap: 4px; }
+    .filter-item label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .filter-item select, .filter-item input {
+      background: #090e17; border: 1px solid var(--border); color: #fff;
+      padding: 8px 10px; border-radius: 8px; font-size: 12px; outline: none;
+    }
+    .filter-item select:disabled { opacity: 0.5; cursor: not-allowed; background: #131a26; }
+
+    .admin-bar {
+      display: flex; gap: 8px; margin-top: 12px; padding-top: 10px;
+      border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .btn-action {
+      background: var(--card-bg); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 12px; border-radius: 8px;
+      font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 10px; margin-bottom: 14px;
+    }
+    @media (min-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; position: relative;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .kpi-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .badge-kpi { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; }
+    .badge-green { background: var(--success-glow); color: var(--success); }
+    .badge-yellow { background: var(--warning-glow); color: var(--warning); }
+    .badge-red { background: var(--danger-glow); color: var(--danger); }
+    .kpi-val { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    @media (min-width: 768px) { .kpi-val { font-size: 24px; } }
+    .kpi-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+    .prog-bar { background: #263346; height: 5px; border-radius: 3px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
+    .tabs-bar {
+      display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto;
+      padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-muted); padding: 8px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .table-container {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      background: #141f30; padding: 10px 12px; text-transform: uppercase;
+      font-size: 10px; font-weight: 800; color: var(--text-muted);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #1c2738; white-space: nowrap; }
+    .tar { text-align: right; }
+    .fw-bold { font-weight: 700; }
+    .row-region { background: rgba(37,99,235,0.08); font-weight: 800; font-size: 13px; }
+    .row-agencia { background: rgba(255,255,255,0.02); font-weight: 700; }
+    .row-ejecutivo td:first-child { padding-left: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. PANTALLA LOGIN -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <div class="login-brand">
+        <div class="login-logo">X</div>
+        <h2>GESTIÓN X</h2>
+        <p>Microfinanciera McM • Territorio 1</p>
+      </div>
+
+      <div class="login-error" id="loginErrorMsg">
+        Usuario o contraseña incorrectos. Verifica en la hoja de Drive.
+      </div>
+
+      <form onsubmit="handleLoginSubmit(event)">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="txtUsername" class="input-login" placeholder="Ej: gte_toluca o admin" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="txtPassword" class="input-login" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-login">Ingresar al Dashboard</button>
+      </form>
+
+      <div class="login-footer-info">
+        <span>Parámetros y credenciales vinculadas a:</span><br>
+        <a id="lnkConfigSheet" href="https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit" target="_blank">
+          Configuración y Metas en Google Drive ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DASHBOARD -->
+  <div id="dashboardApp">
+    <div class="app-bar">
+      <div class="app-title">
+        <h1>GESTIÓN X <span class="badge-scope" id="lblScope">McM</span></h1>
+        <span class="app-subtitle" id="lblCorte">Corte Semanal 33 (21-Ago-2026)</span>
+      </div>
+      <div class="user-panel">
+        <div class="user-chip">
+          <div class="user-avatar" id="avatarLetter">U</div>
+          <div class="user-info">
+            <span class="user-name" id="currentUserName">Usuario</span>
+            <span class="user-role" id="currentUserRole">Puesto</span>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Salir ↩</button>
+      </div>
+    </div>
+
+    <div class="restricted-banner">
+      <span id="bannerText">Calculando permisos...</span>
+    </div>
+
+    <div class="filter-card">
+      <div class="filters-header">
+        <span>Filtros Dinámicos</span>
+        <span style="font-size: 11px; color: #38bdf8; cursor: pointer;" onclick="resetFilters()">Reestablecer</span>
+      </div>
+      <div class="filters-grid">
+        <div class="filter-item">
+          <label>Empresa</label>
+          <select id="selEmpresa" disabled><option>McM</option></select>
+        </div>
+        <div class="filter-item">
+          <label>Territorio</label>
+          <select id="selTerritorio" disabled><option>Territorio 1</option></select>
+        </div>
+        <div class="filter-item">
+          <label>Región</label>
+          <select id="selRegion"><option value="ALL">Todas las Regiones</option></select>
+        </div>
+        <div class="filter-item">
+          <label>Agencia</label>
+          <select id="selAgencia"><option value="ALL">Todas las Agencias</option></select>
+        </div>
+        <div class="filter-item">
+          <label>Producto</label>
+          <select id="selProducto">
+            <option value="ALL">Consolidado (Todos)</option>
+            <option value="MCM">MCM Tradicional</option>
+            <option value="MXT">MXT (Más Por Ti)</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Buscar Ejecutivo</label>
+          <input type="text" id="txtSearch" placeholder="Nombre...">
+        </div>
+      </div>
+
+      <div class="admin-bar" id="adminActionsBar">
+        <button class="btn-action" onclick="document.getElementById('uploadFile').click()">
+          📥 Importar Nueva Fecha (.xlsx)
+        </button>
+        <input type="file" id="uploadFile" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+        <button class="btn-action" onclick="window.open('https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit', '_blank')">
+          ⚙️ Modificar Usuarios/Metas en Drive ↗
+        </button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="kpiContainer"></div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchView('hierarchy', this)">Estructura Jerárquica</button>
+      <button class="tab-btn" onclick="switchView('ranking', this)">Ranking Ejecutivos</button>
+      <button class="tab-btn" onclick="switchView('mxt', this)">Mix MCM vs MXT</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Estructura / Ejecutivo</th>
+            <th class="tar">Colocación</th>
+            <th class="tar">Clientes</th>
+            <th class="tar">Promedio</th>
+            <th class="tar">Normalidad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // PEGA AQUÍ LA URL GENERADA EN APPS SCRIPT
+    const APPS_SCRIPT_WEBAPP_URL = "REEMPLAZAR_CON_TU_URL_DE_APPS_SCRIPT_EXEC";
+
+    // Catálogo inicial de fallback
+    let USERS_DATABASE = [
+      { user: "admin", pass: "McM2026*", nombre: "Administrador General", rol: "ADMIN", territorio: "ALL", region: "ALL", agencia: "ALL" },
+      { user: "dir_comercial", pass: "Comercial2026*", nombre: "Dirección Comercial", rol: "DIR_COMERCIAL", territorio: "ALL", region: "ALL", agencia: "ALL" },
+      { user: "subdir_territorio1", pass: "Territorio1*", nombre: "Subdirección Territorial 1", rol: "SUBDIR_TERRITORIAL", territorio: "Territorio 1", region: "ALL", agencia: "ALL" },
+      { user: "gte_nevado", pass: "Nevado2026*", nombre: "ANGEL SALVADOR GUERRERO BARBOSA", rol: "GTE_REGIONAL", territorio: "Territorio 1", region: "NEVADO", agencia: "ALL" },
+      { user: "gte_toluca", pass: "Toluca2026*", nombre: "JANETH ALEJANDRA TORRES ESQUIVEL", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "TOLUCA" },
+      { user: "gte_zinacantepec", pass: "Zinacan2026*", nombre: "PATRICIA TOLENTINO ESTRADA", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "ZINACANTEPEC" },
+      { user: "gte_villavictoria", pass: "Villa2026*", nombre: "OSCAR CAMACHO GONZALEZ", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "VILLA VICTORIA" },
+      { user: "gte_zitacuaro", pass: "Zitacuaro2026*", nombre: "KARINA CARRILLO SALINAS", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "ZITACUARO" },
+      { user: "gte_vallebravo", pass: "Valle2026*", nombre: "ERICK SANCHEZ REBOLLAR", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "VALLE DE BRAVO" }
+    ];
+
+    let METAS = {
+      ejecutivo: { clientes: 50, cartera: 725000, promedio: 14500, normalidad: 0.95 },
+      agencia: { clientes: 250, cartera: 3625000, promedio: 14500, normalidad: 0.95 },
+      region: { clientes: 1250, cartera: 18125000, promedio: 14500, normalidad: 0.95 }
+    };
+
+    let STORE = {
+      fecha: "2026-08-21",
+      semana: 33,
+      records: [],
+      normEjec: {},
+      normGer: {},
+      normReg: 0.95
+    };
+
+    let currentUser = null;
+    let activeView = "hierarchy";
+
+    function init() {
+      syncFromDriveInBackground();
+      const saved = sessionStorage.getItem("gestion_x_session");
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          launchDashboard();
+          return;
+        } catch(e) {
+          sessionStorage.removeItem("gestion_x_session");
+        }
+      }
+      showLoginScreen();
+    }
+
+    function syncFromDriveInBackground() {
+      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("REEMPLAZAR")) return;
+
+      fetch(APPS_SCRIPT_WEBAPP_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.status === "success") {
+            if (data.users && data.users.length) USERS_DATABASE = data.users;
+            if (data.metas) METAS = data.metas;
+            if (data.records && data.records.length) {
+              STORE.records = data.records;
+              STORE.normEjec = data.normEjec || {};
+              STORE.normGer = data.normGer || {};
+              STORE.normReg = data.normReg || 0.95;
+              STORE.fecha = data.fechaCorte || STORE.fecha;
+              STORE.semana = data.semana || STORE.semana;
+              document.getElementById("lblCorte").textContent = `Corte Semanal ${STORE.semana} (${STORE.fecha})`;
+              if (currentUser) render();
+            }
+          }
+        })
+        .catch(() => console.log("Modo local activo."));
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById("txtUsername").value.trim().toLowerCase();
+      const p = document.getElementById("txtPassword").value.trim();
+      const errorMsg = document.getElementById("loginErrorMsg");
+
+      const found = USERS_DATABASE.find(acc => acc.user.toLowerCase() === u && acc.pass === p);
+
+      if (found) {
+        errorMsg.style.display = "none";
+        currentUser = found;
+        sessionStorage.setItem("gestion_x_session", JSON.stringify(found));
+        launchDashboard();
+      } else {
+        errorMsg.style.display = "block";
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem("gestion_x_session");
+      currentUser = null;
+      document.getElementById("txtPassword").value = "";
+      showLoginScreen();
+    }
+
+    function showLoginScreen() {
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("dashboardApp").style.display = "none";
+    }
+
+    function launchDashboard() {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("dashboardApp").style.display = "block";
+      applyUserSecurity();
+      setupListeners();
+      render();
+    }
+
+    function applyUserSecurity() {
+      document.getElementById("currentUserName").textContent = currentUser.nombre;
+      document.getElementById("currentUserRole").textContent = currentUser.rol.replace("_", " ");
+      document.getElementById("avatarLetter").textContent = currentUser.nombre.charAt(0);
+
+      const selReg = document.getElementById("selRegion");
+      const selAg = document.getElementById("selAgencia");
+      const banner = document.getElementById("bannerText");
+      const adminBar = document.getElementById("adminActionsBar");
+
+      const allRegiones = [...new Set(STORE.records.map(r => r.region))].sort();
+      const allAgencias = [...new Set(STORE.records.map(r => r.agencia))].sort();
+
+      selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
+        allRegiones.map(r => `<option value="${r}">${r}</option>`).join("");
+
+      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
+        allAgencias.map(a => `<option value="${a}">${a}</option>`).join("");
+
+      if (currentUser.rol === "GTE_AGENCIA") {
+        selReg.value = currentUser.region;
+        selReg.disabled = true;
+        selAg.innerHTML = `<option value="${currentUser.agencia}">${currentUser.agencia}</option>`;
+        selAg.value = currentUser.agencia;
+        selAg.disabled = true;
+        banner.innerHTML = `🔒 Gerencia de Agencia: <strong>${currentUser.agencia}</strong> (Solo su información autorizada)`;
+        adminBar.style.display = "none";
+      } else if (currentUser.rol === "GTE_REGIONAL") {
+        selReg.value = currentUser.region;
+        selReg.disabled = true;
+        selAg.disabled = false;
+        banner.innerHTML = `🏛️ Gerencia Regional: <strong>${currentUser.region}</strong> (Agencias a su cargo)`;
+        adminBar.style.display = "none";
+      } else if (currentUser.rol === "SUBDIR_TERRITORIAL") {
+        selReg.disabled = false;
+        selAg.disabled = false;
+        banner.innerHTML = `🏢 Subdirección Territorial: <strong>${currentUser.territorio}</strong>`;
+        adminBar.style.display = "flex";
+      } else {
+        selReg.disabled = false;
+        selAg.disabled = false;
+        banner.innerHTML = `🔓 Nivel Directivo / Admin: <strong>${currentUser.nombre}</strong> (Acceso y filtros totales)`;
+        adminBar.style.display = "flex";
+      }
+    }
+
+    function setupListeners() {
+      document.getElementById("selRegion").addEventListener("change", render);
+      document.getElementById("selAgencia").addEventListener("change", render);
+      document.getElementById("selProducto").addEventListener("change", render);
+      document.getElementById("txtSearch").addEventListener("input", render);
+    }
+
+    function resetFilters() {
+      document.getElementById("selProducto").value = "ALL";
+      document.getElementById("txtSearch").value = "";
+      if (!document.getElementById("selRegion").disabled) document.getElementById("selRegion").value = "ALL";
+      if (!document.getElementById("selAgencia").disabled) document.getElementById("selAgencia").value = "ALL";
+      render();
+    }
+
+    function getFilteredData() {
+      const reg = document.getElementById("selRegion").value;
+      const ag = document.getElementById("selAgencia").value;
+      const prod = document.getElementById("selProducto").value;
+      const search = document.getElementById("txtSearch").value.toLowerCase().trim();
+
+      return STORE.records.filter(r => {
+        if (currentUser.rol === "GTE_AGENCIA" && r.agencia !== currentUser.agencia) return false;
+        if (currentUser.rol === "GTE_REGIONAL" && r.region !== currentUser.region) return false;
+
+        if (reg !== "ALL" && r.region !== reg) return false;
+        if (ag !== "ALL" && r.agencia !== ag) return false;
+        if (prod === "MCM" && r.es_mxt) return false;
+        if (prod === "MXT" && !r.es_mxt) return false;
+        if (search && !r.ejecutivo.toLowerCase().includes(search)) return false;
+        return true;
+      });
+    }
+
+    function getStatus(val, meta, type = "ratio") {
+      if (type === "normalidad") {
+        if (val >= 0.95) return "green";
+        if (val >= 0.90) return "yellow";
+        return "red";
+      }
+      const r = meta > 0 ? (val / meta) : 0;
+      if (r >= 1.0) return "green";
+      if (r >= 0.9) return "yellow";
+      return "red";
+    }
+
+    function fmtMoney(n) { return "$" + Math.round(n).toLocaleString("es-MX"); }
+    function fmtPct(n) { return (n * 100).toFixed(1) + "%"; }
+
+    function renderKPIs(filtered) {
+      const selAg = document.getElementById("selAgencia").value;
+      const level = (selAg !== "ALL" || currentUser.rol === "GTE_AGENCIA") ? "agencia" : "region";
+      const target = METAS[level] || METAS.agencia;
+
+      const sumCartera = filtered.reduce((s, r) => s + r.desembolso, 0);
+      const countClientes = filtered.length;
+      const avgCartera = countClientes > 0 ? sumCartera / countClientes : 0;
+
+      let norm = STORE.normReg;
+      if (level === "agencia") {
+        const agName = (selAg !== "ALL") ? selAg : currentUser.agencia;
+        norm = STORE.normGer[agName] || 0;
+      }
+
+      const kpis = [
+        {
+          title: "Cartera Colocada",
+          val: fmtMoney(sumCartera),
+          meta: "Meta: " + fmtMoney(target.cartera),
+          pct: ((sumCartera / target.cartera) * 100).toFixed(0) + "%",
+          status: getStatus(sumCartera, target.cartera),
+          fill: Math.min(100, (sumCartera / target.cartera) * 100)
+        },
+        {
+          title: "Clientes",
+          val: countClientes.toLocaleString("es-MX"),
+          meta: "Meta: " + target.clientes,
+          pct: ((countClientes / target.clientes) * 100).toFixed(0) + "%",
+          status: getStatus(countClientes, target.clientes),
+          fill: Math.min(100, (countClientes / target.clientes) * 100)
+        },
+        {
+          title: "Promedio",
+          val: fmtMoney(avgCartera),
+          meta: "Meta: " + fmtMoney(target.promedio),
+          pct: ((avgCartera / target.promedio) * 100).toFixed(0) + "%",
+          status: getStatus(avgCartera, target.promedio),
+          fill: Math.min(100, (avgCartera / target.promedio) * 100)
+        },
+        {
+          title: "Normalidad",
+          val: fmtPct(norm),
+          meta: "Meta: >=95%",
+          pct: norm >= 0.95 ? "OK" : "Riesgo",
+          status: getStatus(norm, 0.95, "normalidad"),
+          fill: Math.min(100, norm * 100)
+        }
+      ];
+
+      document.getElementById("kpiContainer").innerHTML = kpis.map(k => `
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">${k.title}</span>
+            <span class="badge-kpi badge-${k.status}">${k.pct}</span>
+          </div>
+          <div class="kpi-val">${k.val}</div>
+          <div class="kpi-sub">${k.meta}</div>
+          <div class="prog-bar">
+            <div class="prog-fill" style="width:${k.fill}%; background:var(--${k.status === 'green' ? 'success' : (k.status === 'yellow' ? 'warning' : 'danger')});"></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(filtered) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      if (activeView === "ranking") {
+        const byEjec = {};
+        filtered.forEach(r => {
+          if (!byEjec[r.ejecutivo]) byEjec[r.ejecutivo] = { nombre: r.ejecutivo, agencia: r.agencia, cartera: 0, clientes: 0, mxt: 0 };
+          byEjec[r.ejecutivo].cartera += r.desembolso;
+          byEjec[r.ejecutivo].clientes += 1;
+          if (r.es_mxt) byEjec[r.ejecutivo].mxt += 1;
+        });
+
+        Object.values(byEjec).sort((a, b) => b.cartera - a.cartera).forEach(e => {
+          const prom = e.clientes > 0 ? e.cartera / e.clientes : 0;
+          const norm = STORE.normEjec[e.nombre] !== undefined ? STORE.normEjec[e.nombre] : 0;
+          const st = getStatus(norm, 0.95, "normalidad");
+          const mxtTag = e.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${e.mxt} MXT</span>` : "";
+
+          const tr = document.createElement("tr");
+          tr.className = "row-ejecutivo";
+          tr.innerHTML = `
+            <td><strong>${e.nombre}</strong> <span style="color:var(--text-muted); font-size:10px;">(${e.agencia})</span> ${mxtTag}</td>
+            <td class="tar">${fmtMoney(e.cartera)}</td>
+            <td class="tar">${e.clientes}</td>
+            <td class="tar">${fmtMoney(prom)}</td>
+            <td class="tar fw-bold" style="color:var(--${st === 'green' ? 'success' : (st === 'yellow' ? 'warning' : 'danger')});">${fmtPct(norm)}</td>
+            <td><span class="badge-kpi badge-${st}">${st.toUpperCase()}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      if (activeView === "mxt") {
+        const mix = {
+          "MCM Tradicional": { cartera: 0, clientes: 0 },
+          "MXT (Más Por Ti)": { cartera: 0, clientes: 0 }
+        };
+        filtered.forEach(r => {
+          const k = r.es_mxt ? "MXT (Más Por Ti)" : "MCM Tradicional";
+          mix[k].cartera += r.desembolso;
+          mix[k].clientes += 1;
+        });
+
+        Object.keys(mix).forEach(k => {
+          const m = mix[k];
+          const prom = m.clientes > 0 ? m.cartera / m.clientes : 0;
+          const tr = document.createElement("tr");
+          tr.className = "row-agencia";
+          tr.innerHTML = `
+            <td><strong>${k}</strong></td>
+            <td class="tar">${fmtMoney(m.cartera)}</td>
+            <td class="tar">${m.clientes}</td>
+            <td class="tar">${fmtMoney(prom)}</td>
+            <td class="tar">-</td>
+            <td><span class="badge-kpi badge-green">ACTIVO</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      // Jerárquico
+      const regiones = [...new Set(filtered.map(r => r.region))];
+      regiones.forEach(reg => {
+        const regRecords = filtered.filter(r => r.region === reg);
+        const rCart = regRecords.reduce((s, r) => s + r.desembolso, 0);
+        const rCli = regRecords.length;
+        const rProm = rCli > 0 ? rCart / rCli : 0;
+        const rNorm = STORE.normReg;
+        const rSt = getStatus(rNorm, 0.95, "normalidad");
+
+        if (currentUser.rol !== "GTE_AGENCIA") {
+          const trReg = document.createElement("tr");
+          trReg.className = "row-region";
+          trReg.innerHTML = `
+            <td>🏛️ ${reg}</td>
+            <td class="tar">${fmtMoney(rCart)}</td>
+            <td class="tar">${rCli}</td>
+            <td class="tar">${fmtMoney(rProm)}</td>
+            <td class="tar fw-bold" style="color:var(--${rSt === 'green' ? 'success' : (rSt === 'yellow' ? 'warning' : 'danger')});">${fmtPct(rNorm)}</td>
+            <td><span class="badge-kpi badge-${rSt}">${rSt.toUpperCase()}</span></td>
+          `;
+          tbody.appendChild(trReg);
+        }
+
+        const agencias = [...new Set(regRecords.map(r => r.agencia))];
+        agencias.forEach(ag => {
+          const agRecords = regRecords.filter(r => r.agencia === ag);
+          const aCart = agRecords.reduce((s, r) => s + r.desembolso, 0);
+          const aCli = agRecords.length;
+          const aProm = aCli > 0 ? aCart / aCli : 0;
+          const aNorm = STORE.normGer[ag] || 0;
+          const aSt = getStatus(aNorm, 0.95, "normalidad");
+
+          const trAg = document.createElement("tr");
+          trAg.className = "row-agencia";
+          trAg.innerHTML = `
+            <td style="padding-left:${currentUser.rol === 'GTE_AGENCIA' ? '12px' : '20px'};">📍 ${ag}</td>
+            <td class="tar">${fmtMoney(aCart)}</td>
+            <td class="tar">${aCli}</td>
+            <td class="tar">${fmtMoney(aProm)}</td>
+            <td class="tar fw-bold" style="color:var(--${aSt === 'green' ? 'success' : (aSt === 'yellow' ? 'warning' : 'danger')});">${fmtPct(aNorm)}</td>
+            <td><span class="badge-kpi badge-${aSt}">${aSt.toUpperCase()}</span></td>
+          `;
+          tbody.appendChild(trAg);
+
+          const mapEj = {};
+          agRecords.forEach(r => {
+            if (!mapEj[r.ejecutivo]) mapEj[r.ejecutivo] = { cartera: 0, clientes: 0, mxt: 0 };
+            mapEj[r.ejecutivo].cartera += r.desembolso;
+            mapEj[r.ejecutivo].clientes += 1;
+            if (r.es_mxt) mapEj[r.ejecutivo].mxt += 1;
+          });
+
+          Object.keys(mapEj).sort().forEach(eName => {
+            const ed = mapEj[eName];
+            const eProm = ed.clientes > 0 ? ed.cartera / ed.clientes : 0;
+            const eNorm = STORE.normEjec[eName] !== undefined ? STORE.normEjec[eName] : 0;
+            const eSt = getStatus(eNorm, 0.95, "normalidad");
+            const mxtTag = ed.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${ed.mxt} MXT</span>` : "";
+
+            const trEj = document.createElement("tr");
+            trEj.className = "row-ejecutivo";
+            trEj.innerHTML = `
+              <td>👤 ${eName} ${mxtTag}</td>
+              <td class="tar">${fmtMoney(ed.cartera)}</td>
+              <td class="tar">${ed.clientes}</td>
+              <td class="tar">${fmtMoney(eProm)}</td>
+              <td class="tar fw-bold" style="color:var(--${eSt === 'green' ? 'success' : (eSt === 'yellow' ? 'warning' : 'danger')});">${fmtPct(eNorm)}</td>
+              <td><span class="badge-kpi badge-${eSt}">${eSt.toUpperCase()}</span></td>
+            `;
+            tbody.appendChild(trEj);
+          });
+        });
+      });
+    }
+
+    function switchView(v, btn) {
+      activeView = v;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      render();
+    }
+
+    function render() {
+      const filtered = getFilteredData();
+      renderKPIs(filtered);
+      renderTable(filtered);
+    }
+
+    function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const wb = XLSX.read(data, { type: "array", cellDates: true });
+
+          const wsInd = wb.Sheets["Indicadores"];
+          const indRows = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
+          let hIdx = 2;
+          for (let r = 0; r < Math.min(indRows.length, 10); r++) {
+            if (indRows[r] && indRows[r].includes("Desembolso")) { hIdx = r; break; }
+          }
+          const h = indRows[hIdx];
+          const colReg = h.indexOf("Región");
+          const colAg = h.indexOf("Agencia");
+          const colEj = h.indexOf("Nombre Ejecutivo");
+          const colCli = h.indexOf("Nombre Cliente");
+          const colDes = h.indexOf("Desembolso");
+
+          const newRecords = [];
+          for (let r = hIdx + 1; r < indRows.length; r++) {
+            const row = indRows[r];
+            if (!row || (!row[colDes] && row[colDes] !== 0)) continue;
+            const cliente = String(row[colCli] || "").trim();
+            const esMxt = cliente.endsWith("-MXT");
+            newRecords.push({
+              empresa: "McM",
+              territorio: "Territorio 1",
+              region: String(row[colReg] || "NEVADO").trim(),
+              agencia: String(row[colAg] || "").trim(),
+              ejecutivo: String(row[colEj] || "").trim(),
+              cliente: cliente,
+              desembolso: parseFloat(row[colDes]) || 0,
+              es_mxt: esMxt,
+              producto: esMxt ? "MXT (Más Por Ti)" : "MCM Tradicional"
+            });
+          }
+
+          const wsEj = wb.Sheets["Ejecutivo"];
+          const rEj = XLSX.utils.sheet_to_json(wsEj, { header: 1 });
+          const newNormEj = {};
+          for (let r = 4; r < rEj.length; r++) {
+            if (rEj[r] && rEj[r][2]) newNormEj[String(rEj[r][2]).trim()] = parseFloat(rEj[r][9]) || 0;
+          }
+
+          const wsG = wb.Sheets["Gerente"];
+          const rG = XLSX.utils.sheet_to_json(wsG, { header: 1 });
+          const newNormG = {};
+          for (let r = 4; r < rG.length; r++) {
+            if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
+          }
+
+          const wsR = wb.Sheets["Regional"];
+          const rR = XLSX.utils.sheet_to_json(wsR, { header: 1 });
+          let newNormR = (rR[4] && rR[4][8] !== undefined) ? parseFloat(rR[4][8]) : 0.95;
+
+          let fCorte = "Nueva Fecha";
+          if (wb.SheetNames.includes("1")) {
+            const r1 = XLSX.utils.sheet_to_json(wb.Sheets["1"], { header: 1 });
+            if (r1[2] && r1[2][1]) fCorte = String(r1[2][1]).substring(0, 10);
+          }
+
+          STORE.records = newRecords;
+          STORE.normEjec = newNormEj;
+          STORE.normGer = newNormG;
+          STORE.normReg = newNormR;
+          STORE.fecha = fCorte;
+
+          document.getElementById("lblCorte").textContent = `Corte Actualizado: ${fCorte}`;
+          applyUserSecurity();
+          render();
+          alert(`¡Datos cargados con éxito! ${newRecords.length} créditos procesados.`);
+        } catch (err) {
+          alert("Error al procesar el archivo: " + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
