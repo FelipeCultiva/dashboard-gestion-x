@@ -354,7 +354,9 @@
     let activeView = "hierarchy";
 
     function init() {
+      // Intentar precargar datos de Google Drive
       syncFromDriveInBackground();
+
       const saved = sessionStorage.getItem("gestion_x_session");
       if (saved) {
         try {
@@ -392,13 +394,37 @@
         .catch(() => console.log("Modo local activo."));
     }
 
-    function handleLoginSubmit(e) {
+    async function handleLoginSubmit(e) {
       e.preventDefault();
       const u = document.getElementById("txtUsername").value.trim().toLowerCase();
       const p = document.getElementById("txtPassword").value.trim();
       const errorMsg = document.getElementById("loginErrorMsg");
+      const submitBtn = e.target.querySelector("button[type='submit']");
 
-      const found = USERS_DATABASE.find(acc => acc.user.toLowerCase() === u && acc.pass === p);
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Verificando en Drive...";
+
+      try {
+        // 1. Si existe URL de Google Apps Script, consultar directamente los usuarios de Drive
+        if (APPS_SCRIPT_WEBAPP_URL && !APPS_SCRIPT_WEBAPP_URL.includes("REEMPLAZAR")) {
+          const resp = await fetch(APPS_SCRIPT_WEBAPP_URL + "?action=getUsers");
+          const data = await resp.json();
+          if (data && data.status === "success" && data.users && data.users.length) {
+            USERS_DATABASE = data.users;
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo conectar a Drive en vivo, usando catálogo local.");
+      }
+
+      // 2. Comparación convirtiendo ambos valores a texto y eliminando espacios
+      const found = USERS_DATABASE.find(acc => 
+        String(acc.user || "").trim().toLowerCase() === u && 
+        String(acc.pass || "").trim() === p
+      );
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Ingresar al Dashboard";
 
       if (found) {
         errorMsg.style.display = "none";
