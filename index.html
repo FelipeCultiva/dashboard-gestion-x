@@ -387,7 +387,7 @@
               STORE.fecha = data.fechaCorte || STORE.fecha;
               STORE.semana = data.semana || STORE.semana;
               document.getElementById("lblCorte").textContent = `Corte Semanal ${STORE.semana} (${STORE.fecha})`;
-              if (currentUser) ();
+              if (currentUser) render();
             }
           }
         }
