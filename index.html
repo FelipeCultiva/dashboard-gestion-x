@@ -387,7 +387,7 @@
               STORE.fecha = data.fechaCorte || STORE.fecha;
               STORE.semana = data.semana || STORE.semana;
               document.getElementById("lblCorte").textContent = `Corte Semanal ${STORE.semana} (${STORE.fecha})`;
-              if (currentUser) render();
+              if (currentUser) ();
             }
           }
         })
@@ -453,7 +453,7 @@
       document.getElementById("dashboardApp").style.display = "block";
       applyUserSecurity();
       setupListeners();
-      render();
+      ();
     }
 
     function applyUserSecurity() {
@@ -503,10 +503,10 @@
     }
 
     function setupListeners() {
-      document.getElementById("selRegion").addEventListener("change", render);
-      document.getElementById("selAgencia").addEventListener("change", render);
-      document.getElementById("selProducto").addEventListener("change", render);
-      document.getElementById("txtSearch").addEventListener("input", render);
+      document.getElementById("selRegion").addEventListener("change", );
+      document.getElementById("selAgencia").addEventListener("change", );
+      document.getElementById("selProducto").addEventListener("change", );
+      document.getElementById("txtSearch").addEventListener("input", );
     }
 
     function resetFilters() {
@@ -616,6 +616,20 @@
       `).join("");
     }
 
+    // Calcula la antigüedad en meses: HOY() - Fecha de Ingreso (Col D)
+    function getAntiguedadMeses(fechaIngresoStr) {
+      if (!fechaIngresoStr) return "";
+      const ingreso = new Date(fechaIngresoStr);
+      if (isNaN(ingreso.getTime())) return "";
+      const hoy = new Date();
+      let meses = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
+      if (hoy.getDate() < ingreso.getDate()) {
+        meses--;
+      }
+      meses = Math.max(0, meses);
+      return `(${meses} ${meses === 1 ? 'mes' : 'meses'})`;
+    }
+    
     function renderTable(filtered) {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -634,7 +648,9 @@
           const norm = STORE.normEjec[e.nombre] !== undefined ? STORE.normEjec[e.nombre] : 0;
           const st = getStatus(norm, 0.95, "normalidad");
           const mxtTag = e.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${e.mxt} MXT</span>` : "";
-
+          const edadMeses = getAntiguedadMeses(STORE.ingresoEjec ? STORE.ingresoEjec[e.nombre] : null);
+          const edadBadge = edadMeses ? `<span style="color:#38bdf8; font-size:11px; font-weight:600; margin-left:4px;">${edadMeses}</span>` : '';
+          
           const tr = document.createElement("tr");
           tr.className = "row-ejecutivo";
           tr.innerHTML = `
@@ -738,11 +754,13 @@
             const eNorm = STORE.normEjec[eName] !== undefined ? STORE.normEjec[eName] : 0;
             const eSt = getStatus(eNorm, 0.95, "normalidad");
             const mxtTag = ed.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${ed.mxt} MXT</span>` : "";
-
+            const edadMeses = getAntiguedadMeses(STORE.ingresoEjec ? STORE.ingresoEjec[eName] : null);
+            const edadBadge = edadMeses ? `<span style="color:#38bdf8; font-size:11px; font-weight:600; margin-left:4px;">${edadMeses}</span>` : '';
+            
             const trEj = document.createElement("tr");
             trEj.className = "row-ejecutivo";
             trEj.innerHTML = `
-              <td>👤 ${eName} ${mxtTag}</td>
+              <td>👤 ${eName} ${edadBadge} ${mxtTag}</td>
               <td class="tar">${fmtMoney(ed.cartera)}</td>
               <td class="tar">${ed.clientes}</td>
               <td class="tar">${fmtMoney(eProm)}</td>
@@ -813,9 +831,18 @@
           const wsEj = wb.Sheets["Ejecutivo"];
           const rEj = XLSX.utils.sheet_to_json(wsEj, { header: 1 });
           const newNormEj = {};
+          const newIngresoEj = {};
           for (let r = 4; r < rEj.length; r++) {
-            if (rEj[r] && rEj[r][2]) newNormEj[String(rEj[r][2]).trim()] = parseFloat(rEj[r][9]) || 0;
+            if (rEj[r] && rEj[r][2]) {
+              const nom = String(rEj[r][2]).trim();
+              newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
+              if (rEj[r][3]) {
+                newIngresoEj[nom] = rEj[r][3];
+              }
+            }
           }
+
+          STORE.ingresoEjec = newIngresoEj;
 
           const wsG = wb.Sheets["Gerente"];
           const rG = XLSX.utils.sheet_to_json(wsG, { header: 1 });
