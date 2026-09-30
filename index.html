@@ -710,14 +710,14 @@
 
     function getStatus(val, meta, type = "ratio") {
       if (type === "normalidad") {
-        if (val >= 0.95) return "green";
-        if (val >= 0.90) return "yellow";
-        return "red";
+        if (val >= 0.95) return "verde";
+        if (val >= 0.90) return "amarillo";
+        return "rojo";
       }
       const r = meta > 0 ? (val / meta) : 0;
-      if (r >= 1.0) return "green";
-      if (r >= 0.9) return "yellow";
-      return "red";
+      if (r >= 1.0) return "verde";
+      if (r >= 0.9) return "amarillo";
+      return "rojo";
     }
 
     function fmtMoney(n) { return "$" + Math.round(n).toLocaleString("es-MX"); }
