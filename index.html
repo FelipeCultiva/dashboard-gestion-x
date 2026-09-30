@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>DASHBOARD GESTIÓN X - MCM</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -24,12 +28,34 @@
       --warning-glow: rgba(245, 158, 11, 0.15);
       --danger: #ef4444;
       --danger-glow: rgba(239, 68, 68, 0.15);
+      --mxt: #a855f7;
       --radius: 12px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
+    /* =========================================
+       MODAL FLOTANTE DE CARGA CON BARRA Y %
+       ========================================= */
+    #progressModal {
+      display: none; position: fixed; inset: 0; background: rgba(9, 14, 23, 0.85);
+      backdrop-filter: blur(6px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;
+    }
+    .progress-box {
+      width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+    }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .progress-title { font-size: 13px; font-weight: 700; color: #fff; }
+    .progress-pct-badge { font-size: 13px; font-weight: 800; color: #38bdf8; font-family: 'JetBrains Mono', monospace; }
+    .progress-bar-wrap { width: 100%; height: 8px; background: #1e293b; border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+    .progress-bar-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 99px; transition: width 0.2s linear; }
+    .progress-subtext { font-size: 11px; color: var(--text-muted); }
+
+    /* =========================================
+       PANTALLA DE ACCESO (LOGIN)
+       ========================================= */
     #loginScreen {
       display: flex; min-height: 100vh; align-items: center; justify-content: center;
       padding: 16px; background: radial-gradient(circle at top, #1e293b 0%, #090e17 100%);
@@ -74,6 +100,9 @@
     }
     .login-footer-info a { color: #38bdf8; text-decoration: none; font-weight: 600; }
 
+    /* =========================================
+       DASHBOARD PRINCIPAL
+       ========================================= */
     #dashboardApp { display: none; padding: 14px; }
 
     .app-bar {
@@ -86,7 +115,7 @@
     .badge-scope { font-size: 10px; background: rgba(37,99,235,0.25); color: #93c5fd; padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(59,130,246,0.4); text-transform: uppercase; }
     .app-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    .user-panel { display: flex; align-items: center; gap: 10px; }
+    .user-panel { display: flex; align-items: center; gap: 8px; }
     .user-chip {
       display: flex; align-items: center; gap: 8px; background: var(--card-bg);
       border: 1px solid var(--border); padding: 6px 12px; border-radius: 99px;
@@ -95,6 +124,14 @@
     .user-info { display: flex; flex-direction: column; text-align: left; }
     .user-name { font-size: 11px; font-weight: 700; color: #fff; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-role { font-size: 9px; color: #38bdf8; font-weight: 700; text-transform: uppercase; }
+    
+    .btn-sync-top {
+      background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-sync-top:hover { background: rgba(16, 185, 129, 0.25); }
+
     .btn-logout {
       background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
       color: #fca5a5; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
@@ -189,7 +226,21 @@
 </head>
 <body>
 
-  <!-- 1. PANTALLA LOGIN -->
+  <!-- VENTANA MODAL FLOTANTE DE CARGA CON BARRA Y % -->
+  <div id="progressModal">
+    <div class="progress-box">
+      <div class="progress-header">
+        <span class="progress-title" id="progressModalTitle">Sincronizando</span>
+        <span class="progress-pct-badge" id="progressModalPct">0%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-bar" id="progressBarInner"></div>
+      </div>
+      <div class="progress-subtext" id="progressModalMsg">Conectando con Google Drive...</div>
+    </div>
+  </div>
+
+  <!-- PANTALLA LOGIN -->
   <div id="loginScreen">
     <div class="login-box">
       <div class="login-brand">
@@ -216,21 +267,24 @@
 
       <div class="login-footer-info">
         <span>Parámetros y credenciales vinculadas a:</span><br>
-        <a id="lnkConfigSheet" href="https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit" target="_blank">
+        <a href="https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit" target="_blank">
           Configuración y Metas en Google Drive ↗
         </a>
       </div>
     </div>
   </div>
 
-  <!-- 2. DASHBOARD -->
+  <!-- DASHBOARD -->
   <div id="dashboardApp">
     <div class="app-bar">
       <div class="app-title">
         <h1>GESTIÓN X <span class="badge-scope" id="lblScope">McM</span></h1>
-        <span class="app-subtitle" id="lblCorte">Corte Semanal 33 (21-Ago-2026)</span>
+        <span class="app-subtitle" id="lblCorte">Corte Semanal: Cargando...</span>
       </div>
       <div class="user-panel">
+        <button class="btn-sync-top" onclick="forzarSincronizacionDrive()" title="Actualizar desde Google Drive">
+          🔄 Sincronizar Drive
+        </button>
         <div class="user-chip">
           <div class="user-avatar" id="avatarLetter">U</div>
           <div class="user-info">
@@ -319,61 +373,138 @@
   </div>
 
   <script>
-    // PEGA AQUÍ LA URL GENERADA EN APPS SCRIPT
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
+    // ========================================================
+    // URL DE TU APPS SCRIPT WEB APP (DESPLEGADO EN GOOGLE DRIVE)
+    // ========================================================
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyR0jB6Z3Z1kQn8bN6x_REPLACE_EXEC/exec";
 
-    // Catálogo inicial de fallback
-    let USERS_DATABASE = [
-      { user: "admin", pass: "McM2026*", nombre: "Administrador General", rol: "ADMIN", territorio: "ALL", region: "ALL", agencia: "ALL" },
-      { user: "dir_comercial", pass: "Comercial2026*", nombre: "Dirección Comercial", rol: "DIR_COMERCIAL", territorio: "ALL", region: "ALL", agencia: "ALL" },
-      { user: "subdir_territorio1", pass: "Territorio1*", nombre: "Subdirección Territorial 1", rol: "SUBDIR_TERRITORIAL", territorio: "Territorio 1", region: "ALL", agencia: "ALL" },
-      { user: "gte_nevado", pass: "Nevado2026*", nombre: "ANGEL SALVADOR GUERRERO BARBOSA", rol: "GTE_REGIONAL", territorio: "Territorio 1", region: "NEVADO", agencia: "ALL" },
-      { user: "gte_toluca", pass: "Toluca2026*", nombre: "JANETH ALEJANDRA TORRES ESQUIVEL", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "TOLUCA" },
-      { user: "gte_zinacantepec", pass: "Zinacan2026*", nombre: "PATRICIA TOLENTINO ESTRADA", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "ZINACANTEPEC" },
-      { user: "gte_villavictoria", pass: "Villa2026*", nombre: "OSCAR CAMACHO GONZALEZ", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "VILLA VICTORIA" },
-      { user: "gte_zitacuaro", pass: "Zitacuaro2026*", nombre: "KARINA CARRILLO SALINAS", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "ZITACUARO" },
-      { user: "gte_vallebravo", pass: "Valle2026*", nombre: "ERICK SANCHEZ REBOLLAR", rol: "GTE_AGENCIA", territorio: "Territorio 1", region: "NEVADO", agencia: "VALLE DE BRAVO" }
-    ];
-
-    let METAS = {
-      ejecutivo: { clientes: 50, cartera: 725000, promedio: 14500, normalidad: 0.95 },
-      agencia: { clientes: 250, cartera: 3625000, promedio: 14500, normalidad: 0.95 },
-      region: { clientes: 1250, cartera: 18125000, promedio: 14500, normalidad: 0.95 }
-    };
-
+    // ESTRUCTURAS TOTALMENTE VACÍAS (CERO DATOS QUEMADOS)
+    let USERS_DATABASE = [];
+    let METAS = {};
     let STORE = {
-      fecha: "2026-08-21",
-      semana: 33,
+      fecha: "",
+      semana: "",
       records: [],
       normEjec: {},
       normGer: {},
-      normReg: 0.95
+      normReg: 0.95,
+      ingresoEjec: {}
     };
 
     let currentUser = null;
     let activeView = "hierarchy";
 
-    function init() {
-      // Intentar precargar datos de Google Drive
-      syncFromDriveInBackground();
+    // ========================================================
+    // CONTROLADOR DE MODAL DE PROGRESO FLOTANTE CON %
+    // ========================================================
+    function mostrarModalProgreso(inicio, fin, duracion, titulo, mensaje, callback) {
+      const modal = document.getElementById("progressModal");
+      const bar = document.getElementById("progressBarInner");
+      const pct = document.getElementById("progressModalPct");
+      const titleEl = document.getElementById("progressModalTitle");
+      const msgEl = document.getElementById("progressModalMsg");
 
-      const saved = sessionStorage.getItem("gestion_x_session");
-      if (saved) {
-        try {
-          currentUser = JSON.parse(saved);
-          launchDashboard();
-          return;
-        } catch(e) {
-          sessionStorage.removeItem("gestion_x_session");
+      if (modal) modal.style.display = "flex";
+      if (titleEl) titleEl.textContent = titulo;
+      if (msgEl) msgEl.textContent = mensaje;
+
+      let start = null;
+      function animStep(timestamp) {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duracion, 1);
+        const currentPct = Math.round(inicio + (fin - inicio) * progress);
+        if (bar) bar.style.width = currentPct + "%";
+        if (pct) pct.textContent = currentPct + "%";
+
+        if (progress < 1) {
+          window.requestAnimationFrame(animStep);
+        } else {
+          if (currentPct >= 100) {
+            setTimeout(() => {
+              if (modal) modal.style.display = "none";
+            }, 300);
+          }
+          if (callback) callback();
         }
       }
-      showLoginScreen();
+      window.requestAnimationFrame(animStep);
     }
 
-    function syncFromDriveInBackground() {
-      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("REEMPLAZAR")) return;
+    // ========================================================
+    // PERSISTENCIA LOCAL (OFFLINE EN PC Y CELULAR)
+    // ========================================================
+    function guardarEnStorageLocal() {
+      try {
+        localStorage.setItem("gestion_x_store", JSON.stringify(STORE));
+        localStorage.setItem("gestion_x_users", JSON.stringify(USERS_DATABASE));
+        localStorage.setItem("gestion_x_metas", JSON.stringify(METAS));
+      } catch (e) {
+        console.warn("No se pudo escribir en localStorage:", e);
+      }
+    }
 
-      fetch(APPS_SCRIPT_WEBAPP_URL)
+    function cargarDesdeStorageLocal() {
+      try {
+        const s = localStorage.getItem("gestion_x_store");
+        const u = localStorage.getItem("gestion_x_users");
+        const m = localStorage.getItem("gestion_x_metas");
+        if (s) STORE = JSON.parse(s);
+        if (u) USERS_DATABASE = JSON.parse(u);
+        if (m) METAS = JSON.parse(m);
+        return Boolean(s && u);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ========================================================
+    // CÁLCULO DE EDAD / ANTIGÜEDAD (X m)
+    // ========================================================
+    function getAntiguedadMeses(nom) {
+      const fechaStr = STORE.ingresoEjec ? STORE.ingresoEjec[nom] : null;
+      if (!fechaStr) return "";
+      const ing = new Date(fechaStr);
+      if (isNaN(ing.getTime())) return "";
+      const hoy = new Date();
+      let m = (hoy.getFullYear() - ing.getFullYear()) * 12 + (hoy.getMonth() - ing.getMonth());
+      if (hoy.getDate() < ing.getDate()) m--;
+      m = Math.max(0, m);
+      return "(" + m + " m)";
+    }
+
+    // ========================================================
+    // INICIALIZACIÓN Y SINCRONIZACIÓN
+    // ========================================================
+    function init() {
+      const tieneDatosLocales = cargarDesdeStorageLocal();
+
+      const sesionGuardada = sessionStorage.getItem("gestion_x_session");
+      if (sesionGuardada) {
+        try {
+          currentUser = JSON.parse(sesionGuardada);
+          launchDashboard();
+        } catch (e) {
+          sessionStorage.removeItem("gestion_x_session");
+          showLoginScreen();
+        }
+      } else {
+        showLoginScreen();
+      }
+
+      // Si hay conexión, sincronizar con Drive en segundo plano
+      sincronizarConDrive(tieneDatosLocales ? false : true);
+    }
+
+    function sincronizarConDrive(esPrimeraVez) {
+      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("REPLACE")) return;
+
+      if (esPrimeraVez) {
+        mostrarModalProgreso(0, 60, 800, "Sincronizando con Drive", "Descargando configuración y datos...", () => {});
+      }
+
+      const urlAntiCache = APPS_SCRIPT_WEBAPP_URL + (APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?") + "_t=" + Date.now();
+
+      fetch(urlAntiCache, { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
           if (data && data.status === "success") {
@@ -384,16 +515,49 @@
               STORE.normEjec = data.normEjec || {};
               STORE.normGer = data.normGer || {};
               STORE.normReg = data.normReg || 0.95;
+              STORE.ingresoEjec = data.ingresoEjec || {};
               STORE.fecha = data.fechaCorte || STORE.fecha;
               STORE.semana = data.semana || STORE.semana;
-              document.getElementById("lblCorte").textContent = `Corte Semanal ${STORE.semana} (${STORE.fecha})`;
-              if (currentUser) render();
+
+              // Guardar para uso sin conexión (offline)
+              guardarEnStorageLocal();
+
+              const lbl = document.getElementById("lblCorte");
+              if (lbl) lbl.textContent = "Corte Semanal " + STORE.semana + " (" + STORE.fecha + ")";
+
+              if (esPrimeraVez) {
+                mostrarModalProgreso(60, 100, 300, "Sincronizado", "Corte semanal listo.", () => {
+                  if (currentUser) {
+                    applyUserSecurity();
+                    render();
+                  }
+                });
+              } else {
+                if (currentUser) {
+                  applyUserSecurity();
+                  render();
+                }
+              }
             }
           }
         })
-        .catch(() => console.log("Modo local activo."));
+        .catch(err => {
+          console.warn("Sin conexión a Drive. Ejecutando con datos locales.", err);
+          if (esPrimeraVez && !STORE.records.length) {
+            mostrarModalProgreso(100, 100, 200, "Sin Conexión", "Conéctate a internet para sincronizar por primera vez.", () => {});
+          }
+        });
     }
 
+    function forzarSincronizacionDrive() {
+      mostrarModalProgreso(0, 75, 700, "Actualizando", "Consultando corte más reciente en Drive...", () => {
+        sincronizarConDrive(true);
+      });
+    }
+
+    // ========================================================
+    // LOGIN Y PERMISOS
+    // ========================================================
     async function handleLoginSubmit(e) {
       e.preventDefault();
       const u = document.getElementById("txtUsername").value.trim().toLowerCase();
@@ -402,24 +566,24 @@
       const submitBtn = e.target.querySelector("button[type='submit']");
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "Verificando en Drive...";
+      submitBtn.textContent = "Verificando...";
 
-      try {
-        // 1. Si existe URL de Google Apps Script, consultar directamente los usuarios de Drive
-        if (APPS_SCRIPT_WEBAPP_URL && !APPS_SCRIPT_WEBAPP_URL.includes("REEMPLAZAR")) {
-          const resp = await fetch(APPS_SCRIPT_WEBAPP_URL + "?action=getUsers");
-          const data = await resp.json();
-          if (data && data.status === "success" && data.users && data.users.length) {
-            USERS_DATABASE = data.users;
+      // Si no tenemos usuarios cargados en memoria, consultar a Drive
+      if (!USERS_DATABASE.length && APPS_SCRIPT_WEBAPP_URL && !APPS_SCRIPT_WEBAPP_URL.includes("REPLACE")) {
+        try {
+          const resp = await fetch(APPS_SCRIPT_WEBAPP_URL + "?action=getUsers&_t=" + Date.now(), { cache: "no-store" });
+          const d = await resp.json();
+          if (d && d.status === "success" && d.users) {
+            USERS_DATABASE = d.users;
+            guardarEnStorageLocal();
           }
+        } catch (err) {
+          console.warn(err);
         }
-      } catch (err) {
-        console.warn("No se pudo conectar a Drive en vivo, usando catálogo local.");
       }
 
-      // 2. Comparación convirtiendo ambos valores a texto y eliminando espacios
-      const found = USERS_DATABASE.find(acc => 
-        String(acc.user || "").trim().toLowerCase() === u && 
+      const found = USERS_DATABASE.find(acc =>
+        String(acc.user || "").trim().toLowerCase() === u &&
         String(acc.pass || "").trim() === p
       );
 
@@ -466,47 +630,48 @@
       const banner = document.getElementById("bannerText");
       const adminBar = document.getElementById("adminActionsBar");
 
-      const allRegiones = [...new Set(STORE.records.map(r => r.region))].sort();
-      const allAgencias = [...new Set(STORE.records.map(r => r.agencia))].sort();
+      // Poblar Regiones y Agencias dinámicamente desde los registros descargados
+      const allRegiones = [...new Set(STORE.records.map(r => r.region))].filter(Boolean).sort();
+      const allAgencias = [...new Set(STORE.records.map(r => r.agencia))].filter(Boolean).sort();
 
       selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
-        allRegiones.map(r => `<option value="${r}">${r}</option>`).join("");
+        allRegiones.map(r => '<option value="' + r + '">' + r + '</option>').join("");
 
       selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
-        allAgencias.map(a => `<option value="${a}">${a}</option>`).join("");
+        allAgencias.map(a => '<option value="' + a + '">' + a + '</option>').join("");
 
       if (currentUser.rol === "GTE_AGENCIA") {
         selReg.value = currentUser.region;
         selReg.disabled = true;
-        selAg.innerHTML = `<option value="${currentUser.agencia}">${currentUser.agencia}</option>`;
+        selAg.innerHTML = '<option value="' + currentUser.agencia + '">' + currentUser.agencia + '</option>';
         selAg.value = currentUser.agencia;
         selAg.disabled = true;
-        banner.innerHTML = `🔒 Gerencia de Agencia: <strong>${currentUser.agencia}</strong> (Solo su información autorizada)`;
+        banner.innerHTML = "🔒 Gerencia de Agencia: <strong>" + currentUser.agencia + "</strong> (Solo su información autorizada)";
         adminBar.style.display = "none";
       } else if (currentUser.rol === "GTE_REGIONAL") {
         selReg.value = currentUser.region;
         selReg.disabled = true;
         selAg.disabled = false;
-        banner.innerHTML = `🏛️ Gerencia Regional: <strong>${currentUser.region}</strong> (Agencias a su cargo)`;
+        banner.innerHTML = "🏛️ Gerencia Regional: <strong>" + currentUser.region + "</strong> (Agencias a su cargo)";
         adminBar.style.display = "none";
       } else if (currentUser.rol === "SUBDIR_TERRITORIAL") {
         selReg.disabled = false;
         selAg.disabled = false;
-        banner.innerHTML = `🏢 Subdirección Territorial: <strong>${currentUser.territorio}</strong>`;
+        banner.innerHTML = "🏢 Subdirección Territorial: <strong>" + currentUser.territorio + "</strong>";
         adminBar.style.display = "flex";
       } else {
         selReg.disabled = false;
         selAg.disabled = false;
-        banner.innerHTML = `🔓 Nivel Directivo / Admin: <strong>${currentUser.nombre}</strong> (Acceso y filtros totales)`;
+        banner.innerHTML = "🔓 Nivel Directivo / Admin: <strong>" + currentUser.nombre + "</strong> (Acceso y filtros totales)";
         adminBar.style.display = "flex";
       }
     }
 
     function setupListeners() {
-      document.getElementById("selRegion").addEventListener("change", );
-      document.getElementById("selAgencia").addEventListener("change", );
-      document.getElementById("selProducto").addEventListener("change", );
-      document.getElementById("txtSearch").addEventListener("input", );
+      document.getElementById("selRegion").addEventListener("change", () => ejecutarConsultaConProgreso());
+      document.getElementById("selAgencia").addEventListener("change", () => ejecutarConsultaConProgreso());
+      document.getElementById("selProducto").addEventListener("change", () => ejecutarConsultaConProgreso());
+      document.getElementById("txtSearch").addEventListener("input", () => render());
     }
 
     function resetFilters() {
@@ -514,7 +679,14 @@
       document.getElementById("txtSearch").value = "";
       if (!document.getElementById("selRegion").disabled) document.getElementById("selRegion").value = "ALL";
       if (!document.getElementById("selAgencia").disabled) document.getElementById("selAgencia").value = "ALL";
-      render();
+      ejecutarConsultaConProgreso();
+    }
+
+    // Modal de progreso durante cada filtrado/consulta
+    function ejecutarConsultaConProgreso() {
+      mostrarModalProgreso(0, 100, 200, "Consultando", "Filtrando datos...", () => {
+        render();
+      });
     }
 
     function getFilteredData() {
@@ -554,7 +726,7 @@
     function renderKPIs(filtered) {
       const selAg = document.getElementById("selAgencia").value;
       const level = (selAg !== "ALL" || currentUser.rol === "GTE_AGENCIA") ? "agencia" : "region";
-      const target = METAS[level] || METAS.agencia;
+      const target = (METAS && METAS[level]) ? METAS[level] : { clientes: 250, promedio: 14500, cartera: 3625000, normalidad: 0.95 };
 
       const sumCartera = filtered.reduce((s, r) => s + r.desembolso, 0);
       const countClientes = filtered.length;
@@ -616,20 +788,6 @@
       `).join("");
     }
 
-    // Calcula la antigüedad en meses: HOY() - Fecha de Ingreso (Col D)
-    function getAntiguedadMeses(fechaIngresoStr) {
-      if (!fechaIngresoStr) return "";
-      const ingreso = new Date(fechaIngresoStr);
-      if (isNaN(ingreso.getTime())) return "";
-      const hoy = new Date();
-      let meses = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
-      if (hoy.getDate() < ingreso.getDate()) {
-        meses--;
-      }
-      meses = Math.max(0, meses);
-      return `(${meses} ${meses === 1 ? 'mes' : 'meses'})`;
-    }
-    
     function renderTable(filtered) {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -647,14 +805,14 @@
           const prom = e.clientes > 0 ? e.cartera / e.clientes : 0;
           const norm = STORE.normEjec[e.nombre] !== undefined ? STORE.normEjec[e.nombre] : 0;
           const st = getStatus(norm, 0.95, "normalidad");
-          const mxtTag = e.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${e.mxt} MXT</span>` : "";
-          const edadMeses = getAntiguedadMeses(STORE.ingresoEjec ? STORE.ingresoEjec[e.nombre] : null);
-          const edadBadge = edadMeses ? `<span style="color:#38bdf8; font-size:11px; font-weight:600; margin-left:4px;">${edadMeses}</span>` : '';
-          
+          const mxtTag = e.mxt > 0 ? '<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">' + e.mxt + ' MXT</span>' : "";
+          const edad = getAntiguedadMeses(e.nombre);
+          const edadBadge = edad ? '<span style="color:#38bdf8; font-size:11px; font-weight:700; margin-left:4px;">' + edad + '</span>' : "";
+
           const tr = document.createElement("tr");
           tr.className = "row-ejecutivo";
           tr.innerHTML = `
-            <td><strong>${e.nombre}</strong> <span style="color:var(--text-muted); font-size:10px;">(${e.agencia})</span> ${mxtTag}</td>
+            <td><strong>${e.nombre}</strong> ${edadBadge} <span style="color:var(--text-muted); font-size:10px;">(${e.agencia})</span> ${mxtTag}</td>
             <td class="tar">${fmtMoney(e.cartera)}</td>
             <td class="tar">${e.clientes}</td>
             <td class="tar">${fmtMoney(prom)}</td>
@@ -695,7 +853,7 @@
         return;
       }
 
-      // Jerárquico
+      // Vista Jerárquica
       const regiones = [...new Set(filtered.map(r => r.region))];
       regiones.forEach(reg => {
         const regRecords = filtered.filter(r => r.region === reg);
@@ -753,10 +911,10 @@
             const eProm = ed.clientes > 0 ? ed.cartera / ed.clientes : 0;
             const eNorm = STORE.normEjec[eName] !== undefined ? STORE.normEjec[eName] : 0;
             const eSt = getStatus(eNorm, 0.95, "normalidad");
-            const mxtTag = ed.mxt > 0 ? `<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">${ed.mxt} MXT</span>` : "";
-            const edadMeses = getAntiguedadMeses(STORE.ingresoEjec ? STORE.ingresoEjec[eName] : null);
-            const edadBadge = edadMeses ? `<span style="color:#38bdf8; font-size:11px; font-weight:600; margin-left:4px;">${edadMeses}</span>` : '';
-            
+            const mxtTag = ed.mxt > 0 ? '<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">' + ed.mxt + ' MXT</span>' : "";
+            const edad = getAntiguedadMeses(eName);
+            const edadBadge = edad ? '<span style="color:#38bdf8; font-size:11px; font-weight:700; margin-left:4px;">' + edad + '</span>' : "";
+
             const trEj = document.createElement("tr");
             trEj.className = "row-ejecutivo";
             trEj.innerHTML = `
@@ -777,7 +935,7 @@
       activeView = v;
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      render();
+      ejecutarConsultaConProgreso();
     }
 
     function render() {
@@ -786,96 +944,100 @@
       renderTable(filtered);
     }
 
+    // Carga de Excel manual con modal de progreso
     function handleExcelUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const wb = XLSX.read(data, { type: "array", cellDates: true });
+      mostrarModalProgreso(0, 50, 400, "Procesando Archivo", "Extrayendo indicadores...", () => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, { type: "array", cellDates: true });
 
-          const wsInd = wb.Sheets["Indicadores"];
-          const indRows = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
-          let hIdx = 2;
-          for (let r = 0; r < Math.min(indRows.length, 10); r++) {
-            if (indRows[r] && indRows[r].includes("Desembolso")) { hIdx = r; break; }
-          }
-          const h = indRows[hIdx];
-          const colReg = h.indexOf("Región");
-          const colAg = h.indexOf("Agencia");
-          const colEj = h.indexOf("Nombre Ejecutivo");
-          const colCli = h.indexOf("Nombre Cliente");
-          const colDes = h.indexOf("Desembolso");
+            const wsInd = wb.Sheets["Indicadores"];
+            const indRows = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
+            let hIdx = 2;
+            for (let r = 0; r < Math.min(indRows.length, 10); r++) {
+              if (indRows[r] && indRows[r].includes("Desembolso")) { hIdx = r; break; }
+            }
+            const h = indRows[hIdx];
+            const colReg = h.indexOf("Región");
+            const colAg = h.indexOf("Agencia");
+            const colEj = h.indexOf("Nombre Ejecutivo");
+            const colCli = h.indexOf("Nombre Cliente");
+            const colDes = h.indexOf("Desembolso");
 
-          const newRecords = [];
-          for (let r = hIdx + 1; r < indRows.length; r++) {
-            const row = indRows[r];
-            if (!row || (!row[colDes] && row[colDes] !== 0)) continue;
-            const cliente = String(row[colCli] || "").trim();
-            const esMxt = cliente.endsWith("-MXT");
-            newRecords.push({
-              empresa: "McM",
-              territorio: "Territorio 1",
-              region: String(row[colReg] || "NEVADO").trim(),
-              agencia: String(row[colAg] || "").trim(),
-              ejecutivo: String(row[colEj] || "").trim(),
-              cliente: cliente,
-              desembolso: parseFloat(row[colDes]) || 0,
-              es_mxt: esMxt,
-              producto: esMxt ? "MXT (Más Por Ti)" : "MCM Tradicional"
-            });
-          }
+            const newRecords = [];
+            for (let r = hIdx + 1; r < indRows.length; r++) {
+              const row = indRows[r];
+              if (!row || (!row[colDes] && row[colDes] !== 0)) continue;
+              const cliente = String(row[colCli] || "").trim();
+              const esMxt = cliente.endsWith("-MXT");
+              newRecords.push({
+                empresa: "McM",
+                territorio: "Territorio 1",
+                region: String(row[colReg] || "NEVADO").trim(),
+                agencia: String(row[colAg] || "").trim(),
+                ejecutivo: String(row[colEj] || "").trim(),
+                cliente: cliente,
+                desembolso: parseFloat(row[colDes]) || 0,
+                es_mxt: esMxt,
+                producto: esMxt ? "MXT (Más Por Ti)" : "MCM Tradicional"
+              });
+            }
 
-          const wsEj = wb.Sheets["Ejecutivo"];
-          const rEj = XLSX.utils.sheet_to_json(wsEj, { header: 1 });
-          const newNormEj = {};
-          const newIngresoEj = {};
-          for (let r = 4; r < rEj.length; r++) {
-            if (rEj[r] && rEj[r][2]) {
-              const nom = String(rEj[r][2]).trim();
-              newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
-              if (rEj[r][3]) {
-                newIngresoEj[nom] = rEj[r][3];
+            const wsEj = wb.Sheets["Ejecutivo"];
+            const rEj = XLSX.utils.sheet_to_json(wsEj, { header: 1 });
+            const newNormEj = {};
+            const newIngresoEj = {};
+            for (let r = 4; r < rEj.length; r++) {
+              if (rEj[r] && rEj[r][2]) {
+                const nom = String(rEj[r][2]).trim();
+                newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
+                if (rEj[r][3]) newIngresoEj[nom] = rEj[r][3];
               }
             }
+
+            const wsG = wb.Sheets["Gerente"];
+            const rG = XLSX.utils.sheet_to_json(wsG, { header: 1 });
+            const newNormG = {};
+            for (let r = 4; r < rG.length; r++) {
+              if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
+            }
+
+            const wsR = wb.Sheets["Regional"];
+            const rR = XLSX.utils.sheet_to_json(wsR, { header: 1 });
+            let newNormR = (rR[4] && rR[4][8] !== undefined) ? parseFloat(rR[4][8]) : 0.95;
+
+            let fCorte = "Nueva Fecha";
+            if (wb.SheetNames.includes("1")) {
+              const r1 = XLSX.utils.sheet_to_json(wb.Sheets["1"], { header: 1 });
+              if (r1[2] && r1[2][1]) fCorte = String(r1[2][1]).substring(0, 10);
+            }
+
+            STORE.records = newRecords;
+            STORE.normEjec = newNormEj;
+            STORE.normGer = newNormG;
+            STORE.normReg = newNormR;
+            STORE.ingresoEjec = newIngresoEj;
+            STORE.fecha = fCorte;
+
+            guardarEnStorageLocal();
+
+            mostrarModalProgreso(50, 100, 300, "Cargado", "Archivo procesado con éxito.", () => {
+              document.getElementById("lblCorte").textContent = "Corte Actualizado: " + fCorte;
+              applyUserSecurity();
+              render();
+            });
+
+          } catch (err) {
+            alert("Error al procesar el archivo: " + err.message);
           }
-
-          STORE.ingresoEjec = newIngresoEj;
-
-          const wsG = wb.Sheets["Gerente"];
-          const rG = XLSX.utils.sheet_to_json(wsG, { header: 1 });
-          const newNormG = {};
-          for (let r = 4; r < rG.length; r++) {
-            if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
-          }
-
-          const wsR = wb.Sheets["Regional"];
-          const rR = XLSX.utils.sheet_to_json(wsR, { header: 1 });
-          let newNormR = (rR[4] && rR[4][8] !== undefined) ? parseFloat(rR[4][8]) : 0.95;
-
-          let fCorte = "Nueva Fecha";
-          if (wb.SheetNames.includes("1")) {
-            const r1 = XLSX.utils.sheet_to_json(wb.Sheets["1"], { header: 1 });
-            if (r1[2] && r1[2][1]) fCorte = String(r1[2][1]).substring(0, 10);
-          }
-
-          STORE.records = newRecords;
-          STORE.normEjec = newNormEj;
-          STORE.normGer = newNormG;
-          STORE.normReg = newNormR;
-          STORE.fecha = fCorte;
-
-          document.getElementById("lblCorte").textContent = `Corte Actualizado: ${fCorte}`;
-          applyUserSecurity();
-          render();
-          alert(`¡Datos cargados con éxito! ${newRecords.length} créditos procesados.`);
-        } catch (err) {
-          alert("Error al procesar el archivo: " + err.message);
-        }
-      };
-      reader.readAsArrayBuffer(file);
+        };
+        reader.readAsArrayBuffer(file);
+      });
     }
 
     window.onload = init;
