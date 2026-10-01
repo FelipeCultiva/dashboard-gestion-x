@@ -87,6 +87,17 @@
       border-radius: 6px;
       letter-spacing: 0.5px;
     }
+    .badge-mxt {
+      background: rgba(168, 85, 247, 0.25) !important;
+      color: #d8b4fe !important;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      display: inline-block;
+    }
     .badge-verde {
       background: rgba(16, 185, 129, 0.2) !important;
       color: #10b981 !important;
@@ -178,6 +189,14 @@
       </div>
       <div class="filters-grid">
         <div class="form-group">
+          <label>Producto</label>
+          <select id="selProducto" class="form-select">
+            <option value="ALL">Consolidado (Todos)</option>
+            <option value="TRAD">MCM Tradicional</option>
+            <option value="MXT">MXT (Más Por Ti)</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Territorio</label>
           <select id="selTerritorio" class="form-select">
             <option value="ALL">Todos los Territorios</option>
@@ -248,6 +267,7 @@
     <div class="view-tabs">
       <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Jerárquica</button>
       <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
+      <button class="tab-btn" id="btnTabMix" onclick="cambiarVista('mxt')">Mix MCM vs MXT</button>
     </div>
 
     <!-- TABLA -->
@@ -388,7 +408,7 @@
       const selReg = document.getElementById("selRegion");
       const selAg = document.getElementById("selAgencia");
       const txtB = document.getElementById("txtBuscar");
-
+      document.getElementById("selProducto").addEventListener("change", () => renderizar());
       selTerr.addEventListener("change", () => {
         actualizarOpcionesRegion();
         actualizarOpcionesAgencia();
@@ -495,12 +515,29 @@
       const terr = document.getElementById("selTerritorio").value;
       const reg = document.getElementById("selRegion").value;
       const ag = document.getElementById("selAgencia").value;
+      const prod = document.getElementById("selProducto").value;
       const search = document.getElementById("txtBuscar").value.toLowerCase().trim();
 
-      return DB.ejecutivos.filter(e => {
+      return DB.ejecutivos.map(e => {
+        // Clonar para recalcular si se filtra por producto específico
+        let cart = Number(e.cartera) || 0;
+        let cli = Number(e.clientes) || 0;
+
+        if (prod === "MXT") {
+          cart = Number(e.carteraMxt) || 0;
+          cli = Number(e.clientesMxt) || 0;
+        } else if (prod === "TRAD") {
+          cart = Number(e.carteraTrad) || (cart - (Number(e.carteraMxt) || 0));
+          cli = Number(e.clientesTrad) || (cli - (Number(e.clientesMxt) || 0));
+        }
+
+        const prom = cli > 0 ? Math.round(cart / cli) : 0;
+        return { ...e, carteraActiva: cart, clientesActivos: cli, promedioActivo: prom };
+      }).filter(e => {
         if (terr !== "ALL" && e.territorio !== terr) return false;
         if (reg !== "ALL" && e.region !== reg) return false;
         if (ag !== "ALL" && e.agencia !== ag) return false;
+        if (prod === "MXT" && e.carteraActiva <= 0) return false;
         if (search && !e.ejecutivo.toLowerCase().includes(search)) return false;
         return true;
       });
@@ -510,41 +547,49 @@
       const data = obtenerDatosFiltrados();
       const regVal = document.getElementById("selRegion").value;
       const agVal = document.getElementById("selAgencia").value;
+      const prodVal = document.getElementById("selProducto").value;
 
-      // 1. Valores reales acumulados del corte
-      const cartReal = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
-      const cliReal = data.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
+      // 1. Valores reales acumulados
+      const cartReal = data.reduce((s, e) => s + e.carteraActiva, 0);
+      const cliReal = data.reduce((s, e) => s + e.clientesActivos, 0);
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
 
-      // 2. Metas reales de Drive según el nivel de filtrado
+      // 2. Metas de Drive
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
       let normVal = 0;
 
-      if (agVal !== "ALL" && DB.agencias[agVal]) {
-        metaCart = DB.agencias[agVal].metaCartera;
-        metaCli = DB.agencias[agVal].metaClientes;
-        metaProm = DB.agencias[agVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
-        normVal = DB.agencias[agVal].normalidad;
-      } else if (regVal !== "ALL" && DB.regiones[regVal]) {
-        metaCart = DB.regiones[regVal].metaCartera;
-        metaCli = DB.regiones[regVal].metaClientes;
-        metaProm = DB.regiones[regVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
-        normVal = DB.regiones[regVal].normalidad;
+      if (prodVal === "ALL") {
+        if (agVal !== "ALL" && DB.agencias[agVal]) {
+          metaCart = DB.agencias[agVal].metaCartera;
+          metaCli = DB.agencias[agVal].metaClientes;
+          metaProm = DB.agencias[agVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+          normVal = DB.agencias[agVal].normalidad;
+        } else if (regVal !== "ALL" && DB.regiones[regVal]) {
+          metaCart = DB.regiones[regVal].metaCartera;
+          metaCli = DB.regiones[regVal].metaClientes;
+          metaProm = DB.regiones[regVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+          normVal = DB.regiones[regVal].normalidad;
+        } else {
+          metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
+          metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
+          metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
+          normVal = cartReal > 0 
+            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / data.reduce((s, e) => s + Number(e.cartera), 0)) 
+            : 0.95;
+        }
       } else {
+        // En producto individual se ajusta al acumulado activo
         metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
         metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
-        normVal = cartReal > 0 
-          ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / cartReal) 
-          : 0.95;
+        normVal = 0.95;
       }
 
-      // Si metaProm no viene definida, se calcula con la relación institucional
       if (!metaProm && metaCli > 0) metaProm = Math.round(metaCart / metaCli);
 
-      // 3. Evaluar colorimetría contra las reglas de Drive
+      // 3. Evaluar colorimetría con reglas de Drive
       const stCart = evaluarColorEstado(cartReal, metaCart, "cartera");
       const stCli  = evaluarColorEstado(cliReal, metaCli, "clientes");
       const stProm = evaluarColorEstado(promReal, metaProm, "promedio");
@@ -583,8 +628,8 @@
       fProm.style.width = Math.min(100, pctP) + "%";
       fProm.style.background = stProm.color;
 
-      // --- TARJETA 4: NORMALIDAD ---
-      const normPctText = (normVal * 100).toFixed(1) + "%";
+      // --- TARJETA 4: NORMALIDAD (CON 2 DECIMALES) ---
+      const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
       lblNormVal.style.color = stNorm.color;
@@ -595,7 +640,6 @@
       fNorm.style.width = Math.min(100, normVal * 100) + "%";
       fNorm.style.background = stNorm.color;
 
-      // 4. Renderizar las filas de la tabla
       renderizarTabla(data);
     }
 
@@ -605,27 +649,131 @@
       tbody.innerHTML = "";
 
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No se encontraron ejecutivos para los filtros seleccionados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No se encontraron registros para los filtros seleccionados.</td></tr>`;
         return;
       }
 
+      // VISTA MIX MCM VS MXT
+      if (vistaActual === "mxt") {
+        const resumenMix = {
+          "MCM Tradicional": { cartera: 0, clientes: 0 },
+          "MXT (Más Por Ti)": { cartera: 0, clientes: 0 }
+        };
+
+        data.forEach(e => {
+          resumenMix["MCM Tradicional"].cartera += (Number(e.carteraTrad) || (Number(e.cartera) - (Number(e.carteraMxt) || 0)));
+          resumenMix["MCM Tradicional"].clientes += (Number(e.clientesTrad) || (Number(e.clientes) - (Number(e.clientesMxt) || 0)));
+          resumenMix["MXT (Más Por Ti)"].cartera += (Number(e.carteraMxt) || 0);
+          resumenMix["MXT (Más Por Ti)"].clientes += (Number(e.clientesMxt) || 0);
+        });
+
+        Object.keys(resumenMix).forEach(k => {
+          const item = resumenMix[k];
+          const prom = item.clientes > 0 ? Math.round(item.cartera / item.clientes) : 0;
+          const tr = document.createElement("tr");
+          tr.className = "row-agencia";
+          tr.innerHTML = `
+            <td><strong>${k === "MXT (Más Por Ti)" ? "🟣 " : "🔷 "} ${k}</strong></td>
+            <td class="tar">$${item.cartera.toLocaleString("es-MX")}</td>
+            <td class="tar">${item.clientes.toLocaleString("es-MX")}</td>
+            <td class="tar">$${prom.toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:var(--success);">-</td>
+            <td style="text-align:center;"><span class="badge-kpi badge-verde">ACTIVO</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      // VISTA RANKING EJECUTIVOS
       if (vistaActual === "ranking") {
-        const ordenados = [...data].sort((a, b) => b.cartera - a.cartera);
+        const ordenados = [...data].sort((a, b) => b.carteraActiva - a.carteraActiva);
         ordenados.forEach(e => {
           const st = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
+          const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
-            <td class="tar">$${Number(e.cartera).toLocaleString("es-MX")}</td>
-            <td class="tar">${e.clientes}</td>
-            <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(1)}%</td>
+            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span> ${mxtBadge}</td>
+            <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
+            <td class="tar">${e.clientesActivos}</td>
+            <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(2)}%</td>
             <td style="text-align:center;"><span class="badge-kpi ${st.css}">${st.txt}</span></td>
           `;
           tbody.appendChild(tr);
         });
         return;
       }
+
+      // VISTA ESTRUCTURA JERÁRQUICA
+      const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
+      regionesUnicas.forEach(reg => {
+        const dataReg = data.filter(e => e.region === reg);
+        const rCart = dataReg.reduce((s, e) => s + e.carteraActiva, 0);
+        const rCli = dataReg.reduce((s, e) => s + e.clientesActivos, 0);
+        const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
+        const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.carteraActiva), 0) / rCart : 0.95);
+        const stReg = evaluarColorEstado(rNorm, 0.95, "normalidad");
+
+        const trReg = document.createElement("tr");
+        trReg.className = "row-region";
+        trReg.innerHTML = `
+          <td>🏛️ ${reg}</td>
+          <td class="tar">$${rCart.toLocaleString("es-MX")}</td>
+          <td class="tar">${rCli}</td>
+          <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
+          <td class="tar fw-bold" style="color:${stReg.color};">${(rNorm * 100).toFixed(2)}%</td>
+          <td style="text-align:center;"><span class="badge-kpi ${stReg.css}">${stReg.txt}</span></td>
+        `;
+        tbody.appendChild(trReg);
+
+        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))].filter(Boolean);
+        agenciasUnicas.forEach(ag => {
+          const dataAg = dataReg.filter(e => e.agencia === ag);
+          const aCart = dataAg.reduce((s, e) => s + e.carteraActiva, 0);
+          const aCli = dataAg.reduce((s, e) => s + e.clientesActivos, 0);
+          const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
+          const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.carteraActiva), 0) / aCart : 0.95);
+          const stAg = evaluarColorEstado(aNorm, 0.95, "normalidad");
+
+          const trAg = document.createElement("tr");
+          trAg.className = "row-agencia";
+          trAg.innerHTML = `
+            <td style="padding-left:24px;">📍 ${ag}</td>
+            <td class="tar">$${aCart.toLocaleString("es-MX")}</td>
+            <td class="tar">${aCli}</td>
+            <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:${stAg.color};">${(aNorm * 100).toFixed(2)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${stAg.css}">${stAg.txt}</span></td>
+          `;
+          tbody.appendChild(trAg);
+
+          dataAg.forEach(e => {
+            const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
+            const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
+            const trEj = document.createElement("tr");
+            trEj.innerHTML = `
+              <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> ${mxtBadge}</td>
+              <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
+              <td class="tar">${e.clientesActivos}</td>
+              <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
+              <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(2)}%</td>
+              <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
+            `;
+            tbody.appendChild(trEj);
+          });
+        });
+      });
+    }
+
+    function cambiarVista(vista) {
+      vistaActual = vista;
+      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
+      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
+      const btnMix = document.getElementById("btnTabMix");
+      if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
+      renderizar();
+    }
 
       // Vista Jerárquica
       const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
