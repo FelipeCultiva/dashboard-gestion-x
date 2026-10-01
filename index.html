@@ -146,6 +146,36 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+
+    /* Estilos del Logo y Copyright en Login */
+    .login-logo-img {
+      max-width: 140px;
+      height: auto;
+      margin: 0 auto 12px;
+      display: block;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .login-footer-copy {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      border-top: 1px solid var(--card-border);
+      padding-top: 14px;
+    }
+
+    /* Animación fluida de la barra de progreso */
+    .prog-fill-animated {
+      background: linear-gradient(90deg, #0284c7, #38bdf8, #0284c7);
+      background-size: 200% 100%;
+      animation: gradientMove 1.5s linear infinite;
+    }
+    @keyframes gradientMove {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    
     /* Pastillas de Brecha en Metas */
     .kpi-gap {
       display: inline-block;
@@ -202,11 +232,15 @@
 <body>
 
   <!-- LOGIN -->
+  <!-- LOGIN -->
   <div id="pantallaLogin">
     <div class="login-box">
-      <div class="login-icon">X</div>
-      <h2 style="margin-bottom:4px;">GESTIÓN X</h2>
-      <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Microfinanciera McM</p>
+      <!-- LOGO MÁS CON MENOS 2026 -->
+      <img src="LOGO%20MAS%20CON%20MENOS%202026.jpeg" alt="Más con Menos" class="login-logo-img" onerror="this.style.display='none'; document.getElementById('loginFallbackIcon').style.display='flex';">
+      <div id="loginFallbackIcon" class="login-icon" style="display:none;">X</div>
+      
+      <h2 style="margin-bottom:4px; font-size:1.5rem; font-weight:800;">GESTIÓN X</h2>
+      <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Microfinanciera Más con Menos (McM)</p>
       
       <div id="loginErrorMsg" style="display:none; color:var(--danger); font-size:12px; margin-bottom:12px;">Usuario o contraseña incorrectos.</div>
 
@@ -215,6 +249,12 @@
         <input type="password" id="txtPass" class="input-login" placeholder="Contraseña" required autocomplete="current-password" autocapitalize="none" autocorrect="off">
         <button type="submit" class="btn-login" id="btnLogin">Ingresar al Dashboard</button>
       </form>
+
+      <!-- DERECHOS DE AUTOR -->
+      <div class="login-footer-copy">
+        © 2026 Financiera Más con Menos<br>
+        Todos los derechos reservados. Uso exclusivo interno.
+      </div>
     </div>
   </div>
 
@@ -386,17 +426,18 @@
     </div>
 
   <!-- MODAL DE PROGRESO -->
+  <!-- MODAL DE PROGRESO CON CONTADOR DE SEGUNDOS -->
   <div id="progressModal">
     <div class="modal-content">
       <h3 id="modalProgTitulo" style="font-size:16px; margin-bottom:8px;">Sincronizando con Drive</h3>
-      <div id="modalProgPct" style="font-size:24px; font-weight:800; color:#38bdf8; margin-bottom:12px;">0%</div>
+      <div id="modalProgSegundos" style="font-size:26px; font-weight:800; color:#38bdf8; margin-bottom:12px;">0.0 s</div>
       <div class="prog-bar" style="height:6px; margin-bottom:12px;">
-        <div id="modalProgFill" class="prog-fill" style="width:0%; background:#0284c7;"></div>
+        <div id="modalProgFill" class="prog-fill prog-fill-animated" style="width:100%;"></div>
       </div>
-      <div id="modalProgSub" style="font-size:12px; color:var(--text-muted);">Consultando datos frescos...</div>
+      <div id="modalProgSub" style="font-size:12px; color:var(--text-muted);">Consultando datos frescos del servidor...</div>
     </div>
   </div>
-
+    
   <!-- NOTIFICACIÓN EMERGENTE TEMPORAL (TOAST) -->
   <div id="toastNotification">
     <span style="font-size:18px;">📅</span>
@@ -902,27 +943,37 @@
       }
 
       // --- VISTA 1: TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO ---
+      // --- VISTA TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO ---
       if (vistaActual === "top10" || vistaActual === "bottom10") {
         const esTop = (vistaActual === "top10");
         
-        // Filtrar ejecutivos con meta de cartera > 0
         const evaluados = data.filter(e => Number(e.metaCartera) > 0).map(e => {
+          // 1. Cartera (30%)
           const cCart = Number(e.carteraActiva) / Number(e.metaCartera);
-          const mProm = Number(e.metaPromedio) || (Number(e.metaClientes) > 0 ? Number(e.metaCartera) / Number(e.metaClientes) : 14500);
-          const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
-          const cNorm = (Number(e.normalidad) || 0) / 0.95; // Meta institucional 95%
+          
+          // 2. Clientes (30%)
+          const metaCli = Number(e.metaClientes) || (Number(e.metaCartera) / 14500);
+          const cCli = metaCli > 0 ? (Number(e.clientesActivos) / metaCli) : 1;
 
-          // PONDERACIÓN SOLICITADA: 50% Cartera + 25% Promedio + 25% Normalidad
-          const score = (0.50 * cCart) + (0.25 * cProm) + (0.25 * cNorm);
+          // 3. Cartera Promedio (20%)
+          const mProm = Number(e.metaPromedio) || (metaCli > 0 ? Number(e.metaCartera) / metaCli : 14500);
+          const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
+
+          // 4. Normalidad (20%)
+          const cNorm = (Number(e.normalidad) || 0) / 0.95;
+
+          // PONDERACIÓN EXACTA: 30% Cartera + 30% Clientes + 20% Promedio + 20% Normalidad
+          const score = (0.30 * cCart) + (0.30 * cCli) + (0.20 * cProm) + (0.20 * cNorm);
+
           return { 
             ...e, 
             scoreVal: score, 
             scorePct: Math.round(score * 100), 
-            cCartPct: Math.round(cCart * 100) 
+            cCartPct: Math.round(cCart * 100),
+            cCliPct: Math.round(cCli * 100)
           };
         });
 
-        // Ordenar según sea Top o Bottom
         const lista = esTop 
           ? evaluados.sort((a, b) => b.scoreVal - a.scoreVal).slice(0, 10)
           : evaluados.sort((a, b) => a.scoreVal - b.scoreVal).slice(0, 10);
@@ -945,7 +996,7 @@
               <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span>
             </td>
             <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")} <span style="font-size:10px; color:var(--text-muted);">(${e.cCartPct}%)</span></td>
-            <td class="tar">${e.clientesActivos}</td>
+            <td class="tar">${e.clientesActivos} <span style="font-size:10px; color:var(--text-muted);">(${e.cCliPct}%)</span></td>
             <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
             <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : (e.normalidad >= 0.90 ? 'var(--warning)' : 'var(--danger)')};">${(e.normalidad * 100).toFixed(2)}%</td>
             <td style="text-align:center;"><span class="badge-kpi ${badgeClass}">Score: ${e.scorePct}%</span></td>
@@ -1113,20 +1164,52 @@
       sincronizarConDrive(true);
     }
 
-    async function sincronizarConDrive(esManual = false) {
-      if (esManual) {
-        animarProgreso(0, 35, 400, "Sincronizando con Drive", "Consultando parámetros y colorimetría...");
+    // Cronómetro en segundos para el modal de sincronización
+    let cronometroInterval = null;
+    let tiempoInicioSinc = 0;
+
+    function iniciarCronometroModal(titulo, subtitulo) {
+      const modal = document.getElementById("progressModal");
+      const lblSeg = document.getElementById("modalProgSegundos");
+      const lblTit = document.getElementById("modalProgTitulo");
+      const lblSub = document.getElementById("modalProgSub");
+
+      if (lblTit && titulo) lblTit.textContent = titulo;
+      if (lblSub && subtitulo) lblSub.textContent = subtitulo;
+      if (lblSeg) lblSeg.textContent = "0.0 s";
+      
+      modal.style.display = "flex";
+      tiempoInicioSinc = performance.now();
+
+      if (cronometroInterval) clearInterval(cronometroInterval);
+      cronometroInterval = setInterval(() => {
+        const transcurrido = (performance.now() - tiempoInicioSinc) / 1000;
+        if (lblSeg) lblSeg.textContent = transcurrido.toFixed(1) + " s";
+      }, 100);
+    }
+
+    function detenerCronometroModal(callback) {
+      if (cronometroInterval) {
+        clearInterval(cronometroInterval);
+        cronometroInterval = null;
       }
+      setTimeout(() => {
+        document.getElementById("progressModal").style.display = "none";
+        if (callback) callback();
+      }, 500);
+    }
+
+    async function sincronizarConDrive(esManual = false) {
+      iniciarCronometroModal(
+        "Sincronizando con Drive",
+        "Descargando y procesando registros de BASE..."
+      );
 
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
         const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}_t=${Date.now()}`);
-
-        if (esManual) {
-          animarProgreso(35, 75, 400, "Descargando Datos", "Procesando registros de BASE y reglas...");
-        }
-
         const d = await res.json();
+
         if (d && d.status === "success") {
           DB.ejecutivos = d.ejecutivos || [];
           DB.agencias = d.agencias || {};
@@ -1139,42 +1222,33 @@
             localStorage.setItem("mcm_database", JSON.stringify(DB));
           } catch (e) {}
 
-          const aplicarDatos = () => {
+          const totalSegundos = ((performance.now() - tiempoInicioSinc) / 1000).toFixed(1);
+          document.getElementById("modalProgSub").textContent = `¡Listo en ${totalSegundos}s! Sincronización exitosa.`;
+
+          detenerCronometroModal(() => {
             document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
             actualizarOpcionesRegion(false);
             actualizarOpcionesAgencia(false);
             renderizar();
-            // 2. VENTANA EMERGENTE CON LA FECHA DE ACTUALIZACIÓN
             mostrarToast("Base de datos sincronizada: Corte al " + (DB.fecha || "En vivo"));
-          };
+          });
 
-          if (esManual) {
-            animarProgreso(75, 100, 300, "¡Completado!", "Dashboard actualizado con éxito.", () => {
-              aplicarDatos();
-              setTimeout(() => {
-                document.getElementById("progressModal").style.display = "none";
-              }, 450);
-            });
-          } else {
-            aplicarDatos();
-          }
         } else {
-          throw new Error(d.message || "Error al procesar");
+          throw new Error(d.message || "Error de respuesta del servidor");
         }
       } catch (err) {
         console.warn("Fallo o demora en vivo, usando copia local:", err);
         cargarCopiaLocal();
-        if (esManual) {
-          animarProgreso(75, 100, 300, "Modo Offline", "Sin conexión. Se cargó la copia local.", () => {
-            setTimeout(() => {
-              document.getElementById("progressModal").style.display = "none";
-              mostrarToast("Modo Offline: Corte local " + (DB.fecha || ""));
-            }, 800);
-          });
-        }
+        document.getElementById("modalProgSub").textContent = "Sin conexión en vivo. Se cargó la copia local.";
+        detenerCronometroModal(() => {
+          actualizarOpcionesRegion(false);
+          actualizarOpcionesAgencia(false);
+          renderizar();
+          mostrarToast("Modo Offline: Corte local " + (DB.fecha || ""));
+        });
       }
     }
-
+    
     function cargarCopiaLocal() {
       try {
         const local = localStorage.getItem("mcm_database");
