@@ -828,7 +828,9 @@
         {
           title: "Normalidad",
           val: fmtPct(norm),
-          meta: "Meta: >=95%",
+          meta: STORE.debugNormalidad 
+            ? `<span style="color:#f59e0b; font-size:10px; font-weight:700;">🔍 ${level === 'agencia' ? 'Gerente' : 'Regional'}: Hoja [${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].hoja}] Col [${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].colLetra}] "${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].header}"</span>`
+            : "Meta: >=95%",
           pct: norm >= 0.95 ? "OK" : "Riesgo",
           status: getStatus(norm, 0.95, "normalidad"),
           fill: Math.min(100, norm * 100)
@@ -1068,7 +1070,26 @@
               });
             }
 
-            // 3. Pestaña Ejecutivo (Buscar columna de Normalidad dinámicamente)
+            // Variable auxiliar para convertir número de columna a letra (0 -> A, 1 -> B, etc.)
+            function numALetra(colIndex) {
+              let temp, letra = '';
+              let col = colIndex + 1;
+              while (col > 0) {
+                temp = (col - 1) % 26;
+                letra = String.fromCharCode(65 + temp) + letra;
+                col = (col - temp - 1) / 26;
+              }
+              return letra;
+            }
+
+            // Objeto de diagnóstico temporal
+            STORE.debugNormalidad = {
+              ejecutivo: { hoja: "No encontrada", colLetra: "-", header: "-", muestra: "-" },
+              gerente: { hoja: "No encontrada", colLetra: "-", header: "-", muestra: "-" },
+              regional: { hoja: "No encontrada", colLetra: "-", header: "-", muestra: "-" }
+            };
+
+            // --- EJECUTIVO ---
             const ejecSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("ejecutivo"));
             const newNormEj = {};
             const newIngresoEj = {};
@@ -1078,17 +1099,23 @@
               for (let r = 0; r < Math.min(rEj.length, 10); r++) {
                 if (rEj[r] && rEj[r].some(c => String(c).includes("Normalidad") || String(c).includes("Ejecutivo"))) { hEj = r; break; }
               }
-              const headEj = (rEj[hEj] || []).map(c => String(c || "").trim().toLowerCase());
-              const colNom = headEj.findIndex(c => c.includes("ejecutivo") || c.includes("nombre"));
-              const colNorm = headEj.findIndex(c => c.includes("normalidad"));
-              const colIng = headEj.findIndex(c => c.includes("ingreso"));
+              const headEj = (rEj[hEj] || []).map(c => String(c || "").trim());
+              const colNom = headEj.findIndex(c => c.toLowerCase().includes("ejecutivo") || c.toLowerCase().includes("nombre"));
+              const colNorm = headEj.findIndex(c => c.toLowerCase().includes("normalidad"));
+              const colIng = headEj.findIndex(c => c.toLowerCase().includes("ingreso"));
+
+              STORE.debugNormalidad.ejecutivo = {
+                hoja: ejecSheetName,
+                colLetra: colNorm !== -1 ? numALetra(colNorm) : "N/D",
+                header: colNorm !== -1 ? headEj[colNorm] : "No hallado",
+                filaHead: hEj + 1
+              };
 
               for (let r = hEj + 1; r < rEj.length; r++) {
                 const row = rEj[r];
                 if (row && colNom !== -1 && row[colNom]) {
                   const nom = String(row[colNom]).trim();
                   let nVal = colNorm !== -1 ? parseFloat(row[colNorm]) : 0;
-                  if (nVal > 1.5) nVal = nVal / 100;
                   newNormEj[nom] = isNaN(nVal) ? 0 : nVal;
 
                   if (colIng !== -1 && row[colIng]) {
@@ -1100,7 +1127,7 @@
               }
             }
 
-            // 4. Pestaña Gerente (Normalidad por Agencia)
+            // --- GERENTE (AGENCIAS) ---
             const gerSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("gerente"));
             const newNormG = {};
             if (gerSheetName && wb.Sheets[gerSheetName]) {
@@ -1109,20 +1136,54 @@
               for (let r = 0; r < Math.min(rG.length, 10); r++) {
                 if (rG[r] && rG[r].some(c => String(c).includes("Normalidad") || String(c).includes("Agencia"))) { hG = r; break; }
               }
-              const headG = (rG[hG] || []).map(c => String(c || "").trim().toLowerCase());
-              const colAgG = headG.findIndex(c => c.includes("agencia") || c.includes("sucursal"));
-              const colNormG = headG.findIndex(c => c.includes("normalidad"));
+              const headG = (rG[hG] || []).map(c => String(c || "").trim());
+              const colAgG = headG.findIndex(c => c.toLowerCase().includes("agencia") || c.toLowerCase().includes("sucursal"));
+              const colNormG = headG.findIndex(c => c.toLowerCase().includes("normalidad"));
+
+              STORE.debugNormalidad.gerente = {
+                hoja: gerSheetName,
+                colLetra: colNormG !== -1 ? numALetra(colNormG) : "N/D",
+                header: colNormG !== -1 ? headG[colNormG] : "No hallado",
+                filaHead: hG + 1
+              };
 
               for (let r = hG + 1; r < rG.length; r++) {
                 const row = rG[r];
                 if (row && colAgG !== -1 && row[colAgG]) {
                   let nVal = colNormG !== -1 ? parseFloat(row[colNormG]) : 0;
-                  if (nVal > 1.5) nVal = nVal / 100;
                   newNormG[String(row[colAgG]).trim()] = isNaN(nVal) ? 0 : nVal;
                 }
               }
             }
 
+            // --- REGIONAL ---
+            const regSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("regional"));
+            const newNormR = {};
+            if (regSheetName && wb.Sheets[regSheetName]) {
+              const rR = XLSX.utils.sheet_to_json(wb.Sheets[regSheetName], { header: 1 });
+              let hR = 3;
+              for (let r = 0; r < Math.min(rR.length, 10); r++) {
+                if (rR[r] && rR[r].some(c => String(c).includes("Normalidad") || String(c).includes("Regi"))) { hR = r; break; }
+              }
+              const headR = (rR[hR] || []).map(c => String(c || "").trim());
+              const colRegR = headR.findIndex(c => c.toLowerCase().includes("regi") || c.toLowerCase().includes("zona"));
+              const colNormR = headR.findIndex(c => c.toLowerCase().includes("normalidad"));
+
+              STORE.debugNormalidad.regional = {
+                hoja: regSheetName,
+                colLetra: colNormR !== -1 ? numALetra(colNormR) : "N/D",
+                header: colNormR !== -1 ? headR[colNormR] : "No hallado",
+                filaHead: hR + 1
+              };
+
+              for (let r = hR + 1; r < rR.length; r++) {
+                const row = rR[r];
+                if (row && colRegR !== -1 && row[colRegR]) {
+                  let nVal = colNormR !== -1 ? parseFloat(row[colNormR]) : 0.95;
+                  newNormR[String(row[colRegR]).trim().toUpperCase()] = isNaN(nVal) ? 0.95 : nVal;
+                }
+              }
+            }
             // 5. Pestaña Regional (Normalidad por Región)
             const regSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("regional"));
             const newNormR = {};
