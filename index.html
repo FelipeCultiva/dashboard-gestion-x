@@ -619,55 +619,82 @@
       render();
     }
 
+    function actualizarOpcionesAgencia() {
+      const selReg = document.getElementById("selRegion");
+      const selAg = document.getElementById("selAgencia");
+      const regionSeleccionada = selReg.value;
+      const valorAgenciaActual = selAg.value;
+
+      // Si el usuario es gerente de agencia fija, no alterar sus permisos
+      if (currentUser && currentUser.rol === "GTE_AGENCIA") {
+        selAg.innerHTML = `<option value="${currentUser.agencia}">${currentUser.agencia}</option>`;
+        selAg.value = currentUser.agencia;
+        selAg.disabled = true;
+        return;
+      }
+
+      // Filtrar agencias que correspondan a la región seleccionada (o todas si es ALL)
+      const registrosBase = (regionSeleccionada === "ALL")
+        ? STORE.records
+        : STORE.records.filter(r => r.region === regionSeleccionada);
+
+      const agenciasDisponibles = [...new Set(registrosBase.map(r => r.agencia))].filter(Boolean).sort();
+
+      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
+        agenciasDisponibles.map(a => `<option value="${a}">${a}</option>`).join("");
+
+      // Conservar la agencia si aún existe dentro de la nueva región; de lo contrario, volver a ALL
+      if (agenciasDisponibles.includes(valorAgenciaActual)) {
+        selAg.value = valorAgenciaActual;
+      } else {
+        selAg.value = "ALL";
+      }
+    }
+
     function applyUserSecurity() {
       document.getElementById("currentUserName").textContent = currentUser.nombre;
       document.getElementById("currentUserRole").textContent = currentUser.rol.replace("_", " ");
       document.getElementById("avatarLetter").textContent = currentUser.nombre.charAt(0);
 
       const selReg = document.getElementById("selRegion");
-      const selAg = document.getElementById("selAgencia");
       const banner = document.getElementById("bannerText");
       const adminBar = document.getElementById("adminActionsBar");
 
-      // Poblar Regiones y Agencias dinámicamente desde los registros descargados
+      // Poblar regiones únicas ordenadas
       const allRegiones = [...new Set(STORE.records.map(r => r.region))].filter(Boolean).sort();
-      const allAgencias = [...new Set(STORE.records.map(r => r.agencia))].filter(Boolean).sort();
-
       selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
-        allRegiones.map(r => '<option value="' + r + '">' + r + '</option>').join("");
-
-      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
-        allAgencias.map(a => '<option value="' + a + '">' + a + '</option>').join("");
+        allRegiones.map(r => `<option value="${r}">${r}</option>`).join("");
 
       if (currentUser.rol === "GTE_AGENCIA") {
         selReg.value = currentUser.region;
         selReg.disabled = true;
-        selAg.innerHTML = '<option value="' + currentUser.agencia + '">' + currentUser.agencia + '</option>';
-        selAg.value = currentUser.agencia;
-        selAg.disabled = true;
-        banner.innerHTML = "🔒 Gerencia de Agencia: <strong>" + currentUser.agencia + "</strong> (Solo su información autorizada)";
-        adminBar.style.display = "none";
+        actualizarOpcionesAgencia();
+        banner.innerHTML = `🔒 Gerencia de Agencia: <strong>${currentUser.agencia}</strong> (Solo su información autorizada)`;
+        if (adminBar) adminBar.style.display = "none";
       } else if (currentUser.rol === "GTE_REGIONAL") {
         selReg.value = currentUser.region;
         selReg.disabled = true;
-        selAg.disabled = false;
-        banner.innerHTML = "🏛️ Gerencia Regional: <strong>" + currentUser.region + "</strong> (Agencias a su cargo)";
-        adminBar.style.display = "none";
+        actualizarOpcionesAgencia();
+        banner.innerHTML = `🏛️ Gerencia Regional: <strong>${currentUser.region}</strong> (Agencias a su cargo)`;
+        if (adminBar) adminBar.style.display = "none";
       } else if (currentUser.rol === "SUBDIR_TERRITORIAL") {
         selReg.disabled = false;
-        selAg.disabled = false;
-        banner.innerHTML = "🏢 Subdirección Territorial: <strong>" + currentUser.territorio + "</strong>";
-        adminBar.style.display = "flex";
+        actualizarOpcionesAgencia();
+        banner.innerHTML = `🏢 Subdirección Territorial: <strong>${currentUser.territorio}</strong>`;
+        if (adminBar) adminBar.style.display = "flex";
       } else {
         selReg.disabled = false;
-        selAg.disabled = false;
-        banner.innerHTML = "🔓 Nivel Directivo / Admin: <strong>" + currentUser.nombre + "</strong> (Acceso y filtros totales)";
-        adminBar.style.display = "flex";
+        actualizarOpcionesAgencia();
+        banner.innerHTML = `🔓 Nivel Directivo / Admin: <strong>${currentUser.nombre}</strong> (Acceso y filtros totales)`;
+        if (adminBar) adminBar.style.display = "flex";
       }
     }
 
     function setupListeners() {
-      document.getElementById("selRegion").addEventListener("change", () => ejecutarConsultaConProgreso());
+      document.getElementById("selRegion").addEventListener("change", () => {
+        actualizarOpcionesAgencia();
+        ejecutarConsultaConProgreso();
+      });
       document.getElementById("selAgencia").addEventListener("change", () => ejecutarConsultaConProgreso());
       document.getElementById("selProducto").addEventListener("change", () => ejecutarConsultaConProgreso());
       document.getElementById("txtSearch").addEventListener("input", () => render());
@@ -677,7 +704,7 @@
       document.getElementById("selProducto").value = "ALL";
       document.getElementById("txtSearch").value = "";
       if (!document.getElementById("selRegion").disabled) document.getElementById("selRegion").value = "ALL";
-      if (!document.getElementById("selAgencia").disabled) document.getElementById("selAgencia").value = "ALL";
+      actualizarOpcionesAgencia();
       ejecutarConsultaConProgreso();
     }
 
@@ -1042,13 +1069,27 @@
               if (rR[4] && rR[4][8] !== undefined) newNormR = parseFloat(rR[4][8]) || 0.95;
             }
 
-            // 6. Fecha y Semana de Corte
-            let fCorte = file.name.replace(/\.[^/.]+$/, "");
-            if (wb.SheetNames.includes("1")) {
-              const r1 = XLSX.utils.sheet_to_json(wb.Sheets["1"], { header: 1 });
+            // 6. Fecha de corte (evitar caída en época 1970)
+            let fCorte = file.name.replace(/\.[^/.]+$/, "").replace(/indicadores|semanales|mcm|ejemplo/gi, "").trim();
+            const sheet1 = wb.SheetNames.find(s => s.trim() === "1" || s.trim().toLowerCase().includes("corte"));
+            if (sheet1 && wb.Sheets[sheet1]) {
+              const r1 = XLSX.utils.sheet_to_json(wb.Sheets[sheet1], { header: 1 });
               if (r1[2] && r1[2][1]) {
-                const d = new Date(r1[2][1]);
-                if (!isNaN(d.getTime())) fCorte = d.toISOString().substring(0, 10);
+                const valorCelda = r1[2][1];
+                if (valorCelda instanceof Date && !isNaN(valorCelda.getTime()) && valorCelda.getFullYear() > 2000) {
+                  fCorte = valorCelda.toISOString().substring(0, 10);
+                } else if (typeof valorCelda === "string" && valorCelda.length >= 8) {
+                  fCorte = valorCelda.substring(0, 10);
+                }
+              }
+            }
+            if (!fCorte || fCorte.startsWith("1970")) {
+              const coincidenciaFecha = file.name.match(/\d{8}/);
+              if (coincidenciaFecha) {
+                const raw = coincidenciaFecha[0];
+                fCorte = `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
+              } else {
+                fCorte = new Date().toISOString().substring(0, 10);
               }
             }
 
