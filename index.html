@@ -205,34 +205,42 @@
     </div>
 
     <!-- TARJETAS KPIS -->
+    <!-- TARJETAS KPIS -->
     <div class="kpis-grid">
+      <!-- 1. Cartera Colocada -->
       <div class="card-kpi">
         <span class="kpi-title">Cartera Colocada</span>
-        <span class="kpi-pct" id="kpiPctCartera">0%</span>
+        <span class="kpi-pct badge-kpi" id="kpiPctCartera">0%</span>
         <div class="kpi-val" id="kpiValCartera">$0</div>
         <div class="kpi-meta" id="kpiMetaCartera">Meta: $0</div>
-        <div class="prog-bar"><div class="prog-fill" id="kpiFillCartera" style="width:0%; background:var(--primary);"></div></div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillCartera" style="width:0%;"></div></div>
       </div>
+
+      <!-- 2. Clientes Vigentes -->
       <div class="card-kpi">
         <span class="kpi-title">Clientes Vigentes</span>
-        <span class="kpi-pct" id="kpiPctClientes">0%</span>
+        <span class="kpi-pct badge-kpi" id="kpiPctClientes">0%</span>
         <div class="kpi-val" id="kpiValClientes">0</div>
         <div class="kpi-meta" id="kpiMetaClientes">Meta: 0</div>
-        <div class="prog-bar"><div class="prog-fill" id="kpiFillClientes" style="width:0%; background:var(--warning);"></div></div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillClientes" style="width:0%;"></div></div>
       </div>
+
+      <!-- 3. Promedio Cartera -->
       <div class="card-kpi">
         <span class="kpi-title">Promedio Cartera</span>
-        <span class="kpi-pct" id="kpiPctPromedio">OK</span>
+        <span class="kpi-pct badge-kpi" id="kpiPctPromedio">0%</span>
         <div class="kpi-val" id="kpiValPromedio">$0</div>
-        <div class="kpi-meta">Promedio General</div>
-        <div class="prog-bar"><div class="prog-fill" id="kpiFillPromedio" style="width:100%; background:var(--success);"></div></div>
+        <div class="kpi-meta" id="kpiMetaPromedio">Meta: $0</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillPromedio" style="width:0%;"></div></div>
       </div>
+
+      <!-- 4. Normalidad -->
       <div class="card-kpi">
         <span class="kpi-title">Normalidad</span>
-        <span class="kpi-pct" id="kpiPctNormalidad">OK</span>
-        <div class="kpi-val" id="kpiValNormalidad" style="color:var(--success);">0.0%</div>
-        <div class="kpi-meta">Meta: >=95%</div>
-        <div class="prog-bar"><div class="prog-fill" id="kpiFillNormalidad" style="width:0%; background:var(--success);"></div></div>
+        <span class="kpi-pct badge-kpi" id="kpiPctNormalidad">0.0%</span>
+        <div class="kpi-val" id="kpiValNormalidad">0.0%</div>
+        <div class="kpi-meta" id="kpiMetaNormalidad">Meta: >=95%</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillNormalidad" style="width:0%;"></div></div>
       </div>
     </div>
 
@@ -242,6 +250,7 @@
       <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
     </div>
 
+    <!-- TABLA -->
     <!-- TABLA -->
     <div class="table-responsive">
       <table>
@@ -502,16 +511,16 @@
       const regVal = document.getElementById("selRegion").value;
       const agVal = document.getElementById("selAgencia").value;
 
-      // 1. Valores reales del corte
-      const cartReal = data.reduce((s, e) => s + e.cartera, 0);
-      const cliReal = data.reduce((s, e) => s + e.clientes, 0);
+      // 1. Valores reales acumulados del corte
+      const cartReal = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+      const cliReal = data.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
 
-      // 2. Metas leídas desde Drive
+      // 2. Metas reales de Drive según el nivel de filtrado
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
-      let normVal = 0.95;
+      let normVal = 0;
 
       if (agVal !== "ALL" && DB.agencias[agVal]) {
         metaCart = DB.agencias[agVal].metaCartera;
@@ -524,13 +533,16 @@
         metaProm = DB.regiones[regVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
         normVal = DB.regiones[regVal].normalidad;
       } else {
-        metaCart = data.reduce((s, e) => s + e.metaCartera, 0);
-        metaCli = data.reduce((s, e) => s + e.metaClientes, 0);
+        metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
+        metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
         normVal = cartReal > 0 
-          ? (data.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / cartReal) 
+          ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / cartReal) 
           : 0.95;
       }
+
+      // Si metaProm no viene definida, se calcula con la relación institucional
+      if (!metaProm && metaCli > 0) metaProm = Math.round(metaCart / metaCli);
 
       // 3. Evaluar colorimetría contra las reglas de Drive
       const stCart = evaluarColorEstado(cartReal, metaCart, "cartera");
@@ -544,7 +556,7 @@
       document.getElementById("kpiMetaCartera").textContent = "Meta: $" + metaCart.toLocaleString("es-MX");
       const bCart = document.getElementById("kpiPctCartera");
       bCart.textContent = pctC + "%";
-      bCart.className = "kpi-pct " + stCart.css;
+      bCart.className = "kpi-pct badge-kpi " + stCart.css;
       const fCart = document.getElementById("kpiFillCartera");
       fCart.style.width = Math.min(100, pctC) + "%";
       fCart.style.background = stCart.color;
@@ -555,7 +567,7 @@
       document.getElementById("kpiMetaClientes").textContent = "Meta: " + metaCli.toLocaleString("es-MX");
       const bCli = document.getElementById("kpiPctClientes");
       bCli.textContent = pctCl + "%";
-      bCli.className = "kpi-pct " + stCli.css;
+      bCli.className = "kpi-pct badge-kpi " + stCli.css;
       const fCli = document.getElementById("kpiFillClientes");
       fCli.style.width = Math.min(100, pctCl) + "%";
       fCli.style.background = stCli.color;
@@ -563,32 +575,39 @@
       // --- TARJETA 3: PROMEDIO CARTERA ---
       const pctP = metaProm > 0 ? Math.round((promReal / metaProm) * 100) : 0;
       document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
-      document.getElementById("kpiMetaPromedio").textContent = metaProm > 0 ? "Meta: $" + metaProm.toLocaleString("es-MX") : "Meta: -";
+      document.getElementById("kpiMetaPromedio").textContent = metaProm > 0 ? "Meta: $" + metaProm.toLocaleString("es-MX") : "Meta: $0";
       const bProm = document.getElementById("kpiPctPromedio");
       bProm.textContent = pctP + "%";
-      bProm.className = "kpi-pct " + stProm.css;
+      bProm.className = "kpi-pct badge-kpi " + stProm.css;
       const fProm = document.getElementById("kpiFillPromedio");
       fProm.style.width = Math.min(100, pctP) + "%";
       fProm.style.background = stProm.color;
 
       // --- TARJETA 4: NORMALIDAD ---
+      const normPctText = (normVal * 100).toFixed(1) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
-      lblNormVal.textContent = (normVal * 100).toFixed(1) + "%";
+      lblNormVal.textContent = normPctText;
       lblNormVal.style.color = stNorm.color;
       const bNorm = document.getElementById("kpiPctNormalidad");
-      bNorm.textContent = normVal >= (DB.reglasColor.normalidad ? DB.reglasColor.normalidad.verde : 0.95) ? "OK" : "RIESGO";
-      bNorm.className = "kpi-pct " + stNorm.css;
+      bNorm.textContent = normPctText;
+      bNorm.className = "kpi-pct badge-kpi " + stNorm.css;
       const fNorm = document.getElementById("kpiFillNormalidad");
       fNorm.style.width = Math.min(100, normVal * 100) + "%";
       fNorm.style.background = stNorm.color;
 
-      // 4. Renderizar Filas de la Tabla
+      // 4. Renderizar las filas de la tabla
       renderizarTabla(data);
     }
 
     function renderizarTabla(data) {
-      const tbody = document.getElementById("tablaCuerpo");
+      const tbody = document.getElementById("tablaCuerpo") || document.getElementById("tableBody");
+      if (!tbody) return;
       tbody.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No se encontraron ejecutivos para los filtros seleccionados.</td></tr>`;
+        return;
+      }
 
       if (vistaActual === "ranking") {
         const ordenados = [...data].sort((a, b) => b.cartera - a.cartera);
@@ -597,9 +616,9 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
-            <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
+            <td class="tar">$${Number(e.cartera).toLocaleString("es-MX")}</td>
             <td class="tar">${e.clientes}</td>
-            <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
+            <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
             <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(1)}%</td>
             <td style="text-align:center;"><span class="badge-kpi ${st.css}">${st.txt}</span></td>
           `;
@@ -609,15 +628,16 @@
       }
 
       // Vista Jerárquica
-      const regionesUnicas = [...new Set(data.map(e => e.region))];
+      const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
       regionesUnicas.forEach(reg => {
         const dataReg = data.filter(e => e.region === reg);
-        const rCart = dataReg.reduce((s, e) => s + e.cartera, 0);
-        const rCli = dataReg.reduce((s, e) => s + e.clientes, 0);
+        const rCart = dataReg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+        const rCli = dataReg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
         const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
         const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / rCart : 0.95);
         const stReg = evaluarColorEstado(rNorm, 0.95, "normalidad");
 
+        // Fila Región
         const trReg = document.createElement("tr");
         trReg.className = "row-region";
         trReg.innerHTML = `
@@ -630,15 +650,17 @@
         `;
         tbody.appendChild(trReg);
 
-        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))];
+        // Agencias dentro de la región
+        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))].filter(Boolean);
         agenciasUnicas.forEach(ag => {
           const dataAg = dataReg.filter(e => e.agencia === ag);
-          const aCart = dataAg.reduce((s, e) => s + e.cartera, 0);
-          const aCli = dataAg.reduce((s, e) => s + e.clientes, 0);
+          const aCart = dataAg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+          const aCli = dataAg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
           const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
           const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / aCart : 0.95);
           const stAg = evaluarColorEstado(aNorm, 0.95, "normalidad");
 
+          // Fila Agencia
           const trAg = document.createElement("tr");
           trAg.className = "row-agencia";
           trAg.innerHTML = `
@@ -651,14 +673,15 @@
           `;
           tbody.appendChild(trAg);
 
+          // Filas Ejecutivos
           dataAg.forEach(e => {
             const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
             const trEj = document.createElement("tr");
             trEj.innerHTML = `
               <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span></td>
-              <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
+              <td class="tar">$${Number(e.cartera).toLocaleString("es-MX")}</td>
               <td class="tar">${e.clientes}</td>
-              <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
+              <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
               <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(1)}%</td>
               <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
             `;
