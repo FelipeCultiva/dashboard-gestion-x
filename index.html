@@ -2,250 +2,710 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Metas MXT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DASHBOARD GESTIÓN X - MCM</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #38bdf8;
+      --bg: #0b1120;
+      --card-bg: #151f32;
+      --card-border: #1e293b;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --success: #34d399;
-      --danger: #f87171;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.2);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
+
+    /* Login Modal */
+    #pantallaLogin {
+      position: fixed; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .login-box {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+      padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center;
+    }
+    .login-icon {
+      width: 50px; height: 50px; background: var(--primary); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; margin: 0 auto 16px;
+    }
+    .input-login {
+      width: 100%; background: #0b1120; border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 12px; color: #fff; margin-bottom: 12px; font-size: 14px;
+    }
+    .btn-login {
+      width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 8px;
+      padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      padding: 16px;
-      min-height: 100vh;
-    }
+    /* Barra Superior */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .brand h1 { font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .badge-scope { font-size: 11px; background: rgba(37,99,235,0.25); color: #93c5fd; padding: 2px 8px; border-radius: 99px; }
+    .corte-lbl { font-size: 12px; color: var(--text-muted); }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #334155;
-    }
-
-    .header h1 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
+    .user-actions { display: flex; align-items: center; gap: 10px; }
     .btn-sync {
-      background: #0284c7;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px;
+      font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-logout { background: #334155; color: #f8fafc; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+
+    /* Barra de Seguridad */
+    .security-banner {
+      background: rgba(30, 41, 59, 0.7); border: 1px solid var(--card-border);
+      padding: 8px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; color: var(--text-muted);
     }
 
-    .btn-sync:active {
-      transform: scale(0.96);
+    /* Filtros Dinámicos */
+    .filters-box {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 16px; margin-bottom: 20px;
+    }
+    .filters-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .btn-reset { color: #38bdf8; background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 700; }
+    .form-select, .form-input {
+      width: 100%; background: #0b1120; border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 8px 10px; color: #fff; font-size: 13px;
     }
 
-    .card-kpi {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #334155;
-    }
+    /* KPIs */
+    .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .card-kpi { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; position: relative; }
+    .kpi-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+    .kpi-pct { position: absolute; right: 14px; top: 14px; font-size: 12px; font-weight: 800; }
+    .kpi-val { font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px; }
+    .kpi-meta { font-size: 11px; color: var(--text-muted); }
+    .prog-bar { width: 100%; height: 4px; background: #334155; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 2px; }
 
-    .card-kpi span {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
+    /* Vistas / Tabs */
+    .view-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .tab-btn {
+      background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted);
+      padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
     }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .card-kpi .value {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: var(--success);
-      margin-top: 4px;
+    /* Tabla */
+    .table-responsive { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: #111a2e; padding: 10px 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+    td { padding: 10px 12px; border-top: 1px solid #1e293b; }
+    .tar { text-align: right; }
+    .row-region { background: rgba(30, 41, 59, 0.4); font-weight: 700; }
+    .row-agencia { background: rgba(15, 23, 42, 0.3); font-weight: 600; }
+    .badge-kpi { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+    .badge-verde { background: var(--success-glow); color: var(--success); }
+    .badge-amarillo { background: var(--warning-glow); color: var(--warning); }
+    .badge-rojo { background: var(--danger-glow); color: var(--danger); }
+
+    /* Modal Progreso */
+    #progressModal {
+      position: fixed; inset: 0; background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 10000;
     }
-
-    .section-title {
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    .list-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .item-card {
-      background: var(--card-bg);
-      border-radius: 10px;
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-left: 4px solid var(--accent);
-    }
-
-    .item-level {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .item-conteo {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .item-total {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #fff;
-      text-align: right;
-    }
-
-    .status-bar {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .loading-spinner {
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top: 2px solid #fff;
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .modal-content {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
+      padding: 24px; width: 320px; text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>Control Cartera MXT</h1>
-      <span style="font-size: 0.75rem; color: var(--text-muted);">Metas Reales (Columna E)</span>
+  <!-- PANTALLA LOGIN -->
+  <div id="pantallaLogin">
+    <div class="login-box">
+      <div class="login-icon">X</div>
+      <h2 style="margin-bottom:4px;">GESTIÓN X</h2>
+      <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Microfinanciera McM</p>
+      
+      <div id="loginErrorMsg" style="display:none; color:var(--danger); font-size:12px; margin-bottom:12px;">Usuario o contraseña incorrectos.</div>
+
+      <form id="formLogin">
+        <input type="text" id="txtUser" class="input-login" placeholder="Usuario" required autocomplete="username" autocapitalize="none" autocorrect="off">
+        <input type="password" id="txtPass" class="input-login" placeholder="Contraseña" required autocomplete="current-password" autocapitalize="none" autocorrect="off">
+        <button type="submit" class="btn-login" id="btnLogin">Ingresar al Dashboard</button>
+      </form>
     </div>
-    <button class="btn-sync" id="btnActualizar" onclick="cargarDatos()">
-      <div class="loading-spinner" id="spinner"></div>
-      <span id="btnText">Actualizar</span>
-    </button>
   </div>
 
-  <div class="card-kpi">
-    <span>Gran Total Metas Reales</span>
-    <div class="value" id="lblGranTotal">$0.00</div>
-    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="lblRegistros">0 registros calculados</div>
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="appContainer" style="display:none;">
+    <div class="top-bar">
+      <div class="brand">
+        <h1>GESTIÓN X <span class="badge-scope">McM</span></h1>
+        <div class="corte-lbl" id="lblCorte">Corte: Conectando...</div>
+      </div>
+      <div class="user-actions">
+        <button class="btn-sync" onclick="forzarSincronizacion()"><span id="lblSyncText">🔄 Sincronizar Drive</span></button>
+        <button class="btn-logout" onclick="cerrarSesion()">Salir ↩</button>
+      </div>
+    </div>
+
+    <div class="security-banner" id="bannerSeguridad">Cargando credenciales...</div>
+
+    <!-- FILTROS DINÁMICOS VINCULADOS -->
+    <div class="filters-box">
+      <div class="filters-header">
+        <span>FILTROS DINÁMICOS</span>
+        <button class="btn-reset" onclick="resetFiltros()">REESTABLECER</button>
+      </div>
+      <div class="filters-grid">
+        <div class="form-group">
+          <label>Territorio</label>
+          <select id="selTerritorio" class="form-select">
+            <option value="ALL">Todos los Territorios</option>
+            <option value="Territorio 1">Territorio 1</option>
+            <option value="Territorio 2">Territorio 2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Región</label>
+          <select id="selRegion" class="form-select">
+            <option value="ALL">Todas las Regiones</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Agencia</label>
+          <select id="selAgencia" class="form-select">
+            <option value="ALL">Todas las Agencias</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Buscar Ejecutivo</label>
+          <input type="text" id="txtBuscar" class="form-input" placeholder="Nombre...">
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIS -->
+    <div class="kpis-grid">
+      <div class="card-kpi">
+        <span class="kpi-title">Cartera Colocada</span>
+        <span class="kpi-pct" id="kpiPctCartera" style="color:var(--text);">0%</span>
+        <div class="kpi-val" id="kpiValCartera">$0</div>
+        <div class="kpi-meta" id="kpiMetaCartera">Meta: $0</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillCartera" style="width:0%; background:var(--primary);"></div></div>
+      </div>
+      <div class="card-kpi">
+        <span class="kpi-title">Clientes Vigentes</span>
+        <span class="kpi-pct" id="kpiPctClientes" style="color:var(--text);">0%</span>
+        <div class="kpi-val" id="kpiValClientes">0</div>
+        <div class="kpi-meta" id="kpiMetaClientes">Meta: 0</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillClientes" style="width:0%; background:var(--warning);"></div></div>
+      </div>
+      <div class="card-kpi">
+        <span class="kpi-title">Promedio Cartera</span>
+        <span class="kpi-pct" id="kpiPctPromedio" style="color:var(--text);">OK</span>
+        <div class="kpi-val" id="kpiValPromedio">$0</div>
+        <div class="kpi-meta" id="kpiMetaPromedio">Promedio General</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillPromedio" style="width:100%; background:var(--success);"></div></div>
+      </div>
+      <div class="card-kpi">
+        <span class="kpi-title">Normalidad</span>
+        <span class="kpi-pct" id="kpiPctNormalidad">OK</span>
+        <div class="kpi-val" id="kpiValNormalidad" style="color:var(--success);">0.0%</div>
+        <div class="kpi-meta">Meta: >=95%</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillNormalidad" style="width:0%; background:var(--success);"></div></div>
+      </div>
+    </div>
+
+    <!-- VISTAS -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Jerárquica</button>
+      <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Estructura / Ejecutivo</th>
+            <th class="tar">Colocación</th>
+            <th class="tar">Clientes</th>
+            <th class="tar">Promedio</th>
+            <th class="tar">Normalidad</th>
+            <th style="text-align:center;">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCuerpo">
+          <!-- Render dinámico -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="section-title">Metas Reales por Nivel</div>
-  <div class="list-container" id="listaNiveles">
-    <!-- Carga dinámica -->
+  <!-- MODAL DE PROGRESO -->
+  <div id="progressModal">
+    <div class="modal-content">
+      <h3 id="modalProgTitulo" style="font-size:16px; margin-bottom:8px;">Sincronizando con Drive</h3>
+      <div id="modalProgPct" style="font-size:24px; font-weight:800; color:#38bdf8; margin-bottom:12px;">0%</div>
+      <div class="prog-bar" style="height:6px; margin-bottom:12px;">
+        <div id="modalProgFill" class="prog-fill" style="width:0%; background:#0284c7;"></div>
+      </div>
+      <div id="modalProgSub" style="font-size:12px; color:var(--text-muted);">Consultando datos frescos...</div>
+    </div>
   </div>
-
-  <div class="status-bar" id="lblStatus">Listo</div>
 
   <script>
-    const formatoMoneda = new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
+    // URL Web App de Google Apps Script
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQOU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuQZ3s9bdzK/exec";
+
+    let DB = { ejecutivos: [], agencias: {}, regiones: {}, users: [], fecha: "" };
+    let usuarioActual = null;
+    let vistaActual = "jerarquia";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Validar sesión persistida
+      const sesion = sessionStorage.getItem("mcm_user_session") || localStorage.getItem("mcm_user_session");
+      if (sesion) {
+        try {
+          usuarioActual = JSON.parse(sesion);
+          iniciarAplicacion();
+          return;
+        } catch(e) {}
+      }
+
+      // Si no hay sesión, mostrar pantalla de Login obligatoria
+      document.getElementById("pantallaLogin").style.display = "flex";
+      document.getElementById("appContainer").style.display = "none";
+      cargarCopiaLocal();
     });
 
-    function alternarCargando(activo) {
-      const btn = document.getElementById("btnActualizar");
-      const sp = document.getElementById("spinner");
-      const txt = document.getElementById("btnText");
-      if (activo) {
-        btn.disabled = true;
-        sp.style.display = "block";
-        txt.innerText = "Cargando...";
-      } else {
-        btn.disabled = false;
-        sp.style.display = "none";
-        txt.innerText = "Actualizar";
+    // Formulario de Login
+    document.getElementById("formLogin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const u = document.getElementById("txtUser").value.trim().toLowerCase();
+      const p = document.getElementById("txtPass").value.trim();
+      const btn = document.getElementById("btnLogin");
+      const err = document.getElementById("loginErrorMsg");
+
+      btn.disabled = true;
+      btn.textContent = "Validando...";
+      err.style.display = "none";
+
+      // Si la lista de usuarios no está cargada, consultar al backend
+      if (!DB.users || !DB.users.length) {
+        try {
+          const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
+          const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`);
+          const d = await res.json();
+          if (d && d.users) DB.users = d.users;
+        } catch(e) {
+          console.warn("Fallo al conectar en vivo:", e);
+        }
       }
+
+      // Validar usuario
+      const found = (DB.users || []).find(acc => acc.user === u && acc.pass === p);
+      btn.disabled = false;
+      btn.textContent = "Ingresar al Dashboard";
+
+      if (found) {
+        usuarioActual = found;
+        sessionStorage.setItem("mcm_user_session", JSON.stringify(found));
+        localStorage.setItem("mcm_user_session", JSON.stringify(found));
+        iniciarAplicacion();
+      } else {
+        err.style.display = "block";
+      }
+    });
+
+    function iniciarAplicacion() {
+      document.getElementById("pantallaLogin").style.display = "none";
+      document.getElementById("appContainer").style.display = "block";
+      
+      cargarCopiaLocal();
+      aplicarSeguridadRol();
+      vincularEventosFiltros();
+
+      // Sincronizar en vivo con Drive
+      sincronizarConDrive(false);
     }
 
-    function cargarDatos() {
-      alternarCargando(true);
-      document.getElementById("lblStatus").innerText = "Sincronizando con Google Sheets...";
+    // -------------------------------------------------------------
+    // FILTROS EN CASCADA CON EVENTO "CHANGE"
+    // -------------------------------------------------------------
+    function vincularEventosFiltros() {
+      const selTerr = document.getElementById("selTerritorio");
+      const selReg = document.getElementById("selRegion");
+      const selAg = document.getElementById("selAgencia");
+      const txtB = document.getElementById("txtBuscar");
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          alternarCargando(false);
-          if (res.status === "error") {
-            document.getElementById("lblStatus").innerText = "Error: " + res.message;
-            return;
-          }
-          renderizar(res);
-        })
-        .withFailureHandler(function(err) {
-          alternarCargando(false);
-          document.getElementById("lblStatus").innerText = "Error de red/servidor: " + err.message;
-        })
-        .obtenerDatosCarteraMXT();
+      // Evento change en Territorio
+      selTerr.addEventListener("change", () => {
+        actualizarOpcionesRegion();
+        actualizarOpcionesAgencia();
+        renderizar();
+      });
+
+      // Evento change en Región
+      selReg.addEventListener("change", () => {
+        actualizarOpcionesAgencia();
+        renderizar();
+      });
+
+      // Evento change en Agencia
+      selAg.addEventListener("change", () => renderizar());
+
+      // Búsqueda instantánea
+      txtB.addEventListener("input", () => renderizar());
     }
 
-    function renderizar(data) {
-      document.getElementById("lblGranTotal").innerText = formatoMoneda.format(data.granTotal);
-      document.getElementById("lblRegistros").innerText = `${data.registros} registros procesados`;
-      document.getElementById("lblStatus").innerText = `Actualizado: ${data.fechaActualizacion}`;
+    function actualizarOpcionesRegion() {
+      const selTerrVal = document.getElementById("selTerritorio").value;
+      const selReg = document.getElementById("selRegion");
+      const regActual = selReg.value;
 
-      const cont = document.getElementById("listaNiveles");
-      cont.innerHTML = "";
-
-      const niveles = Object.keys(data.totalesPorNivel);
-      if (niveles.length === 0) {
-        cont.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No hay metas registradas.</div>`;
+      if (usuarioActual && usuarioActual.rol === "GTE_REGIONAL") {
+        selReg.innerHTML = `<option value="${usuarioActual.region}">${usuarioActual.region}</option>`;
+        selReg.value = usuarioActual.region;
+        selReg.disabled = true;
         return;
       }
 
-      niveles.forEach(niv => {
-        const item = data.totalesPorNivel[niv];
-        const card = document.createElement("div");
-        card.className = "item-card";
-        card.innerHTML = `
-          <div>
-            <div class="item-level">${niv}</div>
-            <div class="item-conteo">${item.conteo} promotores / registros</div>
-          </div>
-          <div class="item-total">${formatoMoneda.format(item.total)}</div>
-        `;
-        cont.appendChild(card);
+      let lista = DB.ejecutivos;
+      if (selTerrVal !== "ALL") {
+        lista = lista.filter(e => e.territorio === selTerrVal);
+      }
+
+      const regiones = [...new Set(lista.map(e => e.region))].filter(Boolean).sort();
+      selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
+        regiones.map(r => `<option value="${r}">${r}</option>`).join("");
+
+      selReg.value = regiones.includes(regActual) ? regActual : "ALL";
+    }
+
+    function actualizarOpcionesAgencia() {
+      const selTerrVal = document.getElementById("selTerritorio").value;
+      const selRegVal = document.getElementById("selRegion").value;
+      const selAg = document.getElementById("selAgencia");
+      const agActual = selAg.value;
+
+      if (usuarioActual && usuarioActual.rol === "GTE_AGENCIA") {
+        selAg.innerHTML = `<option value="${usuarioActual.agencia}">${usuarioActual.agencia}</option>`;
+        selAg.value = usuarioActual.agencia;
+        selAg.disabled = true;
+        return;
+      }
+
+      let lista = DB.ejecutivos;
+      if (selTerrVal !== "ALL") lista = lista.filter(e => e.territorio === selTerrVal);
+      if (selRegVal !== "ALL") lista = lista.filter(e => e.region === selRegVal);
+
+      const agencias = [...new Set(lista.map(e => e.agencia))].filter(Boolean).sort();
+      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
+        agencias.map(a => `<option value="${a}">${a}</option>`).join("");
+
+      selAg.value = agencias.includes(agActual) ? agActual : "ALL";
+    }
+
+    function resetFiltros() {
+      if (!document.getElementById("selTerritorio").disabled) document.getElementById("selTerritorio").value = "ALL";
+      actualizarOpcionesRegion();
+      actualizarOpcionesAgencia();
+      document.getElementById("txtBuscar").value = "";
+      renderizar();
+    }
+
+    function aplicarSeguridadRol() {
+      const b = document.getElementById("bannerSeguridad");
+      const selTerr = document.getElementById("selTerritorio");
+      const selReg = document.getElementById("selRegion");
+
+      if (usuarioActual.rol === "SUBDIR_TERRITORIAL") {
+        selTerr.value = usuarioActual.territorio;
+        selTerr.disabled = true;
+        b.innerHTML = `🏢 Subdirección Territorial: <strong>${usuarioActual.territorio}</strong>`;
+      } else if (usuarioActual.rol === "GTE_REGIONAL") {
+        selTerr.value = usuarioActual.territorio;
+        selTerr.disabled = true;
+        selReg.value = usuarioActual.region;
+        selReg.disabled = true;
+        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
+      } else if (usuarioActual.rol === "GTE_AGENCIA") {
+        selTerr.value = usuarioActual.territorio;
+        selTerr.disabled = true;
+        selReg.value = usuarioActual.region;
+        selReg.disabled = true;
+        b.innerHTML = `📍 Gerencia de Agencia: <strong>${usuarioActual.agencia}</strong>`;
+      } else {
+        selTerr.disabled = false;
+        selReg.disabled = false;
+        b.innerHTML = `🔓 Acceso Directivo / Admin: <strong>${usuarioActual.nombre}</strong>`;
+      }
+
+      actualizarOpcionesRegion();
+      actualizarOpcionesAgencia();
+    }
+
+    // -------------------------------------------------------------
+    // CÁLCULOS Y RENDERIZADO DE KPIS Y TABLAS
+    // -------------------------------------------------------------
+    function obtenerDatosFiltrados() {
+      const terr = document.getElementById("selTerritorio").value;
+      const reg = document.getElementById("selRegion").value;
+      const ag = document.getElementById("selAgencia").value;
+      const search = document.getElementById("txtBuscar").value.toLowerCase().trim();
+
+      return DB.ejecutivos.filter(e => {
+        if (terr !== "ALL" && e.territorio !== terr) return false;
+        if (reg !== "ALL" && e.region !== reg) return false;
+        if (ag !== "ALL" && e.agencia !== ag) return false;
+        if (search && !e.ejecutivo.toLowerCase().includes(search)) return false;
+        return true;
       });
     }
 
-    // Ejecución inicial automática al abrir en móvil
-    window.addEventListener("DOMContentLoaded", cargarDatos);
+    function renderizar() {
+      const data = obtenerDatosFiltrados();
+      const terrVal = document.getElementById("selTerritorio").value;
+      const regVal = document.getElementById("selRegion").value;
+      const agVal = document.getElementById("selAgencia").value;
+
+      // 1. CÁLCULO DE TOTALES REALES DEL CORTE
+      const cartReal = data.reduce((s, e) => s + e.cartera, 0);
+      const cliReal = data.reduce((s, e) => s + e.clientes, 0);
+      const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
+
+      // 2. METAS REALES EXTRAÍDAS DEL ARCHIVO BASE
+      let metaCart = 0;
+      let metaCli = 0;
+      let normVal = 0.95;
+
+      if (agVal !== "ALL" && DB.agencias[agVal]) {
+        metaCart = DB.agencias[agVal].metaCartera;
+        metaCli = DB.agencias[agVal].metaClientes;
+        normVal = DB.agencias[agVal].normalidad;
+      } else if (regVal !== "ALL" && DB.regiones[regVal]) {
+        metaCart = DB.regiones[regVal].metaCartera;
+        metaCli = DB.regiones[regVal].metaClientes;
+        normVal = DB.regiones[regVal].normalidad;
+      } else {
+        // Sumar metas de los ejecutivos filtrados
+        metaCart = data.reduce((s, e) => s + e.metaCartera, 0);
+        metaCli = data.reduce((s, e) => s + e.metaClientes, 0);
+        // Promedio ponderado de normalidad
+        normVal = cartReal > 0 
+          ? (data.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / cartReal) 
+          : 0.95;
+      }
+
+      // Renderizar KPIs Superiores
+      document.getElementById("kpiValCartera").textContent = "$" + cartReal.toLocaleString("es-MX");
+      document.getElementById("kpiMetaCartera").textContent = "Meta: $" + metaCart.toLocaleString("es-MX");
+      const pctC = metaCart > 0 ? Math.round((cartReal / metaCart) * 100) : 0;
+      document.getElementById("kpiPctCartera").textContent = pctC + "%";
+      document.getElementById("kpiFillCartera").style.width = Math.min(100, pctC) + "%";
+
+      document.getElementById("kpiValClientes").textContent = cliReal.toLocaleString("es-MX");
+      document.getElementById("kpiMetaClientes").textContent = "Meta: " + metaCli.toLocaleString("es-MX");
+      const pctCl = metaCli > 0 ? Math.round((cliReal / metaCli) * 100) : 0;
+      document.getElementById("kpiPctClientes").textContent = pctCl + "%";
+      document.getElementById("kpiFillClientes").style.width = Math.min(100, pctCl) + "%";
+
+      document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
+
+      const normPctText = (normVal * 100).toFixed(1) + "%";
+      const lblNorm = document.getElementById("kpiValNormalidad");
+      lblNorm.textContent = normPctText;
+      lblNorm.style.color = normVal >= 0.95 ? "var(--success)" : (normVal >= 0.90 ? "var(--warning)" : "var(--danger)");
+      document.getElementById("kpiPctNormalidad").textContent = normVal >= 0.95 ? "OK" : "RIESGO";
+      document.getElementById("kpiFillNormalidad").style.width = Math.min(100, normVal * 100) + "%";
+      document.getElementById("kpiFillNormalidad").style.background = normVal >= 0.95 ? "var(--success)" : "var(--danger)";
+
+      // Renderizar Tabla
+      renderizarTabla(data);
+    }
+
+    function renderizarTabla(data) {
+      const tbody = document.getElementById("tablaCuerpo");
+      tbody.innerHTML = "";
+
+      if (vistaActual === "ranking") {
+        const ordenados = [...data].sort((a, b) => b.cartera - a.cartera);
+        ordenados.forEach(e => {
+          const badgeClass = e.normalidad >= 0.95 ? "badge-verde" : (e.normalidad >= 0.90 ? "badge-amarillo" : "badge-rojo");
+          const estadoTxt = e.normalidad >= 0.95 ? "VERDE" : (e.normalidad >= 0.90 ? "AMARILLO" : "ROJO");
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
+            <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
+            <td class="tar">${e.clientes}</td>
+            <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : (e.normalidad >= 0.90 ? 'var(--warning)' : 'var(--danger)')};">${(e.normalidad * 100).toFixed(1)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${badgeClass}">${estadoTxt}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      // Vista Jerárquica
+      const regionesUnicas = [...new Set(data.map(e => e.region))];
+      regionesUnicas.forEach(reg => {
+        const dataReg = data.filter(e => e.region === reg);
+        const rCart = dataReg.reduce((s, e) => s + e.cartera, 0);
+        const rCli = dataReg.reduce((s, e) => s + e.clientes, 0);
+        const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
+        const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / rCart : 0.95);
+        const rBadge = rNorm >= 0.95 ? "badge-verde" : (rNorm >= 0.90 ? "badge-amarillo" : "badge-rojo");
+
+        // Fila Región
+        const trReg = document.createElement("tr");
+        trReg.className = "row-region";
+        trReg.innerHTML = `
+          <td>🏛️ ${reg}</td>
+          <td class="tar">$${rCart.toLocaleString("es-MX")}</td>
+          <td class="tar">${rCli}</td>
+          <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
+          <td class="tar fw-bold" style="color:${rNorm >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(rNorm * 100).toFixed(1)}%</td>
+          <td style="text-align:center;"><span class="badge-kpi ${rBadge}">${rNorm >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+        `;
+        tbody.appendChild(trReg);
+
+        // Agencias dentro de la región
+        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))];
+        agenciasUnicas.forEach(ag => {
+          const dataAg = dataReg.filter(e => e.agencia === ag);
+          const aCart = dataAg.reduce((s, e) => s + e.cartera, 0);
+          const aCli = dataAg.reduce((s, e) => s + e.clientes, 0);
+          const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
+          const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / aCart : 0.95);
+          const aBadge = aNorm >= 0.95 ? "badge-verde" : (aNorm >= 0.90 ? "badge-amarillo" : "badge-rojo");
+
+          // Fila Agencia
+          const trAg = document.createElement("tr");
+          trAg.className = "row-agencia";
+          trAg.innerHTML = `
+            <td style="padding-left:24px;">📍 ${ag}</td>
+            <td class="tar">$${aCart.toLocaleString("es-MX")}</td>
+            <td class="tar">${aCli}</td>
+            <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:${aNorm >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(aNorm * 100).toFixed(1)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${aBadge}">${aNorm >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+          `;
+          tbody.appendChild(trAg);
+
+          // Ejecutivos dentro de la agencia
+          dataAg.forEach(e => {
+            const eBadge = e.normalidad >= 0.95 ? "badge-verde" : (e.normalidad >= 0.90 ? "badge-amarillo" : "badge-rojo");
+            const trEj = document.createElement("tr");
+            trEj.innerHTML = `
+              <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span></td>
+              <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
+              <td class="tar">${e.clientes}</td>
+              <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
+              <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(e.normalidad * 100).toFixed(1)}%</td>
+              <td style="text-align:center;"><span class="badge-kpi ${eBadge}">${e.normalidad >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+            `;
+            tbody.appendChild(trEj);
+          });
+        });
+      });
+    }
+
+    function cambiarVista(vista) {
+      vistaActual = vista;
+      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
+      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
+      renderizar();
+    }
+
+    // -------------------------------------------------------------
+    // SINCRONIZACIÓN Y PERSISTENCIA OFFLINE
+    // -------------------------------------------------------------
+    function mostrarModalProgreso(val, tit, sub) {
+      const m = document.getElementById("progressModal");
+      m.style.display = "flex";
+      document.getElementById("modalProgPct").textContent = val + "%";
+      document.getElementById("modalProgFill").style.width = val + "%";
+      if (tit) document.getElementById("modalProgTitulo").textContent = tit;
+      if (sub) document.getElementById("modalProgSub").textContent = sub;
+    }
+
+    function ocultarModalProgreso() {
+      document.getElementById("progressModal").style.display = "none";
+    }
+
+    function forzarSincronizacion() {
+      sincronizarConDrive(true);
+    }
+
+    async function sincronizarConDrive(mostrarProgresoCompleto) {
+      if (mostrarProgresoCompleto) {
+        mostrarModalProgreso(25, "Sincronizando con Drive", "Descargando datos consolidados de BASE...");
+      }
+
+      try {
+        const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
+        // fetch sin cache-control para no romper WebKit en iPhone
+        const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}_t=${Date.now()}`);
+        if (mostrarProgresoCompleto) mostrarModalProgreso(65, "Procesando Datos", "Actualizando cortes y metas...");
+        
+        const d = await res.json();
+        if (d && d.status === "success") {
+          DB.ejecutivos = d.ejecutivos || [];
+          DB.agencias = d.agencias || {};
+          DB.regiones = d.regiones || {};
+          DB.users = d.users || [];
+          DB.fecha = d.fecha || "";
+
+          // Guardar en Storage Local para acceso offline
+          try {
+            localStorage.setItem("mcm_database", JSON.stringify(DB));
+          } catch(e) {}
+
+          document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
+          actualizarOpcionesRegion();
+          actualizarOpcionesAgencia();
+          renderizar();
+
+          if (mostrarProgresoCompleto) {
+            mostrarModalProgreso(100, "¡Sincronizado!", "Datos actualizados correctamente.");
+            setTimeout(ocultarModalProgreso, 500);
+          }
+        } else {
+          throw new Error(d.message || "Error al procesar");
+        }
+      } catch (err) {
+        console.warn("Demora o error en vivo, usando copia local:", err);
+        cargarCopiaLocal();
+        if (mostrarProgresoCompleto) {
+          mostrarModalProgreso(100, "Modo Offline", "Sin conexión. Se cargó la última copia local.");
+          setTimeout(ocultarModalProgreso, 800);
+        }
+      }
+    }
+
+    function cargarCopiaLocal() {
+      try {
+        const local = localStorage.getItem("mcm_database");
+        if (local) {
+          const parsed = JSON.parse(local);
+          DB = parsed;
+          if (DB.fecha) document.getElementById("lblCorte").textContent = "Corte Local: " + DB.fecha;
+        }
+      } catch(e) {}
+    }
+
+    function cerrarSesion() {
+      sessionStorage.removeItem("mcm_user_session");
+      localStorage.removeItem("mcm_user_session");
+      location.reload();
+    }
   </script>
 </body>
 </html>
