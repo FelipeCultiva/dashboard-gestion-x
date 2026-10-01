@@ -716,27 +716,28 @@
       const b = document.getElementById("bannerSeguridad");
       const selTerr = document.getElementById("selTerritorio");
       const selReg = document.getElementById("selRegion");
+      const nombreColab = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : "Colaborador";
 
       if (usuarioActual.rol === "SUBDIR_TERRITORIAL") {
         selTerr.value = usuarioActual.territorio;
         selTerr.disabled = true;
-        b.innerHTML = `🏢 Subdirección Territorial: <strong>${usuarioActual.territorio}</strong>`;
+        b.innerHTML = `🏢 Subdirección Territorial: <strong>${usuarioActual.territorio}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
       } else if (usuarioActual.rol === "GTE_REGIONAL") {
         selTerr.value = usuarioActual.territorio;
         selTerr.disabled = true;
         selReg.value = usuarioActual.region;
         selReg.disabled = true;
-        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
+        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
       } else if (usuarioActual.rol === "GTE_AGENCIA") {
         selTerr.value = usuarioActual.territorio;
         selTerr.disabled = true;
         selReg.value = usuarioActual.region;
         selReg.disabled = true;
-        b.innerHTML = `📍 Gerencia de Agencia: <strong>${usuarioActual.agencia}</strong>`;
+        b.innerHTML = `📍 Gerencia de Agencia: <strong>${usuarioActual.agencia}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
       } else {
         selTerr.disabled = false;
         selReg.disabled = false;
-        b.innerHTML = `🔓 Acceso Directivo / Admin: <strong>${usuarioActual.nombre}</strong>`;
+        b.innerHTML = `🔓 Acceso Directivo / Admin: <strong>${nombreColab}</strong>`;
       }
 
       actualizarOpcionesRegion(false);
