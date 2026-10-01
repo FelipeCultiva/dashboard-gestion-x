@@ -622,10 +622,9 @@
     function actualizarOpcionesAgencia() {
       const selReg = document.getElementById("selRegion");
       const selAg = document.getElementById("selAgencia");
-      const regionSeleccionada = selReg.value;
-      const valorAgenciaActual = selAg.value;
+      const regionSel = (selReg.value || "ALL").trim().toUpperCase();
+      const agenciaActual = (selAg.value || "ALL").trim().toUpperCase();
 
-      // Si el usuario es gerente de agencia fija, no alterar sus permisos
       if (currentUser && currentUser.rol === "GTE_AGENCIA") {
         selAg.innerHTML = `<option value="${currentUser.agencia}">${currentUser.agencia}</option>`;
         selAg.value = currentUser.agencia;
@@ -633,22 +632,18 @@
         return;
       }
 
-      // Filtrar agencias que correspondan a la región seleccionada (o todas si es ALL)
-      const registrosBase = (regionSeleccionada === "ALL")
+      // Filtrar limpiando espacios y mayúsculas
+      const registros = (regionSel === "ALL")
         ? STORE.records
-        : STORE.records.filter(r => r.region === regionSeleccionada);
+        : STORE.records.filter(r => String(r.region || "").trim().toUpperCase() === regionSel);
 
-      const agenciasDisponibles = [...new Set(registrosBase.map(r => r.agencia))].filter(Boolean).sort();
+      const agencias = [...new Set(registros.map(r => String(r.agencia || "").trim()))].filter(Boolean).sort();
 
       selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
-        agenciasDisponibles.map(a => `<option value="${a}">${a}</option>`).join("");
+        agencias.map(a => `<option value="${a}">${a}</option>`).join("");
 
-      // Conservar la agencia si aún existe dentro de la nueva región; de lo contrario, volver a ALL
-      if (agenciasDisponibles.includes(valorAgenciaActual)) {
-        selAg.value = valorAgenciaActual;
-      } else {
-        selAg.value = "ALL";
-      }
+      const existe = agencias.some(a => a.toUpperCase() === agenciaActual);
+      selAg.value = existe ? agenciaActual : "ALL";
     }
 
     function applyUserSecurity() {
@@ -716,20 +711,23 @@
     }
 
     function getFilteredData() {
-      const reg = document.getElementById("selRegion").value;
-      const ag = document.getElementById("selAgencia").value;
+      const reg = (document.getElementById("selRegion").value || "ALL").trim().toUpperCase();
+      const ag = (document.getElementById("selAgencia").value || "ALL").trim().toUpperCase();
       const prod = document.getElementById("selProducto").value;
       const search = document.getElementById("txtSearch").value.toLowerCase().trim();
 
       return STORE.records.filter(r => {
-        if (currentUser.rol === "GTE_AGENCIA" && r.agencia !== currentUser.agencia) return false;
-        if (currentUser.rol === "GTE_REGIONAL" && r.region !== currentUser.region) return false;
+        const rReg = String(r.region || "").trim().toUpperCase();
+        const rAg = String(r.agencia || "").trim().toUpperCase();
 
-        if (reg !== "ALL" && r.region !== reg) return false;
-        if (ag !== "ALL" && r.agencia !== ag) return false;
+        if (currentUser.rol === "GTE_AGENCIA" && rAg !== currentUser.agencia.toUpperCase()) return false;
+        if (currentUser.rol === "GTE_REGIONAL" && rReg !== currentUser.region.toUpperCase()) return false;
+
+        if (reg !== "ALL" && rReg !== reg) return false;
+        if (ag !== "ALL" && rAg !== ag) return false;
         if (prod === "MCM" && r.es_mxt) return false;
         if (prod === "MXT" && !r.es_mxt) return false;
-        if (search && !r.ejecutivo.toLowerCase().includes(search)) return false;
+        if (search && !String(r.ejecutivo || "").toLowerCase().includes(search)) return false;
         return true;
       });
     }
@@ -747,7 +745,13 @@
     }
 
     function fmtMoney(n) { return "$" + Math.round(n).toLocaleString("es-MX"); }
-    function fmtPct(n) { return (n * 100).toFixed(1) + "%"; }
+    // Formateador seguro de porcentajes (si es > 1.5, ya viene en base 100; si es <= 1.5 viene en decimal)
+    function fmtPct(n) {
+      if (n === null || n === undefined || isNaN(n)) return "0.0%";
+      let val = Number(n);
+      if (val > 1.5) val = val / 100; // Corrección automática si viene en formato porcentaje directo
+      return (val * 100).toFixed(1) + "%";
+    }
 
     function renderKPIs(filtered) {
       const selAg = document.getElementById("selAgencia").value;
@@ -758,10 +762,42 @@
       const countClientes = filtered.length;
       const avgCartera = countClientes > 0 ? sumCartera / countClientes : 0;
 
-      let norm = STORE.normReg;
-      if (level === "agencia") {
-        const agName = (selAg !== "ALL") ? selAg : currentUser.agencia;
-        norm = STORE.normGer[agName] || 0;
+      // 1. Obtener la región y agencia activas
+      const selRegVal = (document.getElementById("selRegion") ? document.getElementById("selRegion").value : "ALL").trim().toUpperCase();
+      const selAgVal = (document.getElementById("selAgencia") ? document.getElementById("selAgencia").value : "ALL").trim().toUpperCase();
+
+      let norm = 0.95;
+
+      // 2. Si se consulta una AGENCIA específica
+      if (level === "agencia" || selAgVal !== "ALL" || (currentUser && currentUser.rol === "GTE_AGENCIA")) {
+        const agName = (selAgVal !== "ALL") ? selAgVal : (currentUser ? currentUser.agencia : "");
+        // Buscar por nombre exacto o normalizado
+        norm = STORE.normGer[agName] !== undefined ? STORE.normGer[agName] : (STORE.normGer[agName.toUpperCase()] || 0);
+      
+      // 3. Si se consulta una REGIÓN específica
+      } else if (selRegVal !== "ALL" || (currentUser && currentUser.rol === "GTE_REGIONAL")) {
+        const regName = (selRegVal !== "ALL") ? selRegVal : (currentUser ? currentUser.region : "");
+        if (typeof STORE.normReg === "object" && STORE.normReg !== null) {
+          norm = STORE.normReg[regName] !== undefined ? STORE.normReg[regName] : (STORE.normReg[regName.toUpperCase()] || 0.95);
+        } else {
+          norm = Number(STORE.normReg) || 0.95;
+        }
+
+      // 4. Consolidado general (Todas las regiones)
+      } else {
+        if (typeof STORE.normReg === "number") {
+          norm = STORE.normReg;
+        } else if (typeof STORE.normReg === "object" && STORE.normReg !== null) {
+          const vals = Object.values(STORE.normReg).filter(v => typeof v === "number" && !isNaN(v));
+          norm = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0.95;
+        } else {
+          norm = 0.95;
+        }
+      }
+
+      // 5. Blindaje de escala (Evitar que porcentajes en base 100 o millones se disparen)
+      if (norm > 1.5) {
+        norm = norm > 100 ? (norm / 1000000) : (norm / 100);
       }
 
       const kpis = [
@@ -1032,41 +1068,82 @@
               });
             }
 
-            // 3. Extraer Normalidad y Fecha de Ingreso de pestaña Ejecutivo
-            const ejecSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "ejecutivo");
+            // 3. Pestaña Ejecutivo (Buscar columna de Normalidad dinámicamente)
+            const ejecSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("ejecutivo"));
             const newNormEj = {};
             const newIngresoEj = {};
             if (ejecSheetName && wb.Sheets[ejecSheetName]) {
               const rEj = XLSX.utils.sheet_to_json(wb.Sheets[ejecSheetName], { header: 1 });
-              for (let r = 4; r < rEj.length; r++) {
-                if (rEj[r] && rEj[r][2]) {
-                  const nom = String(rEj[r][2]).trim();
-                  newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
-                  if (rEj[r][3]) {
-                    newIngresoEj[nom] = rEj[r][3] instanceof Date 
-                      ? rEj[r][3].toISOString().substring(0, 10) 
-                      : String(rEj[r][3]).substring(0, 10);
+              let hEj = 3;
+              for (let r = 0; r < Math.min(rEj.length, 10); r++) {
+                if (rEj[r] && rEj[r].some(c => String(c).includes("Normalidad") || String(c).includes("Ejecutivo"))) { hEj = r; break; }
+              }
+              const headEj = (rEj[hEj] || []).map(c => String(c || "").trim().toLowerCase());
+              const colNom = headEj.findIndex(c => c.includes("ejecutivo") || c.includes("nombre"));
+              const colNorm = headEj.findIndex(c => c.includes("normalidad"));
+              const colIng = headEj.findIndex(c => c.includes("ingreso"));
+
+              for (let r = hEj + 1; r < rEj.length; r++) {
+                const row = rEj[r];
+                if (row && colNom !== -1 && row[colNom]) {
+                  const nom = String(row[colNom]).trim();
+                  let nVal = colNorm !== -1 ? parseFloat(row[colNorm]) : 0;
+                  if (nVal > 1.5) nVal = nVal / 100;
+                  newNormEj[nom] = isNaN(nVal) ? 0 : nVal;
+
+                  if (colIng !== -1 && row[colIng]) {
+                    newIngresoEj[nom] = row[colIng] instanceof Date 
+                      ? row[colIng].toISOString().substring(0, 10) 
+                      : String(row[colIng]).substring(0, 10);
                   }
                 }
               }
             }
 
-            // 4. Extraer Normalidad de Gerente
-            const gerSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "gerente");
+            // 4. Pestaña Gerente (Normalidad por Agencia)
+            const gerSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("gerente"));
             const newNormG = {};
             if (gerSheetName && wb.Sheets[gerSheetName]) {
               const rG = XLSX.utils.sheet_to_json(wb.Sheets[gerSheetName], { header: 1 });
-              for (let r = 4; r < rG.length; r++) {
-                if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
+              let hG = 3;
+              for (let r = 0; r < Math.min(rG.length, 10); r++) {
+                if (rG[r] && rG[r].some(c => String(c).includes("Normalidad") || String(c).includes("Agencia"))) { hG = r; break; }
+              }
+              const headG = (rG[hG] || []).map(c => String(c || "").trim().toLowerCase());
+              const colAgG = headG.findIndex(c => c.includes("agencia") || c.includes("sucursal"));
+              const colNormG = headG.findIndex(c => c.includes("normalidad"));
+
+              for (let r = hG + 1; r < rG.length; r++) {
+                const row = rG[r];
+                if (row && colAgG !== -1 && row[colAgG]) {
+                  let nVal = colNormG !== -1 ? parseFloat(row[colNormG]) : 0;
+                  if (nVal > 1.5) nVal = nVal / 100;
+                  newNormG[String(row[colAgG]).trim()] = isNaN(nVal) ? 0 : nVal;
+                }
               }
             }
 
-            // 5. Extraer Normalidad Regional
-            const regSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "regional");
-            let newNormR = 0.95;
+            // 5. Pestaña Regional (Normalidad por Región)
+            const regSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("regional"));
+            const newNormR = {};
             if (regSheetName && wb.Sheets[regSheetName]) {
               const rR = XLSX.utils.sheet_to_json(wb.Sheets[regSheetName], { header: 1 });
-              if (rR[4] && rR[4][8] !== undefined) newNormR = parseFloat(rR[4][8]) || 0.95;
+              let hR = 3;
+              for (let r = 0; r < Math.min(rR.length, 10); r++) {
+                if (rR[r] && rR[r].some(c => String(c).includes("Normalidad") || String(c).includes("Regi"))) { hR = r; break; }
+              }
+              const headR = (rR[hR] || []).map(c => String(c || "").trim().toLowerCase());
+              const colRegR = headR.findIndex(c => c.includes("regi") || c.includes("zona"));
+              const colNormR = headR.findIndex(c => c.includes("normalidad"));
+
+              for (let r = hR + 1; r < rR.length; r++) {
+                const row = rR[r];
+                if (row && colRegR !== -1 && row[colRegR]) {
+                  let nVal = colNormR !== -1 ? parseFloat(row[colNormR]) : 0.95;
+                  if (nVal > 1.5) nVal = nVal / 100;
+                  newNormR[String(row[colRegR]).trim().toUpperCase()] = isNaN(nVal) ? 0.95 : nVal;
+                }
+              }
             }
 
             // 6. Fecha de corte (evitar caída en época 1970)
