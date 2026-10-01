@@ -311,10 +311,12 @@
     </div>
 
     <!-- TABS DE VISTA -->
+    <!-- PESTAÑAS DE VISTA -->
     <div class="view-tabs">
       <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Jerárquica</button>
       <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
-      <button class="tab-btn" id="btnTabTopBottom" onclick="cambiarVista('topbottom')">Top 10 Rendimiento</button>
+      <button class="tab-btn" id="btnTabTop10" onclick="cambiarVista('top10')">🏆 Top 10 Mejor Rendimiento</button>
+      <button class="tab-btn" id="btnTabBottom10" onclick="cambiarVista('bottom10')">⚠️ Top 10 Menor Rendimiento</button>
       <button class="tab-btn" id="btnTabMix" onclick="cambiarVista('mxt')">Mix MCM vs MXT</button>
     </div>
 
@@ -872,8 +874,25 @@
       renderizar();
     }
 
+    function cambiarVista(vista) {
+      vistaActual = vista;
+      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
+      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
+      
+      const bTop = document.getElementById("btnTabTop10");
+      if (bTop) bTop.classList.toggle("active", vista === "top10");
+
+      const bBot = document.getElementById("btnTabBottom10");
+      if (bBot) bBot.classList.toggle("active", vista === "bottom10");
+
+      const bMix = document.getElementById("btnTabMix");
+      if (bMix) bMix.classList.toggle("active", vista === "mxt");
+
+      renderizar();
+    }
+
     function renderizarTabla(data) {
-      const tbody = document.getElementById("tablaCuerpo");
+      const tbody = document.getElementById("tablaCuerpo") || document.getElementById("tableBody");
       if (!tbody) return;
       tbody.innerHTML = "";
 
@@ -882,6 +901,61 @@
         return;
       }
 
+      // --- VISTA 1: TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO ---
+      if (vistaActual === "top10" || vistaActual === "bottom10") {
+        const esTop = (vistaActual === "top10");
+        
+        // Filtrar ejecutivos con meta de cartera > 0
+        const evaluados = data.filter(e => Number(e.metaCartera) > 0).map(e => {
+          const cCart = Number(e.carteraActiva) / Number(e.metaCartera);
+          const mProm = Number(e.metaPromedio) || (Number(e.metaClientes) > 0 ? Number(e.metaCartera) / Number(e.metaClientes) : 14500);
+          const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
+          const cNorm = (Number(e.normalidad) || 0) / 0.95; // Meta institucional 95%
+
+          // PONDERACIÓN SOLICITADA: 50% Cartera + 25% Promedio + 25% Normalidad
+          const score = (0.50 * cCart) + (0.25 * cProm) + (0.25 * cNorm);
+          return { 
+            ...e, 
+            scoreVal: score, 
+            scorePct: Math.round(score * 100), 
+            cCartPct: Math.round(cCart * 100) 
+          };
+        });
+
+        // Ordenar según sea Top o Bottom
+        const lista = esTop 
+          ? evaluados.sort((a, b) => b.scoreVal - a.scoreVal).slice(0, 10)
+          : evaluados.sort((a, b) => a.scoreVal - b.scoreVal).slice(0, 10);
+
+        if (!lista.length) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No hay ejecutivos con meta asignada para evaluar en este filtro.</td></tr>`;
+          return;
+        }
+
+        lista.forEach((e, idx) => {
+          const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
+          const badgeClass = esTop ? "badge-verde" : "badge-rojo";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <span style="font-weight:900; margin-right:8px; color:${esTop ? 'var(--success)' : 'var(--danger)'};">#${idx + 1}</span>
+              <strong>${e.ejecutivo}</strong> 
+              <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> 
+              ${mxtBadge} 
+              <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span>
+            </td>
+            <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")} <span style="font-size:10px; color:var(--text-muted);">(${e.cCartPct}%)</span></td>
+            <td class="tar">${e.clientesActivos}</td>
+            <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : (e.normalidad >= 0.90 ? 'var(--warning)' : 'var(--danger)')};">${(e.normalidad * 100).toFixed(2)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${badgeClass}">Score: ${e.scorePct}%</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      // --- VISTA 2: MIX MCM VS MXT ---
       if (vistaActual === "mxt") {
         const resumenMix = {
           "MCM Tradicional": { cartera: 0, clientes: 0 },
@@ -913,6 +987,7 @@
         return;
       }
 
+      // --- VISTA 3: RANKING EJECUTIVOS ---
       if (vistaActual === "ranking") {
         const ordenados = [...data].sort((a, b) => b.carteraActiva - a.carteraActiva);
         ordenados.forEach(e => {
@@ -932,7 +1007,7 @@
         return;
       }
 
-      // Vista Jerárquica
+      // --- VISTA 4: ESTRUCTURA JERÁRQUICA ---
       const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
       regionesUnicas.forEach(reg => {
         const dataReg = data.filter(e => e.region === reg);
@@ -975,7 +1050,6 @@
           `;
           tbody.appendChild(trAg);
 
-          // 5. CONTADOR MXT AL LADO DE LOS MESES DE ANTIGÜEDAD
           dataAg.forEach(e => {
             const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
             const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
