@@ -319,7 +319,8 @@
     </div>
 
     <!-- TABLA -->
-    <div class="table-responsive">
+    <!-- 1. TABLA GENERAL (Jerárquica, Ranking Ejecutivos y Mix MCM vs MXT) -->
+    <div id="contenedorTablaGeneral" class="table-responsive">
       <table>
         <thead>
           <tr>
@@ -334,8 +335,10 @@
         <tbody id="tablaCuerpo"></tbody>
       </table>
     </div>
-    <!-- CONTENEDOR TOP 10 / BOTTOM 10 -->
-    <div id="topBottomContainer" style="display:none;" class="ranking-split-grid">
+
+    <!-- 2. CONTENEDOR TOP 10 / BOTTOM 10 DE RENDIMIENTO -->
+    <div id="contenedorTopBottom" class="ranking-split-grid" style="display:none;">
+      <!-- TOP 10 MEJOR -->
       <div class="ranking-card" style="border-top: 4px solid var(--success);">
         <div class="ranking-card-header" style="color:var(--success);">
           <span>🏆 Top 10 Mejor Rendimiento</span>
@@ -357,6 +360,7 @@
         </div>
       </div>
 
+      <!-- TOP 10 MENOR (BOTTOM) -->
       <div class="ranking-card" style="border-top: 4px solid var(--danger);">
         <div class="ranking-card-header" style="color:var(--danger);">
           <span>⚠️ Top 10 Menor Rendimiento</span>
@@ -378,7 +382,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- MODAL DE PROGRESO -->
   <div id="progressModal">
@@ -768,13 +771,26 @@
       fProm.style.background = stProm.color;
 
       // 4. NORMALIDAD
+      // --- CÁLCULO DE BRECHA DE NORMALIDAD ---
+      const metaNormBase = 0.95;
+      const diffNorm = (normVal - metaNormBase) * 100;
+      const gapNormHtml = diffNorm >= 0
+        ? `<span class="kpi-gap gap-supero">+Superó: ${diffNorm.toFixed(2)}%</span>`
+        : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffNorm).toFixed(2)}%</span>`;
+
+      // Inyección en la tarjeta 4: Normalidad
       const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
       lblNormVal.style.color = stNorm.color;
+
       const bNorm = document.getElementById("kpiPctNormalidad");
       bNorm.textContent = normPctText;
       bNorm.className = "kpi-pct badge-kpi " + stNorm.css;
+
+      // Meta con el badge de falta/superó
+      document.getElementById("kpiMetaNormalidad").innerHTML = `Meta: >=95% ${gapNormHtml}`;
+
       const fNorm = document.getElementById("kpiFillNormalidad");
       fNorm.style.width = Math.min(100, normVal * 100) + "%";
       fNorm.style.background = stNorm.color;
@@ -796,7 +812,7 @@
         const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
         const cNorm = (Number(e.normalidad) || 0) / 0.95; // Meta institucional 95%
 
-        // SCORE INTEGRAL: 50% Cartera + 25% Promedio + 25% Normalidad
+        // SCORE INTEGRAL PONDERADO: 50% Cartera + 25% Promedio + 25% Normalidad
         const score = (0.50 * cCart) + (0.25 * cProm) + (0.25 * cNorm);
         return { ...e, score: score, cCartPct: Math.round(cCart * 100) };
       });
@@ -806,6 +822,7 @@
 
       const renderFilas = (lista, tbodyId, esTop) => {
         const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
         tbody.innerHTML = "";
         if (!lista.length) {
           tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--text-muted);">Sin datos con meta para evaluar.</td></tr>`;
@@ -834,20 +851,22 @@
       vistaActual = vista;
       document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
       document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
+      
       const btnMix = document.getElementById("btnTabMix");
       if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
+
       const btnTop = document.getElementById("btnTabTopBottom");
       if (btnTop) btnTop.classList.toggle("active", vista === "topbottom");
 
-      const tablaGeneral = document.querySelector(".table-responsive");
-      const contenedorTopBottom = document.getElementById("topBottomContainer");
+      const contGeneral = document.getElementById("contenedorTablaGeneral");
+      const contTopBottom = document.getElementById("contenedorTopBottom");
 
       if (vista === "topbottom") {
-        if (tablaGeneral) tablaGeneral.style.display = "none";
-        if (contenedorTopBottom) contenedorTopBottom.style.display = "grid";
+        if (contGeneral) contGeneral.style.display = "none";
+        if (contTopBottom) contTopBottom.style.display = "grid";
       } else {
-        if (tablaGeneral) tablaGeneral.style.display = "block";
-        if (contenedorTopBottom) contenedorTopBottom.style.display = "none";
+        if (contGeneral) contGeneral.style.display = "block";
+        if (contTopBottom) contTopBottom.style.display = "none";
       }
 
       renderizar();
