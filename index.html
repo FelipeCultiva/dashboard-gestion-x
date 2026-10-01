@@ -77,7 +77,31 @@
     .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
     .card-kpi { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; position: relative; }
     .kpi-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
-    .kpi-pct { position: absolute; right: 14px; top: 14px; font-size: 12px; font-weight: 800; }
+    .kpi-pct {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .badge-verde {
+      background: rgba(16, 185, 129, 0.2) !important;
+      color: #10b981 !important;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+    .badge-amarillo {
+      background: rgba(245, 158, 11, 0.2) !important;
+      color: #f59e0b !important;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+    .badge-rojo {
+      background: rgba(239, 68, 68, 0.2) !important;
+      color: #ef4444 !important;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
     .kpi-val { font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px; }
     .kpi-meta { font-size: 11px; color: var(--text-muted); }
     .prog-bar { width: 100%; height: 4px; background: #334155; border-radius: 2px; margin-top: 8px; overflow: hidden; }
@@ -252,14 +276,39 @@
     // URL Web App de Google Apps Script
     const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
 
-    let DB = { 
-      ejecutivos: [], 
-      agencias: {}, 
-      regiones: {}, 
-      metasConfig: { agencia: {}, region: {}, territorio: {} }, 
-      users: [], 
-      fecha: "" 
+    let DB = {
+      ejecutivos: [],
+      agencias: {},
+      regiones: {},
+      reglasColor: {
+        cartera: { verde: 1.00, amarillo: 0.85 },
+        clientes: { verde: 1.00, amarillo: 0.85 },
+        promedio: { verde: 1.00, amarillo: 0.90 },
+        normalidad: { verde: 0.95, amarillo: 0.90 }
+      },
+      users: [],
+      fecha: ""
     };
+
+    // Evaluación dinámica según la pestaña 'Colorimetria' de Drive
+    function evaluarColorEstado(actual, meta, tipoIndicador) {
+      const reglas = (DB.reglasColor && DB.reglasColor[tipoIndicador]) 
+        ? DB.reglasColor[tipoIndicador] 
+        : { verde: 1.00, amarillo: 0.85 };
+
+      // Normalidad evalúa el valor directo; los demás evalúan el ratio actual / meta
+      const valorAComparar = (tipoIndicador === "normalidad") 
+        ? Number(actual) 
+        : (meta > 0 ? (actual / meta) : 0);
+
+      if (valorAComparar >= reglas.verde) {
+        return { color: "#10b981", css: "badge-verde", txt: "VERDE" };
+      }
+      if (valorAComparar >= reglas.amarillo) {
+        return { color: "#f59e0b", css: "badge-amarillo", txt: "AMARILLO" };
+      }
+      return { color: "#ef4444", css: "badge-rojo", txt: "ROJO" };
+    }
     let usuarioActual = null;
     let vistaActual = "jerarquia";
 
@@ -450,98 +499,90 @@
 
     function renderizar() {
       const data = obtenerDatosFiltrados();
-      const terrVal = document.getElementById("selTerritorio").value;
       const regVal = document.getElementById("selRegion").value;
       const agVal = document.getElementById("selAgencia").value;
 
-      // 1. Valores reales acumulados del corte en pantalla
+      // 1. Valores reales del corte
       const cartReal = data.reduce((s, e) => s + e.cartera, 0);
       const cliReal = data.reduce((s, e) => s + e.clientes, 0);
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
 
-      // 2. Metas tomadas 100% de Drive según el nivel de filtrado
+      // 2. Metas leídas desde Drive
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
       let normVal = 0.95;
 
-      // Nivel AGENCIA
       if (agVal !== "ALL" && DB.agencias[agVal]) {
         metaCart = DB.agencias[agVal].metaCartera;
         metaCli = DB.agencias[agVal].metaClientes;
         metaProm = DB.agencias[agVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
         normVal = DB.agencias[agVal].normalidad;
-
-      // Nivel REGIÓN
       } else if (regVal !== "ALL" && DB.regiones[regVal]) {
         metaCart = DB.regiones[regVal].metaCartera;
         metaCli = DB.regiones[regVal].metaClientes;
         metaProm = DB.regiones[regVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
         normVal = DB.regiones[regVal].normalidad;
-
-      // Nivel TERRITORIO o CONSOLIDADO
       } else {
-        // Sumar metas de la base de Drive para las entidades filtradas
         metaCart = data.reduce((s, e) => s + e.metaCartera, 0);
         metaCli = data.reduce((s, e) => s + e.metaClientes, 0);
-        metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : (DB.metasConfig && DB.metasConfig.territorio ? DB.metasConfig.territorio.promedio : 0);
-        
+        metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
         normVal = cartReal > 0 
           ? (data.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / cartReal) 
           : 0.95;
       }
 
-      // 3. Evaluación de Colorimetría
-      const stCart = evaluarColorEstado(cartReal, metaCart);
-      const stCli  = evaluarColorEstado(cliReal, metaCli);
-      const stProm = evaluarColorEstado(promReal, metaProm);
-      const stNorm = evaluarColorEstado(normVal, 0.95, true);
+      // 3. Evaluar colorimetría contra las reglas de Drive
+      const stCart = evaluarColorEstado(cartReal, metaCart, "cartera");
+      const stCli  = evaluarColorEstado(cliReal, metaCli, "clientes");
+      const stProm = evaluarColorEstado(promReal, metaProm, "promedio");
+      const stNorm = evaluarColorEstado(normVal, 0.95, "normalidad");
 
       // --- TARJETA 1: CARTERA COLOCADA ---
       const pctC = metaCart > 0 ? Math.round((cartReal / metaCart) * 100) : 0;
       document.getElementById("kpiValCartera").textContent = "$" + cartReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaCartera").textContent = "Meta: $" + metaCart.toLocaleString("es-MX");
-      const badgeCart = document.getElementById("kpiPctCartera");
-      badgeCart.textContent = pctC + "%";
-      badgeCart.className = "kpi-pct badge-kpi " + stCart.css;
-      const fillCart = document.getElementById("kpiFillCartera");
-      fillCart.style.width = Math.min(100, pctC) + "%";
-      fillCart.style.background = stCart.color;
+      const bCart = document.getElementById("kpiPctCartera");
+      bCart.textContent = pctC + "%";
+      bCart.className = "kpi-pct " + stCart.css;
+      const fCart = document.getElementById("kpiFillCartera");
+      fCart.style.width = Math.min(100, pctC) + "%";
+      fCart.style.background = stCart.color;
 
       // --- TARJETA 2: CLIENTES VIGENTES ---
       const pctCl = metaCli > 0 ? Math.round((cliReal / metaCli) * 100) : 0;
       document.getElementById("kpiValClientes").textContent = cliReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaClientes").textContent = "Meta: " + metaCli.toLocaleString("es-MX");
-      const badgeCli = document.getElementById("kpiPctClientes");
-      badgeCli.textContent = pctCl + "%";
-      badgeCli.className = "kpi-pct badge-kpi " + stCli.css;
-      const fillCli = document.getElementById("kpiFillClientes");
-      fillCli.style.width = Math.min(100, pctCl) + "%";
-      fillCli.style.background = stCli.color;
+      const bCli = document.getElementById("kpiPctClientes");
+      bCli.textContent = pctCl + "%";
+      bCli.className = "kpi-pct " + stCli.css;
+      const fCli = document.getElementById("kpiFillClientes");
+      fCli.style.width = Math.min(100, pctCl) + "%";
+      fCli.style.background = stCli.color;
 
       // --- TARJETA 3: PROMEDIO CARTERA ---
       const pctP = metaProm > 0 ? Math.round((promReal / metaProm) * 100) : 0;
       document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaPromedio").textContent = metaProm > 0 ? "Meta: $" + metaProm.toLocaleString("es-MX") : "Meta: -";
-      const badgeProm = document.getElementById("kpiPctPromedio");
-      badgeProm.textContent = pctP + "%";
-      badgeProm.className = "kpi-pct badge-kpi " + stProm.css;
-      const fillProm = document.getElementById("kpiFillPromedio");
-      fillProm.style.width = Math.min(100, pctP) + "%";
-      fillProm.style.background = stProm.color;
+      const bProm = document.getElementById("kpiPctPromedio");
+      bProm.textContent = pctP + "%";
+      bProm.className = "kpi-pct " + stProm.css;
+      const fProm = document.getElementById("kpiFillPromedio");
+      fProm.style.width = Math.min(100, pctP) + "%";
+      fProm.style.background = stProm.color;
 
       // --- TARJETA 4: NORMALIDAD ---
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = (normVal * 100).toFixed(1) + "%";
       lblNormVal.style.color = stNorm.color;
-      const badgeNorm = document.getElementById("kpiPctNormalidad");
-      badgeNorm.textContent = normVal >= 0.95 ? "OK" : "RIESGO";
-      badgeNorm.className = "kpi-pct badge-kpi " + stNorm.css;
-      const fillNorm = document.getElementById("kpiFillNormalidad");
-      fillNorm.style.width = Math.min(100, normVal * 100) + "%";
-      fillNorm.style.background = stNorm.color;
+      const bNorm = document.getElementById("kpiPctNormalidad");
+      bNorm.textContent = normVal >= (DB.reglasColor.normalidad ? DB.reglasColor.normalidad.verde : 0.95) ? "OK" : "RIESGO";
+      bNorm.className = "kpi-pct " + stNorm.css;
+      const fNorm = document.getElementById("kpiFillNormalidad");
+      fNorm.style.width = Math.min(100, normVal * 100) + "%";
+      fNorm.style.background = stNorm.color;
 
-      // Renderizar filas de tabla
+      // 4. Renderizar Filas de la Tabla
       renderizarTabla(data);
     }
 
@@ -552,22 +593,22 @@
       if (vistaActual === "ranking") {
         const ordenados = [...data].sort((a, b) => b.cartera - a.cartera);
         ordenados.forEach(e => {
-          const badgeClass = e.normalidad >= 0.95 ? "badge-verde" : (e.normalidad >= 0.90 ? "badge-amarillo" : "badge-rojo");
-          const estadoTxt = e.normalidad >= 0.95 ? "VERDE" : (e.normalidad >= 0.90 ? "AMARILLO" : "ROJO");
+          const st = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
             <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
             <td class="tar">${e.clientes}</td>
             <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : (e.normalidad >= 0.90 ? 'var(--warning)' : 'var(--danger)')};">${(e.normalidad * 100).toFixed(1)}%</td>
-            <td style="text-align:center;"><span class="badge-kpi ${badgeClass}">${estadoTxt}</span></td>
+            <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(1)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${st.css}">${st.txt}</span></td>
           `;
           tbody.appendChild(tr);
         });
         return;
       }
 
+      // Vista Jerárquica
       const regionesUnicas = [...new Set(data.map(e => e.region))];
       regionesUnicas.forEach(reg => {
         const dataReg = data.filter(e => e.region === reg);
@@ -575,7 +616,7 @@
         const rCli = dataReg.reduce((s, e) => s + e.clientes, 0);
         const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
         const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / rCart : 0.95);
-        const rBadge = rNorm >= 0.95 ? "badge-verde" : (rNorm >= 0.90 ? "badge-amarillo" : "badge-rojo");
+        const stReg = evaluarColorEstado(rNorm, 0.95, "normalidad");
 
         const trReg = document.createElement("tr");
         trReg.className = "row-region";
@@ -584,8 +625,8 @@
           <td class="tar">$${rCart.toLocaleString("es-MX")}</td>
           <td class="tar">${rCli}</td>
           <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
-          <td class="tar fw-bold" style="color:${rNorm >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(rNorm * 100).toFixed(1)}%</td>
-          <td style="text-align:center;"><span class="badge-kpi ${rBadge}">${rNorm >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+          <td class="tar fw-bold" style="color:${stReg.color};">${(rNorm * 100).toFixed(1)}%</td>
+          <td style="text-align:center;"><span class="badge-kpi ${stReg.css}">${stReg.txt}</span></td>
         `;
         tbody.appendChild(trReg);
 
@@ -596,7 +637,7 @@
           const aCli = dataAg.reduce((s, e) => s + e.clientes, 0);
           const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
           const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / aCart : 0.95);
-          const aBadge = aNorm >= 0.95 ? "badge-verde" : (aNorm >= 0.90 ? "badge-amarillo" : "badge-rojo");
+          const stAg = evaluarColorEstado(aNorm, 0.95, "normalidad");
 
           const trAg = document.createElement("tr");
           trAg.className = "row-agencia";
@@ -605,21 +646,21 @@
             <td class="tar">$${aCart.toLocaleString("es-MX")}</td>
             <td class="tar">${aCli}</td>
             <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:${aNorm >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(aNorm * 100).toFixed(1)}%</td>
-            <td style="text-align:center;"><span class="badge-kpi ${aBadge}">${aNorm >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+            <td class="tar fw-bold" style="color:${stAg.color};">${(aNorm * 100).toFixed(1)}%</td>
+            <td style="text-align:center;"><span class="badge-kpi ${stAg.css}">${stAg.txt}</span></td>
           `;
           tbody.appendChild(trAg);
 
           dataAg.forEach(e => {
-            const eBadge = e.normalidad >= 0.95 ? "badge-verde" : (e.normalidad >= 0.90 ? "badge-amarillo" : "badge-rojo");
+            const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
             const trEj = document.createElement("tr");
             trEj.innerHTML = `
               <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span></td>
               <td class="tar">$${e.cartera.toLocaleString("es-MX")}</td>
               <td class="tar">${e.clientes}</td>
               <td class="tar">$${e.promedio.toLocaleString("es-MX")}</td>
-              <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(e.normalidad * 100).toFixed(1)}%</td>
-              <td style="text-align:center;"><span class="badge-kpi ${eBadge}">${e.normalidad >= 0.95 ? 'VERDE' : 'ROJO'}</span></td>
+              <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(1)}%</td>
+              <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
             `;
             tbody.appendChild(trEj);
           });
@@ -634,15 +675,6 @@
       renderizar();
     }
 
-    function mostrarModalProgreso(val, tit, sub) {
-      const m = document.getElementById("progressModal");
-      m.style.display = "flex";
-      document.getElementById("modalProgPct").textContent = val + "%";
-      document.getElementById("modalProgFill").style.width = val + "%";
-      if (tit) document.getElementById("modalProgTitulo").textContent = tit;
-      if (sub) document.getElementById("modalProgSub").textContent = sub;
-    }
-
     function ocultarModalProgreso() {
       document.getElementById("progressModal").style.display = "none";
     }
@@ -651,46 +683,83 @@
       sincronizarConDrive(true);
     }
 
-    async function sincronizarConDrive(mostrarProgresoCompleto) {
-      if (mostrarProgresoCompleto) {
-        mostrarModalProgreso(25, "Sincronizando con Drive", "Descargando datos consolidados de BASE...");
+    function animarProgreso(desde, hasta, duracionMs, textoTitulo, textoSub, callback) {
+      const modal = document.getElementById("progressModal");
+      modal.style.display = "flex";
+      if (textoTitulo) document.getElementById("modalProgTitulo").textContent = textoTitulo;
+      if (textoSub) document.getElementById("modalProgSub").textContent = textoSub;
+
+      const inicio = performance.now();
+      function paso(ahora) {
+        const transcurrido = ahora - inicio;
+        const progreso = Math.min(1, transcurrido / duracionMs);
+        const actual = Math.round(desde + (hasta - desde) * progreso);
+        document.getElementById("modalProgPct").textContent = actual + "%";
+        document.getElementById("modalProgFill").style.width = actual + "%";
+        if (progreso < 1) {
+          requestAnimationFrame(paso);
+        } else if (callback) {
+          callback();
+        }
+      }
+      requestAnimationFrame(paso);
+    }
+
+    async function sincronizarConDrive(esManual = false) {
+      if (esManual) {
+        animarProgreso(0, 35, 400, "Sincronizando con Drive", "Consultando parámetros y colorimetría...");
       }
 
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
         const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}_t=${Date.now()}`);
-        if (mostrarProgresoCompleto) mostrarModalProgreso(65, "Procesando Datos", "Actualizando cortes y metas...");
-        
+
+        if (esManual) {
+          animarProgreso(35, 75, 400, "Descargando Datos", "Procesando registros de BASE y reglas...");
+        }
+
         const d = await res.json();
         if (d && d.status === "success") {
           DB.ejecutivos = d.ejecutivos || [];
           DB.agencias = d.agencias || {};
           DB.regiones = d.regiones || {};
+          DB.reglasColor = d.reglasColor || DB.reglasColor;
           DB.users = d.users || [];
           DB.fecha = d.fecha || "";
 
           try {
             localStorage.setItem("mcm_database", JSON.stringify(DB));
-          } catch(e) {}
+          } catch (e) {}
 
-          document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
-          actualizarOpcionesRegion();
-          actualizarOpcionesAgencia();
-          renderizar();
+          const aplicarDatos = () => {
+            document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
+            actualizarOpcionesRegion();
+            actualizarOpcionesAgencia();
+            renderizar();
+          };
 
-          if (mostrarProgresoCompleto) {
-            mostrarModalProgreso(100, "¡Sincronizado!", "Datos actualizados correctamente.");
-            setTimeout(ocultarModalProgreso, 500);
+          if (esManual) {
+            animarProgreso(75, 100, 300, "¡Completado!", "Dashboard actualizado con éxito.", () => {
+              aplicarDatos();
+              setTimeout(() => {
+                document.getElementById("progressModal").style.display = "none";
+              }, 450);
+            });
+          } else {
+            aplicarDatos();
           }
         } else {
           throw new Error(d.message || "Error al procesar");
         }
       } catch (err) {
-        console.warn("Demora o error en vivo, usando copia local:", err);
+        console.warn("Fallo o demora en vivo, usando copia local:", err);
         cargarCopiaLocal();
-        if (mostrarProgresoCompleto) {
-          mostrarModalProgreso(100, "Modo Offline", "Sin conexión. Se cargó la última copia local.");
-          setTimeout(ocultarModalProgreso, 800);
+        if (esManual) {
+          animarProgreso(75, 100, 300, "Modo Offline", "Sin conexión. Se cargó la copia local.", () => {
+            setTimeout(() => {
+              document.getElementById("progressModal").style.display = "none";
+            }, 800);
+          });
         }
       }
     }
