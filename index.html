@@ -146,6 +146,57 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+    /* Pastillas de Brecha en Metas */
+    .kpi-gap {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 5px;
+      margin-left: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.3px;
+    }
+    .gap-falta {
+      background: rgba(239, 68, 68, 0.22);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    .gap-supero {
+      background: rgba(16, 185, 129, 0.22);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+
+    /* Módulo Top 10 / Bottom 10 */
+    .ranking-split-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .ranking-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .ranking-card-header {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge-rank-score {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -263,6 +314,7 @@
     <div class="view-tabs">
       <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Jerárquica</button>
       <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
+      <button class="tab-btn" id="btnTabTopBottom" onclick="cambiarVista('topbottom')">Top 10 Rendimiento</button>
       <button class="tab-btn" id="btnTabMix" onclick="cambiarVista('mxt')">Mix MCM vs MXT</button>
     </div>
 
@@ -281,6 +333,50 @@
         </thead>
         <tbody id="tablaCuerpo"></tbody>
       </table>
+    </div>
+    <!-- CONTENEDOR TOP 10 / BOTTOM 10 -->
+    <div id="topBottomContainer" style="display:none;" class="ranking-split-grid">
+      <div class="ranking-card" style="border-top: 4px solid var(--success);">
+        <div class="ranking-card-header" style="color:var(--success);">
+          <span>🏆 Top 10 Mejor Rendimiento</span>
+          <span style="font-size:10px; color:var(--text-muted); font-weight:600;">(50% Cart + 25% Prom + 25% Norm)</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ejecutivo</th>
+                <th class="tar">Score</th>
+                <th class="tar">Colocación</th>
+                <th class="tar">Norm.</th>
+              </tr>
+            </thead>
+            <tbody id="tablaTop10"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="ranking-card" style="border-top: 4px solid var(--danger);">
+        <div class="ranking-card-header" style="color:var(--danger);">
+          <span>⚠️ Top 10 Menor Rendimiento</span>
+          <span style="font-size:10px; color:var(--text-muted); font-weight:600;">(Requiere Atención)</span>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ejecutivo</th>
+                <th class="tar">Score</th>
+                <th class="tar">Colocación</th>
+                <th class="tar">Norm.</th>
+              </tr>
+            </thead>
+            <tbody id="tablaBottom10"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -616,10 +712,32 @@
       const stProm = evaluarColorEstado(promReal, metaProm, "promedio");
       const stNorm = evaluarColorEstado(normVal, 0.95, "normalidad");
 
-      // Cartera
+      // --- CÁLCULO DE BRECHAS VISUALES ---
+      const diffCart = cartReal - metaCart;
+      const gapCartHtml = metaCart > 0 
+        ? (diffCart >= 0 
+            ? `<span class="kpi-gap gap-supero">+Superó: $${diffCart.toLocaleString("es-MX")}</span>` 
+            : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffCart).toLocaleString("es-MX")}</span>`)
+        : "";
+
+      const diffCli = cliReal - metaCli;
+      const gapCliHtml = metaCli > 0 
+        ? (diffCli >= 0 
+            ? `<span class="kpi-gap gap-supero">+Superó: ${diffCli.toLocaleString("es-MX")}</span>` 
+            : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffCli).toLocaleString("es-MX")}</span>`)
+        : "";
+
+      const diffProm = promReal - metaProm;
+      const gapPromHtml = metaProm > 0 
+        ? (diffProm >= 0 
+            ? `<span class="kpi-gap gap-supero">+Superó: $${diffProm.toLocaleString("es-MX")}</span>` 
+            : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffProm).toLocaleString("es-MX")}</span>`)
+        : "";
+
+      // 1. CARTERA
       const pctC = metaCart > 0 ? Math.round((cartReal / metaCart) * 100) : 0;
       document.getElementById("kpiValCartera").textContent = "$" + cartReal.toLocaleString("es-MX");
-      document.getElementById("kpiMetaCartera").textContent = "Meta: $" + metaCart.toLocaleString("es-MX");
+      document.getElementById("kpiMetaCartera").innerHTML = `Meta: $${metaCart.toLocaleString("es-MX")} ${gapCartHtml}`;
       const bCart = document.getElementById("kpiPctCartera");
       bCart.textContent = pctC + "%";
       bCart.className = "kpi-pct badge-kpi " + stCart.css;
@@ -627,10 +745,10 @@
       fCart.style.width = Math.min(100, pctC) + "%";
       fCart.style.background = stCart.color;
 
-      // Clientes
+      // 2. CLIENTES
       const pctCl = metaCli > 0 ? Math.round((cliReal / metaCli) * 100) : 0;
       document.getElementById("kpiValClientes").textContent = cliReal.toLocaleString("es-MX");
-      document.getElementById("kpiMetaClientes").textContent = "Meta: " + metaCli.toLocaleString("es-MX");
+      document.getElementById("kpiMetaClientes").innerHTML = `Meta: ${metaCli.toLocaleString("es-MX")} ${gapCliHtml}`;
       const bCli = document.getElementById("kpiPctClientes");
       bCli.textContent = pctCl + "%";
       bCli.className = "kpi-pct badge-kpi " + stCli.css;
@@ -638,10 +756,10 @@
       fCli.style.width = Math.min(100, pctCl) + "%";
       fCli.style.background = stCli.color;
 
-      // Promedio Cartera
+      // 3. PROMEDIO CARTERA
       const pctP = metaProm > 0 ? Math.round((promReal / metaProm) * 100) : 0;
       document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
-      document.getElementById("kpiMetaPromedio").textContent = metaProm > 0 ? "Meta: $" + metaProm.toLocaleString("es-MX") : "Meta: $0";
+      document.getElementById("kpiMetaPromedio").innerHTML = metaProm > 0 ? `Meta: $${metaProm.toLocaleString("es-MX")} ${gapPromHtml}` : "Meta: $0";
       const bProm = document.getElementById("kpiPctPromedio");
       bProm.textContent = pctP + "%";
       bProm.className = "kpi-pct badge-kpi " + stProm.css;
@@ -649,7 +767,7 @@
       fProm.style.width = Math.min(100, pctP) + "%";
       fProm.style.background = stProm.color;
 
-      // Normalidad a 2 decimales
+      // 4. NORMALIDAD
       const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
@@ -661,7 +779,78 @@
       fNorm.style.width = Math.min(100, normVal * 100) + "%";
       fNorm.style.background = stNorm.color;
 
-      renderizarTabla(data);
+      // Renderizar Vistas según selección
+      if (vistaActual === "topbottom") {
+        renderizarTopBottom(data);
+      } else {
+        renderizarTabla(data);
+      }
+    }
+
+    // RENDERIZADO DEL TOP 10 MEJOR Y PEOR (Ponderado 50/25/25)
+    function renderizarTopBottom(data) {
+      // Filtrar ejecutivos con meta asignada mayor a 0
+      const calificados = data.filter(e => Number(e.metaCartera) > 0).map(e => {
+        const cCart = Number(e.carteraActiva) / Number(e.metaCartera);
+        const mProm = Number(e.metaPromedio) || (Number(e.metaClientes) > 0 ? Number(e.metaCartera) / Number(e.metaClientes) : 14500);
+        const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
+        const cNorm = (Number(e.normalidad) || 0) / 0.95; // Meta institucional 95%
+
+        // SCORE INTEGRAL: 50% Cartera + 25% Promedio + 25% Normalidad
+        const score = (0.50 * cCart) + (0.25 * cProm) + (0.25 * cNorm);
+        return { ...e, score: score, cCartPct: Math.round(cCart * 100) };
+      });
+
+      const top10 = [...calificados].sort((a, b) => b.score - a.score).slice(0, 10);
+      const bottom10 = [...calificados].sort((a, b) => a.score - b.score).slice(0, 10);
+
+      const renderFilas = (lista, tbodyId, esTop) => {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = "";
+        if (!lista.length) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--text-muted);">Sin datos con meta para evaluar.</td></tr>`;
+          return;
+        }
+        lista.forEach((e, idx) => {
+          const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
+          const scoreColor = esTop ? "var(--success)" : "var(--danger)";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="font-weight:800; color:${scoreColor};">${idx + 1}</td>
+            <td><strong>${e.ejecutivo}</strong> <span style="font-size:10px; color:var(--text-muted);">(${e.agencia})</span> ${mxtBadge}</td>
+            <td class="tar fw-bold" style="color:${scoreColor};">${Math.round(e.score * 100)}%</td>
+            <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")} <span style="font-size:10px; color:var(--text-muted);">(${e.cCartPct}%)</span></td>
+            <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(e.normalidad * 100).toFixed(2)}%</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+
+      renderFilas(top10, "tablaTop10", true);
+      renderFilas(bottom10, "tablaBottom10", false);
+    }
+
+    function cambiarVista(vista) {
+      vistaActual = vista;
+      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
+      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
+      const btnMix = document.getElementById("btnTabMix");
+      if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
+      const btnTop = document.getElementById("btnTabTopBottom");
+      if (btnTop) btnTop.classList.toggle("active", vista === "topbottom");
+
+      const tablaGeneral = document.querySelector(".table-responsive");
+      const contenedorTopBottom = document.getElementById("topBottomContainer");
+
+      if (vista === "topbottom") {
+        if (tablaGeneral) tablaGeneral.style.display = "none";
+        if (contenedorTopBottom) contenedorTopBottom.style.display = "grid";
+      } else {
+        if (tablaGeneral) tablaGeneral.style.display = "block";
+        if (contenedorTopBottom) contenedorTopBottom.style.display = "none";
+      }
+
+      renderizar();
     }
 
     function renderizarTabla(data) {
