@@ -542,10 +542,9 @@
           }
         })
         .catch(err => {
-          console.warn("Sin conexión a Drive. Ejecutando con datos locales.", err);
-          if (esPrimeraVez && !STORE.records.length) {
-            mostrarModalProgreso(100, 100, 200, "Sin Conexión", "Conéctate a internet para sincronizar por primera vez.", () => {});
-          }
+          console.warn("Error o demora en sincronización con Drive:", err);
+          // Cerrar la ventana modal y avisar al usuario
+          mostrarModalProgreso(60, 100, 300, "Aviso", "No se pudo sincronizar en vivo. Usando datos locales.", () => {});
         });
     }
 
