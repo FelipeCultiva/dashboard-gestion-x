@@ -2,1212 +2,250 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>DASHBOARD GESTIÓN X - MCM</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
+  <title>Metas MXT</title>
   <style>
     :root {
-      --bg: #090e17;
-      --surface: #111927;
-      --card-bg: #1a2333;
-      --border: #263346;
-      --text: #f1f5f9;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
       --text-muted: #94a3b8;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.15);
-      --warning: #f59e0b;
-      --warning-glow: rgba(245, 158, 11, 0.15);
-      --danger: #ef4444;
-      --danger-glow: rgba(239, 68, 68, 0.15);
-      --mxt: #a855f7;
-      --radius: 12px;
+      --success: #34d399;
+      --danger: #f87171;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-    /* =========================================
-       MODAL FLOTANTE DE CARGA CON BARRA Y %
-       ========================================= */
-    #progressModal {
-      display: none; position: fixed; inset: 0; background: rgba(9, 14, 23, 0.85);
-      backdrop-filter: blur(6px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
     }
-    .progress-box {
-      width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
-    }
-    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .progress-title { font-size: 13px; font-weight: 700; color: #fff; }
-    .progress-pct-badge { font-size: 13px; font-weight: 800; color: #38bdf8; font-family: 'JetBrains Mono', monospace; }
-    .progress-bar-wrap { width: 100%; height: 8px; background: #1e293b; border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
-    .progress-bar-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 99px; transition: width 0.2s linear; }
-    .progress-subtext { font-size: 11px; color: var(--text-muted); }
 
-    /* =========================================
-       PANTALLA DE ACCESO (LOGIN)
-       ========================================= */
-    #loginScreen {
-      display: flex; min-height: 100vh; align-items: center; justify-content: center;
-      padding: 16px; background: radial-gradient(circle at top, #1e293b 0%, #090e17 100%);
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
     }
-    .login-box {
-      width: 100%; max-width: 400px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.6);
-    }
-    .login-brand { text-align: center; margin-bottom: 24px; }
-    .login-logo {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 48px; height: 48px; border-radius: 12px; background: var(--primary);
-      color: #fff; font-size: 22px; font-weight: 800; margin-bottom: 12px;
-    }
-    .login-brand h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-    .login-brand p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-    .input-login {
-      background: #090e17; border: 1px solid var(--border); color: #fff;
-      padding: 11px 14px; border-radius: 10px; font-size: 13px; outline: none;
+    .header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
     }
-    .input-login:focus { border-color: var(--primary); }
 
-    .btn-login {
-      width: 100%; background: var(--primary); color: #fff; border: none;
-      padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: background 0.2s; margin-top: 6px;
-    }
-    .btn-login:hover { background: var(--primary-hover); }
-
-    .login-error {
-      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 12px;
-      margin-bottom: 14px; display: none; text-align: center;
-    }
-    .login-footer-info {
-      margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);
-      text-align: center; font-size: 11px; color: var(--text-muted);
-    }
-    .login-footer-info a { color: #38bdf8; text-decoration: none; font-weight: 600; }
-
-    /* =========================================
-       DASHBOARD PRINCIPAL
-       ========================================= */
-    #dashboardApp { display: none; padding: 14px; }
-
-    .app-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 10px;
-    }
-    .app-title h1 { font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .badge-scope { font-size: 10px; background: rgba(37,99,235,0.25); color: #93c5fd; padding: 2px 8px; border-radius: 99px; border: 1px solid rgba(59,130,246,0.4); text-transform: uppercase; }
-    .app-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-    .user-panel { display: flex; align-items: center; gap: 8px; }
-    .user-chip {
-      display: flex; align-items: center; gap: 8px; background: var(--card-bg);
-      border: 1px solid var(--border); padding: 6px 12px; border-radius: 99px;
-    }
-    .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; }
-    .user-info { display: flex; flex-direction: column; text-align: left; }
-    .user-name { font-size: 11px; font-weight: 700; color: #fff; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role { font-size: 9px; color: #38bdf8; font-weight: 700; text-transform: uppercase; }
-    
-    .btn-sync-top {
-      background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-    }
-    .btn-sync-top:hover { background: rgba(16, 185, 129, 0.25); }
-
-    .btn-logout {
-      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    .btn-sync {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .restricted-banner {
-      background: rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.3);
-      padding: 8px 12px; border-radius: 10px; font-size: 11px; margin-bottom: 14px;
+    .btn-sync:active {
+      transform: scale(0.96);
     }
 
-    .filter-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+    .card-kpi {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
     }
-    .filters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .filters-header span { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-    .filters-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+
+    .card-kpi span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .card-kpi .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--success);
+      margin-top: 4px;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .list-container {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
-    .filter-item { display: flex; flex-direction: column; gap: 4px; }
-    .filter-item label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-    .filter-item select, .filter-item input {
-      background: #090e17; border: 1px solid var(--border); color: #fff;
-      padding: 8px 10px; border-radius: 8px; font-size: 12px; outline: none;
-    }
-    .filter-item select:disabled { opacity: 0.5; cursor: not-allowed; background: #131a26; }
 
-    .admin-bar {
-      display: flex; gap: 8px; margin-top: 12px; padding-top: 10px;
-      border-top: 1px solid var(--border); flex-wrap: wrap;
-    }
-    .btn-action {
-      background: var(--card-bg); border: 1px solid var(--border);
-      color: var(--text); padding: 7px 12px; border-radius: 8px;
-      font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    .item-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--accent);
     }
 
-    .kpi-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      gap: 10px; margin-bottom: 14px;
+    .item-level {
+      font-weight: 600;
+      font-size: 0.95rem;
     }
-    @media (min-width: 768px) {
-      .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
-    }
-    .kpi-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px; position: relative;
-      display: flex; flex-direction: column; justify-content: space-between;
-    }
-    .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-    .kpi-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-    .badge-kpi { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; }
-    .badge-verde, .badge-green { background: var(--success-glow); color: var(--success); }
-    .badge-amarillo, .badge-yellow { background: var(--warning-glow); color: var(--warning); }
-    .badge-rojo, .badge-red { background: var(--danger-glow); color: var(--danger); }
-    .kpi-val { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-    @media (min-width: 768px) { .kpi-val { font-size: 24px; } }
-    .kpi-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
-    .prog-bar { background: #263346; height: 5px; border-radius: 3px; overflow: hidden; }
-    .prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
 
-    .tabs-bar {
-      display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto;
-      padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+    .item-conteo {
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
-    .tab-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-muted); padding: 8px 14px; border-radius: 8px;
-      font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
-    }
-    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .table-container {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow-x: auto;
+    .item-total {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      text-align: right;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th {
-      background: #141f30; padding: 10px 12px; text-transform: uppercase;
-      font-size: 10px; font-weight: 800; color: var(--text-muted);
-      border-bottom: 1px solid var(--border); white-space: nowrap;
+
+    .status-bar {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
-    td { padding: 10px 12px; border-bottom: 1px solid #1c2738; white-space: nowrap; }
-    .tar { text-align: right; }
-    .fw-bold { font-weight: 700; }
-    .row-region { background: rgba(37,99,235,0.08); font-weight: 800; font-size: 13px; }
-    .row-agencia { background: rgba(255,255,255,0.02); font-weight: 700; }
-    .row-ejecutivo td:first-child { padding-left: 20px; }
+
+    .loading-spinner {
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top: 2px solid #fff;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
-  <!-- VENTANA MODAL FLOTANTE DE CARGA CON BARRA Y % -->
-  <div id="progressModal">
-    <div class="progress-box">
-      <div class="progress-header">
-        <span class="progress-title" id="progressModalTitle">Sincronizando</span>
-        <span class="progress-pct-badge" id="progressModalPct">0%</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-bar" id="progressBarInner"></div>
-      </div>
-      <div class="progress-subtext" id="progressModalMsg">Conectando con Google Drive...</div>
+  <div class="header">
+    <div>
+      <h1>Control Cartera MXT</h1>
+      <span style="font-size: 0.75rem; color: var(--text-muted);">Metas Reales (Columna E)</span>
     </div>
+    <button class="btn-sync" id="btnActualizar" onclick="cargarDatos()">
+      <div class="loading-spinner" id="spinner"></div>
+      <span id="btnText">Actualizar</span>
+    </button>
   </div>
 
-  <!-- PANTALLA LOGIN -->
-  <div id="loginScreen">
-    <div class="login-box">
-      <div class="login-brand">
-        <div class="login-logo">X</div>
-        <h2>GESTIÓN X</h2>
-        <p>Microfinanciera McM • Territorio 1</p>
-      </div>
-
-      <div class="login-error" id="loginErrorMsg">
-        Usuario o contraseña incorrectos. Verifica en la hoja de Drive.
-      </div>
-
-      <form onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label>Usuario</label>
-          <input type="text" id="txtUsername" class="input-login" placeholder="Ej: gte_toluca o admin" required autocomplete="username">
-        </div>
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="txtPassword" class="input-login" placeholder="••••••••" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn-login">Ingresar al Dashboard</button>
-      </form>
-
-      <div class="login-footer-info">
-        <span>Parámetros y credenciales vinculadas a:</span><br>
-        <a href="https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit" target="_blank">
-          Configuración y Metas en Google Drive ↗
-        </a>
-      </div>
-    </div>
+  <div class="card-kpi">
+    <span>Gran Total Metas Reales</span>
+    <div class="value" id="lblGranTotal">$0.00</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" id="lblRegistros">0 registros calculados</div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboardApp">
-    <div class="app-bar">
-      <div class="app-title">
-        <h1>GESTIÓN X <span class="badge-scope" id="lblScope">McM</span></h1>
-        <span class="app-subtitle" id="lblCorte">Corte Semanal: Cargando...</span>
-      </div>
-      <div class="user-panel">
-        <button class="btn-sync-top" onclick="forzarSincronizacionDrive()" title="Actualizar desde Google Drive">
-          🔄 Sincronizar Drive
-        </button>
-        <div class="user-chip">
-          <div class="user-avatar" id="avatarLetter">U</div>
-          <div class="user-info">
-            <span class="user-name" id="currentUserName">Usuario</span>
-            <span class="user-role" id="currentUserRole">Puesto</span>
-          </div>
-        </div>
-        <button class="btn-logout" onclick="handleLogout()">Salir ↩</button>
-      </div>
-    </div>
-
-    <div class="restricted-banner">
-      <span id="bannerText">Calculando permisos...</span>
-    </div>
-
-    <div class="filter-card">
-      <div class="filters-header">
-        <span>Filtros Dinámicos</span>
-        <span style="font-size: 11px; color: #38bdf8; cursor: pointer;" onclick="resetFilters()">Reestablecer</span>
-      </div>
-      <div class="filters-grid">
-        <div class="filter-item">
-          <label>Empresa</label>
-          <select id="selEmpresa" disabled><option>McM</option></select>
-        </div>
-        <div class="filter-item">
-          <label>Territorio</label>
-          <select id="selTerritorio" disabled><option>Territorio 1</option></select>
-        </div>
-        <div class="filter-item">
-          <label>Región</label>
-          <select id="selRegion"><option value="ALL">Todas las Regiones</option></select>
-        </div>
-        <div class="filter-item">
-          <label>Agencia</label>
-          <select id="selAgencia"><option value="ALL">Todas las Agencias</option></select>
-        </div>
-        <div class="filter-item">
-          <label>Producto</label>
-          <select id="selProducto">
-            <option value="ALL">Consolidado (Todos)</option>
-            <option value="MCM">MCM Tradicional</option>
-            <option value="MXT">MXT (Más Por Ti)</option>
-          </select>
-        </div>
-        <div class="filter-item">
-          <label>Buscar Ejecutivo</label>
-          <input type="text" id="txtSearch" placeholder="Nombre...">
-        </div>
-      </div>
-
-      <div class="admin-bar" id="adminActionsBar">
-        <button class="btn-action" onclick="document.getElementById('uploadFile').click()">
-          📥 Importar Nueva Fecha (.xlsx)
-        </button>
-        <input type="file" id="uploadFile" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
-        <button class="btn-action" onclick="window.open('https://docs.google.com/spreadsheets/d/1IzIgt3RUy-gAXQ5Te3FJV3oK8n6typuDTSzcvmuuo8k/edit', '_blank')">
-          ⚙️ Modificar Usuarios/Metas en Drive ↗
-        </button>
-      </div>
-    </div>
-
-    <div class="kpi-grid" id="kpiContainer"></div>
-
-    <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchView('hierarchy', this)">Estructura Jerárquica</button>
-      <button class="tab-btn" onclick="switchView('ranking', this)">Ranking Ejecutivos</button>
-      <button class="tab-btn" onclick="switchView('mxt', this)">Mix MCM vs MXT</button>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Estructura / Ejecutivo</th>
-            <th class="tar">Colocación</th>
-            <th class="tar">Clientes</th>
-            <th class="tar">Promedio</th>
-            <th class="tar">Normalidad</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
+  <div class="section-title">Metas Reales por Nivel</div>
+  <div class="list-container" id="listaNiveles">
+    <!-- Carga dinámica -->
   </div>
+
+  <div class="status-bar" id="lblStatus">Listo</div>
 
   <script>
-    // ========================================================
-    // URL DE TU APPS SCRIPT WEB APP (DESPLEGADO EN GOOGLE DRIVE)
-    // ========================================================
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
+    const formatoMoneda = new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN'
+    });
 
-    // ESTRUCTURAS TOTALMENTE VACÍAS (CERO DATOS QUEMADOS)
-    let USERS_DATABASE = [];
-    let METAS = {};
-    let STORE = {
-      fecha: "",
-      semana: "",
-      records: [],
-      normEjec: {},
-      normGer: {},
-      normReg: 0.95,
-      ingresoEjec: {}
-    };
-
-    let currentUser = null;
-    let activeView = "hierarchy";
-
-    // ========================================================
-    // CONTROLADOR DE MODAL DE PROGRESO FLOTANTE CON %
-    // ========================================================
-    function mostrarModalProgreso(inicio, fin, duracion, titulo, mensaje, callback) {
-      const modal = document.getElementById("progressModal");
-      const bar = document.getElementById("progressBarInner");
-      const pct = document.getElementById("progressModalPct");
-      const titleEl = document.getElementById("progressModalTitle");
-      const msgEl = document.getElementById("progressModalMsg");
-
-      if (modal) modal.style.display = "flex";
-      if (titleEl) titleEl.textContent = titulo;
-      if (msgEl) msgEl.textContent = mensaje;
-
-      let start = null;
-      function animStep(timestamp) {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / duracion, 1);
-        const currentPct = Math.round(inicio + (fin - inicio) * progress);
-        if (bar) bar.style.width = currentPct + "%";
-        if (pct) pct.textContent = currentPct + "%";
-
-        if (progress < 1) {
-          window.requestAnimationFrame(animStep);
-        } else {
-          if (currentPct >= 100) {
-            setTimeout(() => {
-              if (modal) modal.style.display = "none";
-            }, 300);
-          }
-          if (callback) callback();
-        }
-      }
-      window.requestAnimationFrame(animStep);
-    }
-
-    // ========================================================
-    // PERSISTENCIA LOCAL (OFFLINE EN PC Y CELULAR)
-    // ========================================================
-    function guardarEnStorageLocal() {
-      try {
-        localStorage.setItem("gestion_x_store", JSON.stringify(STORE));
-        localStorage.setItem("gestion_x_users", JSON.stringify(USERS_DATABASE));
-        localStorage.setItem("gestion_x_metas", JSON.stringify(METAS));
-      } catch (e) {
-        console.warn("No se pudo escribir en localStorage:", e);
-      }
-    }
-
-    function cargarDesdeStorageLocal() {
-      try {
-        const s = localStorage.getItem("gestion_x_store");
-        const u = localStorage.getItem("gestion_x_users");
-        const m = localStorage.getItem("gestion_x_metas");
-        if (s) STORE = JSON.parse(s);
-        if (u) USERS_DATABASE = JSON.parse(u);
-        if (m) METAS = JSON.parse(m);
-        return Boolean(s && u);
-      } catch (e) {
-        return false;
-      }
-    }
-
-    // ========================================================
-    // CÁLCULO DE EDAD / ANTIGÜEDAD (X m)
-    // ========================================================
-    function getAntiguedadMeses(nom) {
-      const fechaStr = STORE.ingresoEjec ? STORE.ingresoEjec[nom] : null;
-      if (!fechaStr) return "";
-      const ing = new Date(fechaStr);
-      if (isNaN(ing.getTime())) return "";
-      const hoy = new Date();
-      let m = (hoy.getFullYear() - ing.getFullYear()) * 12 + (hoy.getMonth() - ing.getMonth());
-      if (hoy.getDate() < ing.getDate()) m--;
-      m = Math.max(0, m);
-      return "(" + m + " m)";
-    }
-
-    // ========================================================
-    // INICIALIZACIÓN Y SINCRONIZACIÓN
-    // ========================================================
-    function init() {
-      const tieneDatosLocales = cargarDesdeStorageLocal();
-
-      const sesionGuardada = sessionStorage.getItem("gestion_x_session");
-      if (sesionGuardada) {
-        try {
-          currentUser = JSON.parse(sesionGuardada);
-          launchDashboard();
-        } catch (e) {
-          sessionStorage.removeItem("gestion_x_session");
-          showLoginScreen();
-        }
+    function alternarCargando(activo) {
+      const btn = document.getElementById("btnActualizar");
+      const sp = document.getElementById("spinner");
+      const txt = document.getElementById("btnText");
+      if (activo) {
+        btn.disabled = true;
+        sp.style.display = "block";
+        txt.innerText = "Cargando...";
       } else {
-        showLoginScreen();
+        btn.disabled = false;
+        sp.style.display = "none";
+        txt.innerText = "Actualizar";
       }
-
-      // Si hay conexión, sincronizar con Drive en segundo plano
-      sincronizarConDrive(tieneDatosLocales ? false : true);
     }
 
-    function sincronizarConDrive(esPrimeraVez) {
-      if (!APPS_SCRIPT_WEBAPP_URL || APPS_SCRIPT_WEBAPP_URL.includes("REPLACE")) return;
+    function cargarDatos() {
+      alternarCargando(true);
+      document.getElementById("lblStatus").innerText = "Sincronizando con Google Sheets...";
 
-      if (esPrimeraVez) {
-        mostrarModalProgreso(0, 60, 800, "Sincronizando con Drive", "Descargando configuración y datos...", () => {});
-      }
-
-      const urlAntiCache = APPS_SCRIPT_WEBAPP_URL + (APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?") + "_t=" + Date.now();
-
-      fetch(urlAntiCache, { cache: "no-store" })
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.status === "success") {
-            if (data.users && data.users.length) USERS_DATABASE = data.users;
-            if (data.metas) METAS = data.metas;
-            if (data.records && data.records.length) {
-              STORE.records = data.records;
-              STORE.normEjec = data.normEjec || {};
-              STORE.normGer = data.normGer || {};
-              STORE.normReg = data.normReg || 0.95;
-              STORE.ingresoEjec = data.ingresoEjec || {};
-              STORE.fecha = data.fechaCorte || STORE.fecha;
-              STORE.semana = data.semana || STORE.semana;
-
-              // Guardar para uso sin conexión (offline)
-              guardarEnStorageLocal();
-
-              const lbl = document.getElementById("lblCorte");
-              if (lbl) lbl.textContent = "Corte Semanal " + STORE.semana + " (" + STORE.fecha + ")";
-
-              if (esPrimeraVez) {
-                mostrarModalProgreso(60, 100, 300, "Sincronizado", "Corte semanal listo.", () => {
-                  if (currentUser) {
-                    applyUserSecurity();
-                    render();
-                  }
-                });
-              } else {
-                if (currentUser) {
-                  applyUserSecurity();
-                  render();
-                }
-              }
-            }
+      google.script.run
+        .withSuccessHandler(function(res) {
+          alternarCargando(false);
+          if (res.status === "error") {
+            document.getElementById("lblStatus").innerText = "Error: " + res.message;
+            return;
           }
+          renderizar(res);
         })
-        .catch(err => {
-          console.warn("Error o demora en sincronización con Drive:", err);
-          // Cerrar la ventana modal y avisar al usuario
-          mostrarModalProgreso(60, 100, 300, "Aviso", "No se pudo sincronizar en vivo. Usando datos locales.", () => {});
-        });
+        .withFailureHandler(function(err) {
+          alternarCargando(false);
+          document.getElementById("lblStatus").innerText = "Error de red/servidor: " + err.message;
+        })
+        .obtenerDatosCarteraMXT();
     }
 
-    function forzarSincronizacionDrive() {
-      mostrarModalProgreso(0, 75, 700, "Actualizando", "Consultando corte más reciente en Drive...", () => {
-        sincronizarConDrive(true);
-      });
-    }
+    function renderizar(data) {
+      document.getElementById("lblGranTotal").innerText = formatoMoneda.format(data.granTotal);
+      document.getElementById("lblRegistros").innerText = `${data.registros} registros procesados`;
+      document.getElementById("lblStatus").innerText = `Actualizado: ${data.fechaActualizacion}`;
 
-    // ========================================================
-    // LOGIN Y PERMISOS
-    // ========================================================
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const u = document.getElementById("txtUsername").value.trim().toLowerCase();
-      const p = document.getElementById("txtPassword").value.trim();
-      const errorMsg = document.getElementById("loginErrorMsg");
-      const submitBtn = e.target.querySelector("button[type='submit']");
+      const cont = document.getElementById("listaNiveles");
+      cont.innerHTML = "";
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Verificando...";
-
-      // Si no tenemos usuarios cargados en memoria, consultar a Drive
-      if (!USERS_DATABASE.length && APPS_SCRIPT_WEBAPP_URL && !APPS_SCRIPT_WEBAPP_URL.includes("REPLACE")) {
-        try {
-          const resp = await fetch(APPS_SCRIPT_WEBAPP_URL + "?action=getUsers&_t=" + Date.now(), { cache: "no-store" });
-          const d = await resp.json();
-          if (d && d.status === "success" && d.users) {
-            USERS_DATABASE = d.users;
-            guardarEnStorageLocal();
-          }
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-
-      const found = USERS_DATABASE.find(acc =>
-        String(acc.user || "").trim().toLowerCase() === u &&
-        String(acc.pass || "").trim() === p
-      );
-
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Ingresar al Dashboard";
-
-      if (found) {
-        errorMsg.style.display = "none";
-        currentUser = found;
-        sessionStorage.setItem("gestion_x_session", JSON.stringify(found));
-        launchDashboard();
-      } else {
-        errorMsg.style.display = "block";
-      }
-    }
-
-    function handleLogout() {
-      sessionStorage.removeItem("gestion_x_session");
-      currentUser = null;
-      document.getElementById("txtPassword").value = "";
-      showLoginScreen();
-    }
-
-    function showLoginScreen() {
-      document.getElementById("loginScreen").style.display = "flex";
-      document.getElementById("dashboardApp").style.display = "none";
-    }
-
-    function launchDashboard() {
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("dashboardApp").style.display = "block";
-      applyUserSecurity();
-      setupListeners();
-      render();
-    }
-
-    function actualizarOpcionesAgencia() {
-      const selReg = document.getElementById("selRegion");
-      const selAg = document.getElementById("selAgencia");
-      const regionSel = (selReg.value || "ALL").trim().toUpperCase();
-      const agenciaActual = (selAg.value || "ALL").trim().toUpperCase();
-
-      if (currentUser && currentUser.rol === "GTE_AGENCIA") {
-        selAg.innerHTML = `<option value="${currentUser.agencia}">${currentUser.agencia}</option>`;
-        selAg.value = currentUser.agencia;
-        selAg.disabled = true;
+      const niveles = Object.keys(data.totalesPorNivel);
+      if (niveles.length === 0) {
+        cont.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No hay metas registradas.</div>`;
         return;
       }
 
-      // Filtrar limpiando espacios y mayúsculas
-      const registros = (regionSel === "ALL")
-        ? STORE.records
-        : STORE.records.filter(r => String(r.region || "").trim().toUpperCase() === regionSel);
-
-      const agencias = [...new Set(registros.map(r => String(r.agencia || "").trim()))].filter(Boolean).sort();
-
-      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
-        agencias.map(a => `<option value="${a}">${a}</option>`).join("");
-
-      const existe = agencias.some(a => a.toUpperCase() === agenciaActual);
-      selAg.value = existe ? agenciaActual : "ALL";
-    }
-
-    function applyUserSecurity() {
-      document.getElementById("currentUserName").textContent = currentUser.nombre;
-      document.getElementById("currentUserRole").textContent = currentUser.rol.replace("_", " ");
-      document.getElementById("avatarLetter").textContent = currentUser.nombre.charAt(0);
-
-      const selReg = document.getElementById("selRegion");
-      const banner = document.getElementById("bannerText");
-      const adminBar = document.getElementById("adminActionsBar");
-
-      // Poblar regiones únicas ordenadas
-      const allRegiones = [...new Set(STORE.records.map(r => r.region))].filter(Boolean).sort();
-      selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
-        allRegiones.map(r => `<option value="${r}">${r}</option>`).join("");
-
-      if (currentUser.rol === "GTE_AGENCIA") {
-        selReg.value = currentUser.region;
-        selReg.disabled = true;
-        actualizarOpcionesAgencia();
-        banner.innerHTML = `🔒 Gerencia de Agencia: <strong>${currentUser.agencia}</strong> (Solo su información autorizada)`;
-        if (adminBar) adminBar.style.display = "none";
-      } else if (currentUser.rol === "GTE_REGIONAL") {
-        selReg.value = currentUser.region;
-        selReg.disabled = true;
-        actualizarOpcionesAgencia();
-        banner.innerHTML = `🏛️ Gerencia Regional: <strong>${currentUser.region}</strong> (Agencias a su cargo)`;
-        if (adminBar) adminBar.style.display = "none";
-      } else if (currentUser.rol === "SUBDIR_TERRITORIAL") {
-        selReg.disabled = false;
-        actualizarOpcionesAgencia();
-        banner.innerHTML = `🏢 Subdirección Territorial: <strong>${currentUser.territorio}</strong>`;
-        if (adminBar) adminBar.style.display = "flex";
-      } else {
-        selReg.disabled = false;
-        actualizarOpcionesAgencia();
-        banner.innerHTML = `🔓 Nivel Directivo / Admin: <strong>${currentUser.nombre}</strong> (Acceso y filtros totales)`;
-        if (adminBar) adminBar.style.display = "flex";
-      }
-    }
-
-    function setupListeners() {
-      document.getElementById("selRegion").addEventListener("change", () => {
-        actualizarOpcionesAgencia();
-        ejecutarConsultaConProgreso();
-      });
-      document.getElementById("selAgencia").addEventListener("change", () => ejecutarConsultaConProgreso());
-      document.getElementById("selProducto").addEventListener("change", () => ejecutarConsultaConProgreso());
-      document.getElementById("txtSearch").addEventListener("input", () => render());
-    }
-
-    function resetFilters() {
-      document.getElementById("selProducto").value = "ALL";
-      document.getElementById("txtSearch").value = "";
-      if (!document.getElementById("selRegion").disabled) document.getElementById("selRegion").value = "ALL";
-      actualizarOpcionesAgencia();
-      ejecutarConsultaConProgreso();
-    }
-
-    // Modal de progreso durante cada filtrado/consulta
-    function ejecutarConsultaConProgreso() {
-      mostrarModalProgreso(0, 100, 200, "Consultando", "Filtrando datos...", () => {
-        render();
-      });
-    }
-
-    function getFilteredData() {
-      const reg = (document.getElementById("selRegion").value || "ALL").trim().toUpperCase();
-      const ag = (document.getElementById("selAgencia").value || "ALL").trim().toUpperCase();
-      const prod = document.getElementById("selProducto").value;
-      const search = document.getElementById("txtSearch").value.toLowerCase().trim();
-
-      return STORE.records.filter(r => {
-        const rReg = String(r.region || "").trim().toUpperCase();
-        const rAg = String(r.agencia || "").trim().toUpperCase();
-
-        if (currentUser.rol === "GTE_AGENCIA" && rAg !== currentUser.agencia.toUpperCase()) return false;
-        if (currentUser.rol === "GTE_REGIONAL" && rReg !== currentUser.region.toUpperCase()) return false;
-
-        if (reg !== "ALL" && rReg !== reg) return false;
-        if (ag !== "ALL" && rAg !== ag) return false;
-        if (prod === "MCM" && r.es_mxt) return false;
-        if (prod === "MXT" && !r.es_mxt) return false;
-        if (search && !String(r.ejecutivo || "").toLowerCase().includes(search)) return false;
-        return true;
-      });
-    }
-
-    function getStatus(val, meta, type = "ratio") {
-      if (type === "normalidad") {
-        if (val >= 0.95) return "verde";
-        if (val >= 0.90) return "amarillo";
-        return "rojo";
-      }
-      const r = meta > 0 ? (val / meta) : 0;
-      if (r >= 1.0) return "verde";
-      if (r >= 0.9) return "amarillo";
-      return "rojo";
-    }
-
-    function fmtMoney(n) { return "$" + Math.round(n).toLocaleString("es-MX"); }
-    // Formateador seguro de porcentajes (si es > 1.5, ya viene en base 100; si es <= 1.5 viene en decimal)
-    function fmtPct(n) {
-      if (n === null || n === undefined || isNaN(n)) return "0.0%";
-      let val = Number(n);
-      if (val > 1.5) val = val / 100; // Corrección automática si viene en formato porcentaje directo
-      return (val * 100).toFixed(1) + "%";
-    }
-
-    function renderKPIs(filtered) {
-      const selAg = document.getElementById("selAgencia").value;
-      const level = (selAg !== "ALL" || currentUser.rol === "GTE_AGENCIA") ? "agencia" : "region";
-      const target = (METAS && METAS[level]) ? METAS[level] : { clientes: 250, promedio: 14500, cartera: 3625000, normalidad: 0.95 };
-
-      const sumCartera = filtered.reduce((s, r) => s + r.desembolso, 0);
-      const countClientes = filtered.length;
-      const avgCartera = countClientes > 0 ? sumCartera / countClientes : 0;
-
-      // 1. Obtener la región y agencia activas
-      const selRegVal = (document.getElementById("selRegion") ? document.getElementById("selRegion").value : "ALL").trim().toUpperCase();
-      const selAgVal = (document.getElementById("selAgencia") ? document.getElementById("selAgencia").value : "ALL").trim().toUpperCase();
-
-      let norm = 0.95;
-
-      // 2. Si se consulta una AGENCIA específica
-      if (level === "agencia" || selAgVal !== "ALL" || (currentUser && currentUser.rol === "GTE_AGENCIA")) {
-        const agName = (selAgVal !== "ALL") ? selAgVal : (currentUser ? currentUser.agencia : "");
-        // Buscar por nombre exacto o normalizado
-        norm = STORE.normGer[agName] !== undefined ? STORE.normGer[agName] : (STORE.normGer[agName.toUpperCase()] || 0);
-      
-      // 3. Si se consulta una REGIÓN específica
-      } else if (selRegVal !== "ALL" || (currentUser && currentUser.rol === "GTE_REGIONAL")) {
-        const regName = (selRegVal !== "ALL") ? selRegVal : (currentUser ? currentUser.region : "");
-        if (typeof STORE.normReg === "object" && STORE.normReg !== null) {
-          norm = STORE.normReg[regName] !== undefined ? STORE.normReg[regName] : (STORE.normReg[regName.toUpperCase()] || 0.95);
-        } else {
-          norm = Number(STORE.normReg) || 0.95;
-        }
-
-      // 4. Consolidado general (Todas las regiones)
-      } else {
-        if (typeof STORE.normReg === "number") {
-          norm = STORE.normReg;
-        } else if (typeof STORE.normReg === "object" && STORE.normReg !== null) {
-          const vals = Object.values(STORE.normReg).filter(v => typeof v === "number" && !isNaN(v));
-          norm = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0.95;
-        } else {
-          norm = 0.95;
-        }
-      }
-
-      // 5. Blindaje de escala (Evitar que porcentajes en base 100 o millones se disparen)
-      if (norm > 1.5) {
-        norm = norm > 100 ? (norm / 1000000) : (norm / 100);
-      }
-
-      const kpis = [
-        {
-          title: "Cartera Colocada",
-          val: fmtMoney(sumCartera),
-          meta: "Meta: " + fmtMoney(target.cartera),
-          pct: ((sumCartera / target.cartera) * 100).toFixed(0) + "%",
-          status: getStatus(sumCartera, target.cartera),
-          fill: Math.min(100, (sumCartera / target.cartera) * 100)
-        },
-        {
-          title: "Clientes",
-          val: countClientes.toLocaleString("es-MX"),
-          meta: "Meta: " + target.clientes,
-          pct: ((countClientes / target.clientes) * 100).toFixed(0) + "%",
-          status: getStatus(countClientes, target.clientes),
-          fill: Math.min(100, (countClientes / target.clientes) * 100)
-        },
-        {
-          title: "Promedio",
-          val: fmtMoney(avgCartera),
-          meta: "Meta: " + fmtMoney(target.promedio),
-          pct: ((avgCartera / target.promedio) * 100).toFixed(0) + "%",
-          status: getStatus(avgCartera, target.promedio),
-          fill: Math.min(100, (avgCartera / target.promedio) * 100)
-        },
-        {
-          title: "Normalidad",
-          val: fmtPct(norm),
-          meta: STORE.debugNormalidad 
-            ? `<span style="color:#f59e0b; font-size:10px; font-weight:700;">🔍 ${level === 'agencia' ? 'Gerente' : 'Regional'}: Hoja [${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].hoja}] Col [${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].colLetra}] "${STORE.debugNormalidad[level === 'agencia' ? 'gerente' : 'regional'].header}"</span>`
-            : "Meta: >=95%",
-          pct: norm >= 0.95 ? "OK" : "Riesgo",
-          status: getStatus(norm, 0.95, "normalidad"),
-          fill: Math.min(100, norm * 100)
-        }
-      ];
-
-      document.getElementById("kpiContainer").innerHTML = kpis.map(k => `
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <span class="kpi-title">${k.title}</span>
-            <span class="badge-kpi badge-${k.status}">${k.pct}</span>
+      niveles.forEach(niv => {
+        const item = data.totalesPorNivel[niv];
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.innerHTML = `
+          <div>
+            <div class="item-level">${niv}</div>
+            <div class="item-conteo">${item.conteo} promotores / registros</div>
           </div>
-          <div class="kpi-val">${k.val}</div>
-          <div class="kpi-sub">${k.meta}</div>
-          <div class="prog-bar">
-            <div class="prog-fill" style="width:${k.fill}%; background:var(--${k.status === 'verde' ? 'success' : (k.status === 'amarillo' ? 'warning' : 'danger')});"></div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function renderTable(filtered) {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-
-      if (activeView === "ranking") {
-        const byEjec = {};
-        filtered.forEach(r => {
-          if (!byEjec[r.ejecutivo]) byEjec[r.ejecutivo] = { nombre: r.ejecutivo, agencia: r.agencia, cartera: 0, clientes: 0, mxt: 0 };
-          byEjec[r.ejecutivo].cartera += r.desembolso;
-          byEjec[r.ejecutivo].clientes += 1;
-          if (r.es_mxt) byEjec[r.ejecutivo].mxt += 1;
-        });
-
-        Object.values(byEjec).sort((a, b) => b.cartera - a.cartera).forEach(e => {
-          const prom = e.clientes > 0 ? e.cartera / e.clientes : 0;
-          const norm = STORE.normEjec[e.nombre] !== undefined ? STORE.normEjec[e.nombre] : 0;
-          const st = getStatus(norm, 0.95, "normalidad");
-          const mxtTag = e.mxt > 0 ? '<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">' + e.mxt + ' MXT</span>' : "";
-          const edad = getAntiguedadMeses(e.nombre);
-          const edadBadge = edad ? '<span style="color:#38bdf8; font-size:11px; font-weight:700; margin-left:4px;">' + edad + '</span>' : "";
-
-          const tr = document.createElement("tr");
-          tr.className = "row-ejecutivo";
-          tr.innerHTML = `
-            <td><strong>${e.nombre}</strong> ${edadBadge} <span style="color:var(--text-muted); font-size:10px;">(${e.agencia})</span> ${mxtTag}</td>
-            <td class="tar">${fmtMoney(e.cartera)}</td>
-            <td class="tar">${e.clientes}</td>
-            <td class="tar">${fmtMoney(prom)}</td>
-            <td class="tar fw-bold" style="color:var(--${st === 'verde' ? 'success' : (st === 'amarillo' ? 'warning' : 'danger')});">${fmtPct(norm)}</td>
-            <td><span class="badge-kpi badge-${st}">${st.toUpperCase()}</span></td>
-          `;
-          tbody.appendChild(tr);
-        });
-        return;
-      }
-
-      if (activeView === "mxt") {
-        const mix = {
-          "MCM Tradicional": { cartera: 0, clientes: 0 },
-          "MXT (Más Por Ti)": { cartera: 0, clientes: 0 }
-        };
-        filtered.forEach(r => {
-          const k = r.es_mxt ? "MXT (Más Por Ti)" : "MCM Tradicional";
-          mix[k].cartera += r.desembolso;
-          mix[k].clientes += 1;
-        });
-
-        Object.keys(mix).forEach(k => {
-          const m = mix[k];
-          const prom = m.clientes > 0 ? m.cartera / m.clientes : 0;
-          const tr = document.createElement("tr");
-          tr.className = "row-agencia";
-          tr.innerHTML = `
-            <td><strong>${k}</strong></td>
-            <td class="tar">${fmtMoney(m.cartera)}</td>
-            <td class="tar">${m.clientes}</td>
-            <td class="tar">${fmtMoney(prom)}</td>
-            <td class="tar">-</td>
-            <td><span class="badge-kpi badge-green">ACTIVO</span></td>
-          `;
-          tbody.appendChild(tr);
-        });
-        return;
-      }
-
-      // Vista Jerárquica
-      const regiones = [...new Set(filtered.map(r => r.region))];
-      regiones.forEach(reg => {
-        const regRecords = filtered.filter(r => r.region === reg);
-        const rCart = regRecords.reduce((s, r) => s + r.desembolso, 0);
-        const rCli = regRecords.length;
-        const rProm = rCli > 0 ? rCart / rCli : 0;
-        const rNorm = STORE.normReg;
-        const rSt = getStatus(rNorm, 0.95, "normalidad");
-
-        if (currentUser.rol !== "GTE_AGENCIA") {
-          const trReg = document.createElement("tr");
-          trReg.className = "row-region";
-          trReg.innerHTML = `
-            <td>🏛️ ${reg}</td>
-            <td class="tar">${fmtMoney(rCart)}</td>
-            <td class="tar">${rCli}</td>
-            <td class="tar">${fmtMoney(rProm)}</td>
-            <td class="tar fw-bold" style="color:var(--${rSt === 'verde' ? 'success' : (rSt === 'amarillo' ? 'warning' : 'danger')});">${fmtPct(rNorm)}</td>
-            <td><span class="badge-kpi badge-${rSt}">${rSt.toUpperCase()}</span></td>
-          `;
-          tbody.appendChild(trReg);
-        }
-
-        const agencias = [...new Set(regRecords.map(r => r.agencia))];
-        agencias.forEach(ag => {
-          const agRecords = regRecords.filter(r => r.agencia === ag);
-          const aCart = agRecords.reduce((s, r) => s + r.desembolso, 0);
-          const aCli = agRecords.length;
-          const aProm = aCli > 0 ? aCart / aCli : 0;
-          const aNorm = STORE.normGer[ag] || 0;
-          const aSt = getStatus(aNorm, 0.95, "normalidad");
-
-          const trAg = document.createElement("tr");
-          trAg.className = "row-agencia";
-          trAg.innerHTML = `
-            <td style="padding-left:${currentUser.rol === 'GTE_AGENCIA' ? '12px' : '20px'};">📍 ${ag}</td>
-            <td class="tar">${fmtMoney(aCart)}</td>
-            <td class="tar">${aCli}</td>
-            <td class="tar">${fmtMoney(aProm)}</td>
-            <td class="tar fw-bold" style="color:var(--${aSt === 'verde' ? 'success' : (aSt === 'amarillo' ? 'warning' : 'danger')});">${fmtPct(aNorm)}</td>
-            <td><span class="badge-kpi badge-${aSt}">${aSt.toUpperCase()}</span></td>
-          `;
-          tbody.appendChild(trAg);
-
-          const mapEj = {};
-          agRecords.forEach(r => {
-            if (!mapEj[r.ejecutivo]) mapEj[r.ejecutivo] = { cartera: 0, clientes: 0, mxt: 0 };
-            mapEj[r.ejecutivo].cartera += r.desembolso;
-            mapEj[r.ejecutivo].clientes += 1;
-            if (r.es_mxt) mapEj[r.ejecutivo].mxt += 1;
-          });
-
-          Object.keys(mapEj).sort().forEach(eName => {
-            const ed = mapEj[eName];
-            const eProm = ed.clientes > 0 ? ed.cartera / ed.clientes : 0;
-            const eNorm = STORE.normEjec[eName] !== undefined ? STORE.normEjec[eName] : 0;
-            const eSt = getStatus(eNorm, 0.95, "normalidad");
-            const mxtTag = ed.mxt > 0 ? '<span style="color:#d8b4fe; font-size:10px; font-weight:800; margin-left:4px;">' + ed.mxt + ' MXT</span>' : "";
-            const edad = getAntiguedadMeses(eName);
-            const edadBadge = edad ? '<span style="color:#38bdf8; font-size:11px; font-weight:700; margin-left:4px;">' + edad + '</span>' : "";
-
-            const trEj = document.createElement("tr");
-            trEj.className = "row-ejecutivo";
-            trEj.innerHTML = `
-              <td>👤 ${eName} ${edadBadge} ${mxtTag}</td>
-              <td class="tar">${fmtMoney(ed.cartera)}</td>
-              <td class="tar">${ed.clientes}</td>
-              <td class="tar">${fmtMoney(eProm)}</td>
-              <td class="tar fw-bold" style="color:var(--${eSt === 'verde' ? 'success' : (eSt === 'amarillo' ? 'warning' : 'danger')});">${fmtPct(eNorm)}</td>
-              <td><span class="badge-kpi badge-${eSt}">${eSt.toUpperCase()}</span></td>
-            `;
-            tbody.appendChild(trEj);
-          });
-        });
+          <div class="item-total">${formatoMoneda.format(item.total)}</div>
+        `;
+        cont.appendChild(card);
       });
     }
 
-    function switchView(v, btn) {
-      activeView = v;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      ejecutarConsultaConProgreso();
-    }
-
-    function render() {
-      const filtered = getFilteredData();
-      renderKPIs(filtered);
-      renderTable(filtered);
-    }
-
-    function handleExcelUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      function colIndexToA1(idx) {
-        let temp, letter = '';
-        let col = idx + 1;
-        while (col > 0) {
-          temp = (col - 1) % 26;
-          letter = String.fromCharCode(65 + temp) + letter;
-          col = (col - temp - 1) / 26;
-        }
-        return letter;
-      }
-
-      mostrarModalProgreso(0, 50, 300, "Procesando Archivo", "Analizando pestañas y columnas...", () => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const wb = XLSX.read(data, { type: "array", cellDates: true });
-
-            // Registro de depuración visible
-            let diagInfo = `Hojas en este archivo: [${wb.SheetNames.join(", ")}]\n\n`;
-
-            // 1. LECTURA DE INDICADORES (COLOCACIÓN)
-            const indSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("indicador")) || wb.SheetNames[0];
-            const wsInd = wb.Sheets[indSheetName];
-            if (!wsInd) throw new Error("No se halló hoja de colocación.");
-
-            const indRows = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
-            let hIdx = -1;
-            const terminosMonto = ["desembolso", "monto", "importe", "colocacion", "colocación", "capital"];
-            
-            for (let r = 0; r < Math.min(indRows.length, 40); r++) {
-              if (indRows[r] && Array.isArray(indRows[r])) {
-                const filaStr = indRows[r].map(c => String(c || "").trim().toLowerCase());
-                if (filaStr.some(c => terminosMonto.some(t => c.includes(t)))) {
-                  hIdx = r;
-                  break;
-                }
-              }
-            }
-
-            if (hIdx === -1) throw new Error("No se halló fila con columna de desembolso/monto.");
-
-            const h = indRows[hIdx].map(c => String(c || "").trim().toLowerCase());
-            const colDes = h.findIndex(c => terminosMonto.some(t => c.includes(t)));
-            const colCli = h.findIndex(c => c.includes("cliente") || c.includes("acreditado") || c.includes("socio"));
-            const colEj  = h.findIndex(c => c.includes("ejecutivo") || c.includes("asesor") || c.includes("promotor"));
-            const colAg  = h.findIndex(c => c.includes("agencia") || c.includes("sucursal"));
-            const colReg = h.findIndex(c => c.includes("regi") || c.includes("zona"));
-
-            const newRecords = [];
-            for (let r = hIdx + 1; r < indRows.length; r++) {
-              const row = indRows[r];
-              if (!row || row[colDes] === undefined || row[colDes] === null || row[colDes] === "") continue;
-              const valNum = parseFloat(String(row[colDes]).replace(/[^0-9.-]+/g, ""));
-              if (isNaN(valNum)) continue;
-
-              const cliente = colCli !== -1 ? String(row[colCli] || "").trim() : "Cliente";
-              const esMxt = cliente.toUpperCase().endsWith("-MXT");
-
-              newRecords.push({
-                empresa: "McM",
-                territorio: "Territorio 1",
-                region: colReg !== -1 ? String(row[colReg] || "NEVADO").trim() : "NEVADO",
-                agencia: colAg !== -1 ? String(row[colAg] || "GENERAL").trim() : "GENERAL",
-                ejecutivo: colEj !== -1 ? String(row[colEj] || "GENERAL").trim() : "GENERAL",
-                cliente: cliente,
-                desembolso: valNum,
-                es_mxt: esMxt,
-                producto: esMxt ? "MXT (Más Por Ti)" : "MCM Tradicional"
-              });
-            }
-
-            // 2. FUNCIÓN GENERICA PARA DETECTAR NORMALIDAD EN CUALQUIER HOJA
-            function extraerNormalidadHoja(nombreClave, colClaveBusqueda) {
-              const sheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes(nombreClave));
-              const resultado = {};
-              let debugTexto = `Hoja '${nombreClave}': NO ENCONTRADA\n`;
-
-              if (sheetName && wb.Sheets[sheetName]) {
-                const sheetRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-                let hRow = -1;
-
-                // Buscar fila de encabezados
-                for (let r = 0; r < Math.min(sheetRows.length, 15); r++) {
-                  if (sheetRows[r] && Array.isArray(sheetRows[r])) {
-                    const rowText = sheetRows[r].map(c => String(c || "").trim().toLowerCase());
-                    if (rowText.some(c => c.includes("normalidad") || c.includes("%") || c.includes("recibido") || c.includes("esperado"))) {
-                      hRow = r;
-                      break;
-                    }
-                  }
-                }
-
-                if (hRow === -1) hRow = 3; // Fallback común
-
-                const headersRow = (sheetRows[hRow] || []).map(c => String(c || "").trim());
-                const headersLower = headersRow.map(c => c.toLowerCase());
-
-                // Detectar columna de nombre
-                const colEntidad = headersLower.findIndex(c => c.includes(colClaveBusqueda));
-                
-                // Detectar columna de normalidad (% Normalidad o Normalidad)
-                let colNorm = headersLower.findIndex(c => c.includes("normalidad"));
-                if (colNorm === -1) colNorm = headersLower.findIndex(c => c.includes("%"));
-                if (colNorm === -1 && nombreClave === "ejecutivo") colNorm = 9; // Columna J tradicional
-                if (colNorm === -1 && nombreClave === "gerente") colNorm = 9;   // Columna J tradicional
-                if (colNorm === -1 && nombreClave === "regional") colNorm = 8;  // Columna I tradicional
-
-                debugTexto = `Hoja: [${sheetName}]\n` +
-                             `• Fila Títulos: ${hRow + 1}\n` +
-                             `• Col. Nombre: ${colIndexToA1(colEntidad)} ("${headersRow[colEntidad] || 'N/D'}")\n` +
-                             `• Col. Normalidad: ${colIndexToA1(colNorm)} ("${headersRow[colNorm] || 'N/D'}")\n`;
-
-                let muestras = [];
-                for (let r = hRow + 1; r < sheetRows.length; r++) {
-                  const row = sheetRows[r];
-                  if (row && colEntidad !== -1 && row[colEntidad]) {
-                    const entNom = String(row[colEntidad]).trim();
-                    let normVal = colNorm !== -1 ? parseFloat(String(row[colNorm]).replace(/[^0-9.-]+/g, "")) : 0;
-                    
-                    if (isNaN(normVal)) normVal = 0;
-                    // Si viene en escala 0-100 (ej. 97.5) convertir a decimal (0.975)
-                    if (normVal > 1.5) normVal = normVal / 100;
-
-                    resultado[entNom] = normVal;
-                    resultado[entNom.toUpperCase()] = normVal;
-
-                    if (muestras.length < 2) muestras.push(`${entNom}: ${(normVal * 100).toFixed(1)}%`);
-                  }
-                }
-                debugTexto += `• Muestra datos: ${muestras.join(" | ") || "Sin registros"}\n\n`;
-              }
-              return { data: resultado, debug: debugTexto };
-            }
-
-            // Extraer de las 3 pestañas
-            const resEjec = extraerNormalidadHoja("ejecutivo", "ejecutivo");
-            const resGer  = extraerNormalidadHoja("gerente", "agencia");
-            const resReg  = extraerNormalidadHoja("regional", "regi");
-
-            diagInfo += resEjec.debug + resGer.debug + resReg.debug;
-
-            // Extraer Fechas de Ingreso
-            const ejecSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("ejecutivo"));
-            const newIngresoEj = {};
-            if (ejecSheetName && wb.Sheets[ejecSheetName]) {
-              const rEj = XLSX.utils.sheet_to_json(wb.Sheets[ejecSheetName], { header: 1 });
-              for (let r = 4; r < rEj.length; r++) {
-                if (rEj[r] && rEj[r][2] && rEj[r][3]) {
-                  const nom = String(rEj[r][2]).trim();
-                  newIngresoEj[nom] = rEj[r][3] instanceof Date 
-                    ? rEj[r][3].toISOString().substring(0, 10) 
-                    : String(rEj[r][3]).substring(0, 10);
-                }
-              }
-            }
-
-            // Fecha de corte
-            let fCorte = file.name.replace(/\.[^/.]+$/, "").replace(/indicadores|semanales|mcm|ejemplo/gi, "").trim();
-            const coincidenciaFecha = file.name.match(/\d{8}/);
-            if (coincidenciaFecha) {
-              const raw = coincidenciaFecha[0];
-              fCorte = `${raw.substring(0, 4)}-${raw.substring(4, 6)}-${raw.substring(6, 8)}`;
-            }
-
-            // Actualizar tienda en memoria
-            STORE.records = newRecords;
-            STORE.normEjec = resEjec.data;
-            STORE.normGer = resGer.data;
-            STORE.normReg = resReg.data;
-            STORE.ingresoEjec = newIngresoEj;
-            STORE.fecha = fCorte;
-
-            guardarEnStorageLocal();
-
-            mostrarModalProgreso(50, 100, 200, "Cargado", "Archivo procesado.", () => {
-              const lblCorte = document.getElementById("lblCorte");
-              if (lblCorte) lblCorte.textContent = "Corte Actualizado: " + fCorte;
-              applyUserSecurity();
-              render();
-              
-              // VENTANA DE DIAGNÓSTICO EN PANTALLA
-              alert("=== DIAGNÓSTICO DE COLUMNAS LEÍDAS ===\n\n" + diagInfo);
-            });
-
-          } catch (err) {
-            const modal = document.getElementById("progressModal");
-            if (modal) modal.style.display = "none";
-            alert("Error al procesar el archivo: " + err.message);
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    }
-
-    window.onload = init;
+    // Ejecución inicial automática al abrir en móvil
+    window.addEventListener("DOMContentLoaded", cargarDatos);
   </script>
 </body>
 </html>
