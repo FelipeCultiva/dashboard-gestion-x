@@ -78,25 +78,8 @@
     .card-kpi { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; position: relative; }
     .kpi-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
     .kpi-pct {
-      position: absolute;
-      right: 14px;
-      top: 14px;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-    }
-    .badge-mxt {
-      background: rgba(168, 85, 247, 0.25) !important;
-      color: #d8b4fe !important;
-      border: 1px solid rgba(168, 85, 247, 0.5);
-      font-size: 10px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 6px;
-      display: inline-block;
+      position: absolute; right: 14px; top: 14px; font-size: 11px; font-weight: 800;
+      padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
     }
     .badge-verde {
       background: rgba(16, 185, 129, 0.2) !important;
@@ -113,6 +96,15 @@
       color: #ef4444 !important;
       border: 1px solid rgba(239, 68, 68, 0.5);
     }
+
+    .badge-mxt {
+      background: rgba(168, 85, 247, 0.25) !important;
+      color: #d8b4fe !important;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
+      margin-left: 6px; display: inline-block;
+    }
+
     .kpi-val { font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px; }
     .kpi-meta { font-size: 11px; color: var(--text-muted); }
     .prog-bar { width: 100%; height: 4px; background: #334155; border-radius: 2px; margin-top: 8px; overflow: hidden; }
@@ -133,9 +125,6 @@
     .row-region { background: rgba(30, 41, 59, 0.4); font-weight: 700; }
     .row-agencia { background: rgba(15, 23, 42, 0.3); font-weight: 600; }
     .badge-kpi { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-    .badge-verde { background: var(--success-glow); color: var(--success); }
-    .badge-amarillo { background: var(--warning-glow); color: var(--warning); }
-    .badge-rojo { background: var(--danger-glow); color: var(--danger); }
 
     #progressModal {
       position: fixed; inset: 0; background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(4px);
@@ -181,21 +170,13 @@
 
     <div class="security-banner" id="bannerSeguridad">Cargando credenciales...</div>
 
-    <!-- FILTROS DINÁMICOS CONECTADOS -->
+    <!-- FILTROS DINÁMICOS -->
     <div class="filters-box">
       <div class="filters-header">
         <span>FILTROS DINÁMICOS</span>
         <button class="btn-reset" onclick="resetFiltros()">REESTABLECER</button>
       </div>
       <div class="filters-grid">
-        <div class="form-group">
-          <label>Producto</label>
-          <select id="selProducto" class="form-select">
-            <option value="ALL">Consolidado (Todos)</option>
-            <option value="TRAD">MCM Tradicional</option>
-            <option value="MXT">MXT (Más Por Ti)</option>
-          </select>
-        </div>
         <div class="form-group">
           <label>Territorio</label>
           <select id="selTerritorio" class="form-select">
@@ -217,6 +198,14 @@
           </select>
         </div>
         <div class="form-group">
+          <label>Producto</label>
+          <select id="selProducto" class="form-select">
+            <option value="ALL">Consolidado (Todos)</option>
+            <option value="TRAD">MCM Tradicional</option>
+            <option value="MXT">MXT (Más Por Ti)</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Buscar Ejecutivo</label>
           <input type="text" id="txtBuscar" class="form-input" placeholder="Nombre...">
         </div>
@@ -224,9 +213,7 @@
     </div>
 
     <!-- TARJETAS KPIS -->
-    <!-- TARJETAS KPIS -->
     <div class="kpis-grid">
-      <!-- 1. Cartera Colocada -->
       <div class="card-kpi">
         <span class="kpi-title">Cartera Colocada</span>
         <span class="kpi-pct badge-kpi" id="kpiPctCartera">0%</span>
@@ -235,7 +222,6 @@
         <div class="prog-bar"><div class="prog-fill" id="kpiFillCartera" style="width:0%;"></div></div>
       </div>
 
-      <!-- 2. Clientes Vigentes -->
       <div class="card-kpi">
         <span class="kpi-title">Clientes Vigentes</span>
         <span class="kpi-pct badge-kpi" id="kpiPctClientes">0%</span>
@@ -244,7 +230,6 @@
         <div class="prog-bar"><div class="prog-fill" id="kpiFillClientes" style="width:0%;"></div></div>
       </div>
 
-      <!-- 3. Promedio Cartera -->
       <div class="card-kpi">
         <span class="kpi-title">Promedio Cartera</span>
         <span class="kpi-pct badge-kpi" id="kpiPctPromedio">0%</span>
@@ -253,11 +238,10 @@
         <div class="prog-bar"><div class="prog-fill" id="kpiFillPromedio" style="width:0%;"></div></div>
       </div>
 
-      <!-- 4. Normalidad -->
       <div class="card-kpi">
         <span class="kpi-title">Normalidad</span>
-        <span class="kpi-pct badge-kpi" id="kpiPctNormalidad">0.0%</span>
-        <div class="kpi-val" id="kpiValNormalidad">0.0%</div>
+        <span class="kpi-pct badge-kpi" id="kpiPctNormalidad">0.00%</span>
+        <div class="kpi-val" id="kpiValNormalidad">0.00%</div>
         <div class="kpi-meta" id="kpiMetaNormalidad">Meta: >=95%</div>
         <div class="prog-bar"><div class="prog-fill" id="kpiFillNormalidad" style="width:0%;"></div></div>
       </div>
@@ -270,7 +254,6 @@
       <button class="tab-btn" id="btnTabMix" onclick="cambiarVista('mxt')">Mix MCM vs MXT</button>
     </div>
 
-    <!-- TABLA -->
     <!-- TABLA -->
     <div class="table-responsive">
       <table>
@@ -302,8 +285,7 @@
   </div>
 
   <script>
-    // URL Web App de Google Apps Script
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQOU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuQZ3s9bdzK/exec";
 
     let DB = {
       ejecutivos: [],
@@ -318,26 +300,6 @@
       users: [],
       fecha: ""
     };
-
-    // Evaluación dinámica según la pestaña 'Colorimetria' de Drive
-    function evaluarColorEstado(actual, meta, tipoIndicador) {
-      const reglas = (DB.reglasColor && DB.reglasColor[tipoIndicador]) 
-        ? DB.reglasColor[tipoIndicador] 
-        : { verde: 1.00, amarillo: 0.85 };
-
-      // Normalidad evalúa el valor directo; los demás evalúan el ratio actual / meta
-      const valorAComparar = (tipoIndicador === "normalidad") 
-        ? Number(actual) 
-        : (meta > 0 ? (actual / meta) : 0);
-
-      if (valorAComparar >= reglas.verde) {
-        return { color: "#10b981", css: "badge-verde", txt: "VERDE" };
-      }
-      if (valorAComparar >= reglas.amarillo) {
-        return { color: "#f59e0b", css: "badge-amarillo", txt: "AMARILLO" };
-      }
-      return { color: "#ef4444", css: "badge-rojo", txt: "ROJO" };
-    }
     let usuarioActual = null;
     let vistaActual = "jerarquia";
 
@@ -367,7 +329,17 @@
       btn.textContent = "Validando...";
       err.style.display = "none";
 
-      // En caso de fallo de red, respaldar con los usuarios de contingencia
+      if (!DB.users || !DB.users.length) {
+        try {
+          const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
+          const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`);
+          const d = await res.json();
+          if (d && d.users) DB.users = d.users;
+        } catch(e) {
+          console.warn("Fallo al conectar usuarios en vivo:", e);
+        }
+      }
+
       if (!DB.users || !DB.users.length) {
         DB.users = [
           { user: "admin", pass: "4321", nombre: "Administrador General", rol: "DIRECTIVO", territorio: "ALL", region: "ALL", agencia: "ALL" },
@@ -376,7 +348,7 @@
         ];
       }
 
-      const found = (DB.users || []).find(acc => acc.user === u && acc.pass === p);
+      const found = DB.users.find(acc => acc.user === u && acc.pass === p);
       btn.disabled = false;
       btn.textContent = "Ingresar al Dashboard";
 
@@ -400,15 +372,13 @@
       sincronizarConDrive(false);
     }
 
-    // -------------------------------------------------------------
-    // EVENTOS CHANGE VINCULADOS (Territorio -> Región -> Agencia)
-    // -------------------------------------------------------------
     function vincularEventosFiltros() {
       const selTerr = document.getElementById("selTerritorio");
       const selReg = document.getElementById("selRegion");
       const selAg = document.getElementById("selAgencia");
+      const selProd = document.getElementById("selProducto");
       const txtB = document.getElementById("txtBuscar");
-      document.getElementById("selProducto").addEventListener("change", () => renderizar());
+
       selTerr.addEventListener("change", () => {
         actualizarOpcionesRegion();
         actualizarOpcionesAgencia();
@@ -421,6 +391,7 @@
       });
 
       selAg.addEventListener("change", () => renderizar());
+      if (selProd) selProd.addEventListener("change", () => renderizar());
       txtB.addEventListener("input", () => renderizar());
     }
 
@@ -476,6 +447,8 @@
       if (!document.getElementById("selTerritorio").disabled) document.getElementById("selTerritorio").value = "ALL";
       actualizarOpcionesRegion();
       actualizarOpcionesAgencia();
+      const p = document.getElementById("selProducto");
+      if (p) p.value = "ALL";
       document.getElementById("txtBuscar").value = "";
       renderizar();
     }
@@ -494,7 +467,7 @@
         selTerr.disabled = true;
         selReg.value = usuarioActual.region;
         selReg.disabled = true;
-        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
+        b.innerHTML = `🏛️️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
       } else if (usuarioActual.rol === "GTE_AGENCIA") {
         selTerr.value = usuarioActual.territorio;
         selTerr.disabled = true;
@@ -511,15 +484,33 @@
       actualizarOpcionesAgencia();
     }
 
+    function evaluarColorEstado(actual, meta, tipoIndicador) {
+      const reglas = (DB.reglasColor && DB.reglasColor[tipoIndicador])
+        ? DB.reglasColor[tipoIndicador]
+        : { verde: 1.00, amarillo: 0.85 };
+
+      const valorAComparar = (tipoIndicador === "normalidad")
+        ? Number(actual)
+        : (meta > 0 ? (actual / meta) : 0);
+
+      if (valorAComparar >= reglas.verde) {
+        return { color: "#10b981", css: "badge-verde", txt: "VERDE" };
+      }
+      if (valorAComparar >= reglas.amarillo) {
+        return { color: "#f59e0b", css: "badge-amarillo", txt: "AMARILLO" };
+      }
+      return { color: "#ef4444", css: "badge-rojo", txt: "ROJO" };
+    }
+
     function obtenerDatosFiltrados() {
       const terr = document.getElementById("selTerritorio").value;
       const reg = document.getElementById("selRegion").value;
       const ag = document.getElementById("selAgencia").value;
-      const prod = document.getElementById("selProducto").value;
+      const prodEl = document.getElementById("selProducto");
+      const prod = prodEl ? prodEl.value : "ALL";
       const search = document.getElementById("txtBuscar").value.toLowerCase().trim();
 
       return DB.ejecutivos.map(e => {
-        // Clonar para recalcular si se filtra por producto específico
         let cart = Number(e.cartera) || 0;
         let cli = Number(e.clientes) || 0;
 
@@ -547,14 +538,13 @@
       const data = obtenerDatosFiltrados();
       const regVal = document.getElementById("selRegion").value;
       const agVal = document.getElementById("selAgencia").value;
-      const prodVal = document.getElementById("selProducto").value;
+      const prodEl = document.getElementById("selProducto");
+      const prodVal = prodEl ? prodEl.value : "ALL";
 
-      // 1. Valores reales acumulados
       const cartReal = data.reduce((s, e) => s + e.carteraActiva, 0);
       const cliReal = data.reduce((s, e) => s + e.clientesActivos, 0);
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
 
-      // 2. Metas de Drive
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
@@ -575,12 +565,12 @@
           metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
           metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
           metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
-          normVal = cartReal > 0 
-            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / data.reduce((s, e) => s + Number(e.cartera), 0)) 
+          const sumCartOrig = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+          normVal = sumCartOrig > 0 
+            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartOrig) 
             : 0.95;
         }
       } else {
-        // En producto individual se ajusta al acumulado activo
         metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
         metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
@@ -589,13 +579,12 @@
 
       if (!metaProm && metaCli > 0) metaProm = Math.round(metaCart / metaCli);
 
-      // 3. Evaluar colorimetría con reglas de Drive
       const stCart = evaluarColorEstado(cartReal, metaCart, "cartera");
       const stCli  = evaluarColorEstado(cliReal, metaCli, "clientes");
       const stProm = evaluarColorEstado(promReal, metaProm, "promedio");
       const stNorm = evaluarColorEstado(normVal, 0.95, "normalidad");
 
-      // --- TARJETA 1: CARTERA COLOCADA ---
+      // Cartera
       const pctC = metaCart > 0 ? Math.round((cartReal / metaCart) * 100) : 0;
       document.getElementById("kpiValCartera").textContent = "$" + cartReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaCartera").textContent = "Meta: $" + metaCart.toLocaleString("es-MX");
@@ -606,7 +595,7 @@
       fCart.style.width = Math.min(100, pctC) + "%";
       fCart.style.background = stCart.color;
 
-      // --- TARJETA 2: CLIENTES VIGENTES ---
+      // Clientes
       const pctCl = metaCli > 0 ? Math.round((cliReal / metaCli) * 100) : 0;
       document.getElementById("kpiValClientes").textContent = cliReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaClientes").textContent = "Meta: " + metaCli.toLocaleString("es-MX");
@@ -617,7 +606,7 @@
       fCli.style.width = Math.min(100, pctCl) + "%";
       fCli.style.background = stCli.color;
 
-      // --- TARJETA 3: PROMEDIO CARTERA ---
+      // Promedio Cartera
       const pctP = metaProm > 0 ? Math.round((promReal / metaProm) * 100) : 0;
       document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaPromedio").textContent = metaProm > 0 ? "Meta: $" + metaProm.toLocaleString("es-MX") : "Meta: $0";
@@ -628,7 +617,7 @@
       fProm.style.width = Math.min(100, pctP) + "%";
       fProm.style.background = stProm.color;
 
-      // --- TARJETA 4: NORMALIDAD (CON 2 DECIMALES) ---
+      // Normalidad con 2 decimales
       const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
@@ -644,7 +633,7 @@
     }
 
     function renderizarTabla(data) {
-      const tbody = document.getElementById("tablaCuerpo") || document.getElementById("tableBody");
+      const tbody = document.getElementById("tablaCuerpo");
       if (!tbody) return;
       tbody.innerHTML = "";
 
@@ -653,7 +642,6 @@
         return;
       }
 
-      // VISTA MIX MCM VS MXT
       if (vistaActual === "mxt") {
         const resumenMix = {
           "MCM Tradicional": { cartera: 0, clientes: 0 },
@@ -685,7 +673,6 @@
         return;
       }
 
-      // VISTA RANKING EJECUTIVOS
       if (vistaActual === "ranking") {
         const ordenados = [...data].sort((a, b) => b.carteraActiva - a.carteraActiva);
         ordenados.forEach(e => {
@@ -705,7 +692,6 @@
         return;
       }
 
-      // VISTA ESTRUCTURA JERÁRQUICA
       const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
       regionesUnicas.forEach(reg => {
         const dataReg = data.filter(e => e.region === reg);
@@ -775,85 +761,6 @@
       renderizar();
     }
 
-      // Vista Jerárquica
-      const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
-      regionesUnicas.forEach(reg => {
-        const dataReg = data.filter(e => e.region === reg);
-        const rCart = dataReg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
-        const rCli = dataReg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
-        const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
-        const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / rCart : 0.95);
-        const stReg = evaluarColorEstado(rNorm, 0.95, "normalidad");
-
-        // Fila Región
-        const trReg = document.createElement("tr");
-        trReg.className = "row-region";
-        trReg.innerHTML = `
-          <td>🏛️ ${reg}</td>
-          <td class="tar">$${rCart.toLocaleString("es-MX")}</td>
-          <td class="tar">${rCli}</td>
-          <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
-          <td class="tar fw-bold" style="color:${stReg.color};">${(rNorm * 100).toFixed(1)}%</td>
-          <td style="text-align:center;"><span class="badge-kpi ${stReg.css}">${stReg.txt}</span></td>
-        `;
-        tbody.appendChild(trReg);
-
-        // Agencias dentro de la región
-        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))].filter(Boolean);
-        agenciasUnicas.forEach(ag => {
-          const dataAg = dataReg.filter(e => e.agencia === ag);
-          const aCart = dataAg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
-          const aCli = dataAg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
-          const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
-          const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / aCart : 0.95);
-          const stAg = evaluarColorEstado(aNorm, 0.95, "normalidad");
-
-          // Fila Agencia
-          const trAg = document.createElement("tr");
-          trAg.className = "row-agencia";
-          trAg.innerHTML = `
-            <td style="padding-left:24px;">📍 ${ag}</td>
-            <td class="tar">$${aCart.toLocaleString("es-MX")}</td>
-            <td class="tar">${aCli}</td>
-            <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:${stAg.color};">${(aNorm * 100).toFixed(1)}%</td>
-            <td style="text-align:center;"><span class="badge-kpi ${stAg.css}">${stAg.txt}</span></td>
-          `;
-          tbody.appendChild(trAg);
-
-          // Filas Ejecutivos
-          dataAg.forEach(e => {
-            const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
-            const trEj = document.createElement("tr");
-            trEj.innerHTML = `
-              <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span></td>
-              <td class="tar">$${Number(e.cartera).toLocaleString("es-MX")}</td>
-              <td class="tar">${e.clientes}</td>
-              <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
-              <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(1)}%</td>
-              <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
-            `;
-            tbody.appendChild(trEj);
-          });
-        });
-      });
-    }
-
-    function cambiarVista(vista) {
-      vistaActual = vista;
-      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
-      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
-      renderizar();
-    }
-
-    function ocultarModalProgreso() {
-      document.getElementById("progressModal").style.display = "none";
-    }
-
-    function forzarSincronizacion() {
-      sincronizarConDrive(true);
-    }
-
     function animarProgreso(desde, hasta, duracionMs, textoTitulo, textoSub, callback) {
       const modal = document.getElementById("progressModal");
       modal.style.display = "flex";
@@ -874,6 +781,10 @@
         }
       }
       requestAnimationFrame(paso);
+    }
+
+    function forzarSincronizacion() {
+      sincronizarConDrive(true);
     }
 
     async function sincronizarConDrive(esManual = false) {
