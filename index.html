@@ -20,8 +20,34 @@
       --danger-glow: rgba(239, 68, 68, 0.2);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      padding: 12px; 
+      min-height: 100vh; 
+      -webkit-text-size-adjust: 100%;
+    }
+
+    #appContainer {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
 
     #pantallaLogin {
       position: fixed; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px);
@@ -110,15 +136,48 @@
     .prog-bar { width: 100%; height: 4px; background: #334155; border-radius: 2px; margin-top: 8px; overflow: hidden; }
     .prog-fill { height: 100%; border-radius: 2px; }
 
-    .view-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto; /* Permite deslizar las pestañas con el dedo en móvil */
+      white-space: nowrap;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Oculta barra tosca en móvil */
+    }
+    .view-tabs::-webkit-scrollbar {
+      display: none;
+    }
     .tab-btn {
-      background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted);
-      padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
+      flex-shrink: 0; /* Evita que los botones se aplasten */
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
     }
     .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    .table-responsive { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    .table-responsive {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow-x: auto;
+      width: 100%;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      min-width: 580px; /* La tabla puede deslizarse dentro de su caja sin estirar la pantalla */
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
     th { background: #111a2e; padding: 10px 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
     td { padding: 10px 12px; border-top: 1px solid #1e293b; }
     .tar { text-align: right; }
@@ -262,7 +321,7 @@
   <div id="appContainer" style="display:none;">
     <div class="top-bar">
       <div class="brand">
-        <h1>GESTIÓN X <span class="badge-scope">McM</span></h1>
+        <h1>INDICADORES CLAVE <span class="badge-scope">McM</span></h1>
         <div class="corte-lbl" id="lblCorte">Corte: Conectando...</div>
       </div>
       <div class="user-actions">
