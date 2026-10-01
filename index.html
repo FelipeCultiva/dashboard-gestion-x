@@ -134,6 +134,18 @@
       background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
       padding: 24px; width: 320px; text-align: center;
     }
+
+    /* Notificación Emergente Temporal */
+    #toastNotification {
+      position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid #38bdf8;
+      color: #fff; padding: 12px 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      display: none; align-items: center; gap: 10px; z-index: 10001; font-size: 13px; font-weight: 600;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -284,8 +296,15 @@
     </div>
   </div>
 
+  <!-- NOTIFICACIÓN EMERGENTE TEMPORAL (TOAST) -->
+  <div id="toastNotification">
+    <span style="font-size:18px;">📅</span>
+    <span id="toastMsg">Base de datos sincronizada</span>
+  </div>
+
   <script>
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQOU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuQZ3s9bdzK/exec";
+    // PEGA AQUÍ TU URL COPIADA DE APPS SCRIPT
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
 
     let DB = {
       ejecutivos: [],
@@ -304,6 +323,12 @@
     let vistaActual = "jerarquia";
 
     document.addEventListener("DOMContentLoaded", () => {
+      // 3. RECUPERAR USUARIO GUARDADO
+      const savedUser = localStorage.getItem("mcm_saved_username") || "";
+      if (savedUser) {
+        document.getElementById("txtUser").value = savedUser;
+      }
+
       const sesion = sessionStorage.getItem("mcm_user_session") || localStorage.getItem("mcm_user_session");
       if (sesion) {
         try {
@@ -329,15 +354,16 @@
       btn.textContent = "Validando...";
       err.style.display = "none";
 
+      // 3. GUARDAR USUARIO EN LOCALSTORAGE
+      localStorage.setItem("mcm_saved_username", u);
+
       if (!DB.users || !DB.users.length) {
         try {
           const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
           const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`);
           const d = await res.json();
           if (d && d.users) DB.users = d.users;
-        } catch(e) {
-          console.warn("Fallo al conectar usuarios en vivo:", e);
-        }
+        } catch(e) {}
       }
 
       if (!DB.users || !DB.users.length) {
@@ -369,7 +395,9 @@
       cargarCopiaLocal();
       aplicarSeguridadRol();
       vincularEventosFiltros();
-      sincronizarConDrive(false);
+
+      // 2. SINCRONIZACIÓN INICIAL CON BARRA DE PROGRESO
+      sincronizarConDrive(true);
     }
 
     function vincularEventosFiltros() {
@@ -380,13 +408,13 @@
       const txtB = document.getElementById("txtBuscar");
 
       selTerr.addEventListener("change", () => {
-        actualizarOpcionesRegion();
-        actualizarOpcionesAgencia();
+        actualizarOpcionesRegion(false);
+        actualizarOpcionesAgencia(false);
         renderizar();
       });
 
       selReg.addEventListener("change", () => {
-        actualizarOpcionesAgencia();
+        actualizarOpcionesAgencia(false);
         renderizar();
       });
 
@@ -395,10 +423,10 @@
       txtB.addEventListener("input", () => renderizar());
     }
 
-    function actualizarOpcionesRegion() {
+    function actualizarOpcionesRegion(forzarReset = false) {
       const selTerrVal = document.getElementById("selTerritorio").value;
       const selReg = document.getElementById("selRegion");
-      const regActual = selReg.value;
+      const regActual = forzarReset ? "ALL" : selReg.value;
 
       if (usuarioActual && usuarioActual.rol === "GTE_REGIONAL") {
         selReg.innerHTML = `<option value="${usuarioActual.region}">${usuarioActual.region}</option>`;
@@ -416,14 +444,14 @@
       selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
         regiones.map(r => `<option value="${r}">${r}</option>`).join("");
 
-      selReg.value = regiones.includes(regActual) ? regActual : "ALL";
+      selReg.value = (regiones.includes(regActual) && !forzarReset) ? regActual : "ALL";
     }
 
-    function actualizarOpcionesAgencia() {
+    function actualizarOpcionesAgencia(forzarReset = false) {
       const selTerrVal = document.getElementById("selTerritorio").value;
       const selRegVal = document.getElementById("selRegion").value;
       const selAg = document.getElementById("selAgencia");
-      const agActual = selAg.value;
+      const agActual = forzarReset ? "ALL" : selAg.value;
 
       if (usuarioActual && usuarioActual.rol === "GTE_AGENCIA") {
         selAg.innerHTML = `<option value="${usuarioActual.agencia}">${usuarioActual.agencia}</option>`;
@@ -440,13 +468,17 @@
       selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
         agencias.map(a => `<option value="${a}">${a}</option>`).join("");
 
-      selAg.value = agencias.includes(agActual) ? agActual : "ALL";
+      selAg.value = (agencias.includes(agActual) && !forzarReset) ? agActual : "ALL";
     }
 
+    // 4. BOTÓN REESTABLECER FILTROS CORREGIDO
     function resetFiltros() {
-      if (!document.getElementById("selTerritorio").disabled) document.getElementById("selTerritorio").value = "ALL";
-      actualizarOpcionesRegion();
-      actualizarOpcionesAgencia();
+      const selTerr = document.getElementById("selTerritorio");
+      if (!selTerr.disabled) selTerr.value = "ALL";
+
+      actualizarOpcionesRegion(true);
+      actualizarOpcionesAgencia(true);
+
       const p = document.getElementById("selProducto");
       if (p) p.value = "ALL";
       document.getElementById("txtBuscar").value = "";
@@ -467,7 +499,7 @@
         selTerr.disabled = true;
         selReg.value = usuarioActual.region;
         selReg.disabled = true;
-        b.innerHTML = `🏛️️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
+        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong>`;
       } else if (usuarioActual.rol === "GTE_AGENCIA") {
         selTerr.value = usuarioActual.territorio;
         selTerr.disabled = true;
@@ -480,8 +512,8 @@
         b.innerHTML = `🔓 Acceso Directivo / Admin: <strong>${usuarioActual.nombre}</strong>`;
       }
 
-      actualizarOpcionesRegion();
-      actualizarOpcionesAgencia();
+      actualizarOpcionesRegion(false);
+      actualizarOpcionesAgencia(false);
     }
 
     function evaluarColorEstado(actual, meta, tipoIndicador) {
@@ -617,7 +649,7 @@
       fProm.style.width = Math.min(100, pctP) + "%";
       fProm.style.background = stProm.color;
 
-      // Normalidad con 2 decimales
+      // Normalidad a 2 decimales
       const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
@@ -680,7 +712,7 @@
           const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span> ${mxtBadge}</td>
+            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> ${mxtBadge} <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
             <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
             <td class="tar">${e.clientesActivos}</td>
             <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
@@ -692,6 +724,7 @@
         return;
       }
 
+      // Vista Jerárquica
       const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
       regionesUnicas.forEach(reg => {
         const dataReg = data.filter(e => e.region === reg);
@@ -734,6 +767,7 @@
           `;
           tbody.appendChild(trAg);
 
+          // 5. CONTADOR MXT AL LADO DE LOS MESES DE ANTIGÜEDAD
           dataAg.forEach(e => {
             const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
             const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
@@ -759,6 +793,16 @@
       const btnMix = document.getElementById("btnTabMix");
       if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
       renderizar();
+    }
+
+    function mostrarToast(mensaje) {
+      const toast = document.getElementById("toastNotification");
+      const msg = document.getElementById("toastMsg");
+      msg.textContent = mensaje;
+      toast.style.display = "flex";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 3500);
     }
 
     function animarProgreso(desde, hasta, duracionMs, textoTitulo, textoSub, callback) {
@@ -815,9 +859,11 @@
 
           const aplicarDatos = () => {
             document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
-            actualizarOpcionesRegion();
-            actualizarOpcionesAgencia();
+            actualizarOpcionesRegion(false);
+            actualizarOpcionesAgencia(false);
             renderizar();
+            // 2. VENTANA EMERGENTE CON LA FECHA DE ACTUALIZACIÓN
+            mostrarToast("Base de datos sincronizada: Corte al " + (DB.fecha || "En vivo"));
           };
 
           if (esManual) {
@@ -840,6 +886,7 @@
           animarProgreso(75, 100, 300, "Modo Offline", "Sin conexión. Se cargó la copia local.", () => {
             setTimeout(() => {
               document.getElementById("progressModal").style.display = "none";
+              mostrarToast("Modo Offline: Corte local " + (DB.fecha || ""));
             }, 800);
           });
         }
