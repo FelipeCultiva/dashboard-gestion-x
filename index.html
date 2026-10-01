@@ -943,37 +943,55 @@
       renderTable(filtered);
     }
 
-    // Carga de Excel manual con modal de progreso
+    // Carga de Excel manual con búsqueda flexible de pestañas y columnas
     function handleExcelUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      mostrarModalProgreso(0, 50, 400, "Procesando Archivo", "Extrayendo indicadores...", () => {
+      mostrarModalProgreso(0, 50, 300, "Procesando Archivo", "Extrayendo indicadores...", () => {
         const reader = new FileReader();
         reader.onload = function(e) {
           try {
             const data = new Uint8Array(e.target.result);
             const wb = XLSX.read(data, { type: "array", cellDates: true });
 
-            const wsInd = wb.Sheets["Indicadores"];
+            // 1. Buscar pestaña de Indicadores sin importar mayúsculas/minúsculas o espacios
+            const indSheetName = wb.SheetNames.find(s => s.trim().toLowerCase().includes("indicador")) || wb.SheetNames[0];
+            const wsInd = wb.Sheets[indSheetName];
+            if (!wsInd) throw new Error("No se encontró la pestaña de Indicadores en el archivo.");
+
             const indRows = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
-            let hIdx = 2;
-            for (let r = 0; r < Math.min(indRows.length, 10); r++) {
-              if (indRows[r] && indRows[r].includes("Desembolso")) { hIdx = r; break; }
+
+            // 2. Detectar dinámicamente la fila de encabezados
+            let hIdx = -1;
+            for (let r = 0; r < Math.min(indRows.length, 15); r++) {
+              if (indRows[r] && indRows[r].some(cell => String(cell || '').trim().toLowerCase().includes("desembolso"))) {
+                hIdx = r;
+                break;
+              }
             }
-            const h = indRows[hIdx];
-            const colReg = h.indexOf("Región");
-            const colAg = h.indexOf("Agencia");
-            const colEj = h.indexOf("Nombre Ejecutivo");
-            const colCli = h.indexOf("Nombre Cliente");
-            const colDes = h.indexOf("Desembolso");
+
+            if (hIdx === -1) {
+              throw new Error("No se localizó la columna 'Desembolso' en los encabezados.");
+            }
+
+            const h = indRows[hIdx].map(cell => String(cell || '').trim().toLowerCase());
+            const colReg = h.findIndex(c => c.includes("regi"));
+            const colAg  = h.findIndex(c => c.includes("agencia"));
+            const colEj  = h.findIndex(c => c.includes("ejecutivo"));
+            const colCli = h.findIndex(c => c.includes("cliente"));
+            const colDes = h.findIndex(c => c.includes("desembolso"));
 
             const newRecords = [];
             for (let r = hIdx + 1; r < indRows.length; r++) {
               const row = indRows[r];
-              if (!row || (!row[colDes] && row[colDes] !== 0)) continue;
+              if (!row || row[colDes] === undefined || row[colDes] === null || row[colDes] === "") continue;
+              const monto = parseFloat(row[colDes]);
+              if (isNaN(monto)) continue;
+
               const cliente = String(row[colCli] || "").trim();
               const esMxt = cliente.endsWith("-MXT");
+
               newRecords.push({
                 empresa: "McM",
                 territorio: "Territorio 1",
@@ -981,41 +999,60 @@
                 agencia: String(row[colAg] || "").trim(),
                 ejecutivo: String(row[colEj] || "").trim(),
                 cliente: cliente,
-                desembolso: parseFloat(row[colDes]) || 0,
+                desembolso: monto,
                 es_mxt: esMxt,
                 producto: esMxt ? "MXT (Más Por Ti)" : "MCM Tradicional"
               });
             }
 
-            const wsEj = wb.Sheets["Ejecutivo"];
-            const rEj = XLSX.utils.sheet_to_json(wsEj, { header: 1 });
+            // 3. Extraer Normalidad y Fecha de Ingreso de pestaña Ejecutivo
+            const ejecSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "ejecutivo");
             const newNormEj = {};
             const newIngresoEj = {};
-            for (let r = 4; r < rEj.length; r++) {
-              if (rEj[r] && rEj[r][2]) {
-                const nom = String(rEj[r][2]).trim();
-                newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
-                if (rEj[r][3]) newIngresoEj[nom] = rEj[r][3];
+            if (ejecSheetName && wb.Sheets[ejecSheetName]) {
+              const rEj = XLSX.utils.sheet_to_json(wb.Sheets[ejecSheetName], { header: 1 });
+              for (let r = 4; r < rEj.length; r++) {
+                if (rEj[r] && rEj[r][2]) {
+                  const nom = String(rEj[r][2]).trim();
+                  newNormEj[nom] = parseFloat(rEj[r][9]) || 0;
+                  if (rEj[r][3]) {
+                    newIngresoEj[nom] = rEj[r][3] instanceof Date 
+                      ? rEj[r][3].toISOString().substring(0, 10) 
+                      : String(rEj[r][3]).substring(0, 10);
+                  }
+                }
               }
             }
 
-            const wsG = wb.Sheets["Gerente"];
-            const rG = XLSX.utils.sheet_to_json(wsG, { header: 1 });
+            // 4. Extraer Normalidad de Gerente
+            const gerSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "gerente");
             const newNormG = {};
-            for (let r = 4; r < rG.length; r++) {
-              if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
+            if (gerSheetName && wb.Sheets[gerSheetName]) {
+              const rG = XLSX.utils.sheet_to_json(wb.Sheets[gerSheetName], { header: 1 });
+              for (let r = 4; r < rG.length; r++) {
+                if (rG[r] && rG[r][1]) newNormG[String(rG[r][1]).trim()] = parseFloat(rG[r][9]) || 0;
+              }
             }
 
-            const wsR = wb.Sheets["Regional"];
-            const rR = XLSX.utils.sheet_to_json(wsR, { header: 1 });
-            let newNormR = (rR[4] && rR[4][8] !== undefined) ? parseFloat(rR[4][8]) : 0.95;
+            // 5. Extraer Normalidad Regional
+            const regSheetName = wb.SheetNames.find(s => s.trim().toLowerCase() === "regional");
+            let newNormR = 0.95;
+            if (regSheetName && wb.Sheets[regSheetName]) {
+              const rR = XLSX.utils.sheet_to_json(wb.Sheets[regSheetName], { header: 1 });
+              if (rR[4] && rR[4][8] !== undefined) newNormR = parseFloat(rR[4][8]) || 0.95;
+            }
 
-            let fCorte = "Nueva Fecha";
+            // 6. Fecha y Semana de Corte
+            let fCorte = file.name.replace(/\.[^/.]+$/, "");
             if (wb.SheetNames.includes("1")) {
               const r1 = XLSX.utils.sheet_to_json(wb.Sheets["1"], { header: 1 });
-              if (r1[2] && r1[2][1]) fCorte = String(r1[2][1]).substring(0, 10);
+              if (r1[2] && r1[2][1]) {
+                const d = new Date(r1[2][1]);
+                if (!isNaN(d.getTime())) fCorte = d.toISOString().substring(0, 10);
+              }
             }
 
+            // Actualizar tienda en memoria y almacenamiento local
             STORE.records = newRecords;
             STORE.normEjec = newNormEj;
             STORE.normGer = newNormG;
@@ -1032,6 +1069,9 @@
             });
 
           } catch (err) {
+            // Cerrar la modal en caso de error y mostrar alerta
+            const modal = document.getElementById("progressModal");
+            if (modal) modal.style.display = "none";
             alert("Error al procesar el archivo: " + err.message);
           }
         };
