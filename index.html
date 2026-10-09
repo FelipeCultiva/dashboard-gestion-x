@@ -1141,12 +1141,19 @@
     function renderizarTablaGeneral() {
       const tbody = document.getElementById("tablaCuerpo");
       tbody.innerHTML = "";
-      const baseData = obtenerDatosBaseUsuario();
+      
+      // FILTRO POR SEGMENTO ACTIVO (Territorio, Región o Agencia seleccionada en Estructura)
+      const dataActiva = obtenerDatosSegmentoActivo();
 
-      // VISTA TOP 10 Y BOTTOM 10 (INCLUSIÓN UNIVERSAL: PARTICIPAN TODOS)
+      if (!dataActiva || dataActiva.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No hay colaboradores registrados en el segmento seleccionado.</td></tr>`;
+        return;
+      }
+
+      // VISTA TOP 10 Y BOTTOM 10 (DEL SEGMENTO ACTIVO)
       if (vistaActual === "top10" || vistaActual === "bottom10") {
         const esTop = (vistaActual === "top10");
-        const evaluados = [...baseData];
+        const evaluados = [...dataActiva];
 
         const maxCart = Math.max(...evaluados.map(e => Number(e.cartera) || 0), 1);
         const maxCli = Math.max(...evaluados.map(e => Number(e.clientes) || 0), 1);
@@ -1194,9 +1201,9 @@
         return;
       }
 
-      // VISTA RANKING COMPLETO (INCLUSIÓN UNIVERSAL)
+      // VISTA RANKING COMPLETO (DEL SEGMENTO ACTIVO)
       if (vistaActual === "ranking") {
-        const ordenados = [...baseData].sort((a, b) => b.cartera - a.cartera);
+        const ordenados = [...dataActiva].sort((a, b) => b.cartera - a.cartera);
         ordenados.forEach((e, idx) => {
           const st = evaluarColor(e.normalidad, 0.95, "normalidad");
           const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
@@ -1220,13 +1227,12 @@
         return;
       }
 
-      // VISTA MIX MCM VS MXT
+      // VISTA MIX MCM VS MXT (DEL SEGMENTO ACTIVO)
       if (vistaActual === "mxt") {
-        const segData = obtenerDatosSegmentoActivo();
-        const cTrad = segData.reduce((s, e) => s + (Number(e.carteraTrad) || 0), 0);
-        const clTrad = segData.reduce((s, e) => s + (Number(e.clientesTrad) || 0), 0);
-        const cMxt = segData.reduce((s, e) => s + (Number(e.carteraMxt) || 0), 0);
-        const clMxt = segData.reduce((s, e) => s + (Number(e.clientesMxt) || 0), 0);
+        const cTrad = dataActiva.reduce((s, e) => s + (Number(e.carteraTrad) || 0), 0);
+        const clTrad = dataActiva.reduce((s, e) => s + (Number(e.clientesTrad) || 0), 0);
+        const cMxt = dataActiva.reduce((s, e) => s + (Number(e.carteraMxt) || 0), 0);
+        const clMxt = dataActiva.reduce((s, e) => s + (Number(e.clientesMxt) || 0), 0);
 
         const filas = [
           { nom: "🔷 MCM Tradicional", cart: cTrad, cli: clTrad },
@@ -1251,6 +1257,7 @@
       }
 
       // VISTA ESTRUCTURA DINÁMICA (ÁRBOL EXPANDIBLE + / -)
+      const baseData = obtenerDatosBaseUsuario();
       const territorios = [...new Set(baseData.map(e => e.territorio))].filter(Boolean).sort();
 
       territorios.forEach(terr => {
@@ -1265,7 +1272,6 @@
         const estaAbiertoTerr = !!arbolEstado[claveTerr];
         const esSeleccionado = (segmentoSeleccionado && segmentoSeleccionado.tipo === "TERRITORIO" && segmentoSeleccionado.id === terr);
 
-        // Fila Territorio
         const trTerr = document.createElement("tr");
         trTerr.className = "row-terr";
         trTerr.innerHTML = `
@@ -1297,7 +1303,6 @@
             const estaAbiertoReg = !!arbolEstado[claveReg];
             const esSeleccionadoReg = (segmentoSeleccionado && segmentoSeleccionado.tipo === "REGION" && segmentoSeleccionado.id === reg);
 
-            // Fila Región
             const trReg = document.createElement("tr");
             trReg.className = "row-reg";
             trReg.innerHTML = `
@@ -1329,7 +1334,6 @@
                 const estaAbiertoAg = !!arbolEstado[claveAg];
                 const esSeleccionadoAg = (segmentoSeleccionado && segmentoSeleccionado.tipo === "AGENCIA" && segmentoSeleccionado.id === ag);
 
-                // Fila Agencia
                 const trAg = document.createElement("tr");
                 trAg.className = "row-ag";
                 trAg.innerHTML = `
@@ -1407,18 +1411,27 @@
         let filasEjecs = "";
         if (abierto) {
           if (enRango.length === 0) {
-            filasEjecs = `<tr><td colspan="5" style="text-align:center; padding:12px; color:var(--text-muted);">Sin ejecutivos en este rango.</td></tr>`;
+            filasEjecs = `<tr><td colspan="4" style="text-align:center; padding:12px; color:var(--text-muted);">Sin ejecutivos en este rango.</td></tr>`;
           } else {
             const ordenados = [...enRango].sort((a, b) => b.cartera - a.cartera);
-            filasEjecs = ordenados.map((e, i) => `
-              <tr>
-                <td><span style="color:var(--text-muted); font-weight:700;">#${i + 1}</span> <strong>${e.ejecutivo}</strong></td>
-                <td><span style="color:#38bdf8; font-weight:700;">${e.meses} meses</span></td>
-                <td>📍 ${e.agencia}</td>
-                <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
-                <td class="tar">${e.clientes}</td>
-              </tr>
-            `).join("");
+            filasEjecs = ordenados.map((e, i) => {
+              const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
+              const st = evaluarColor(e.normalidad, 0.95, "normalidad");
+              return `
+                <tr>
+                  <td>
+                    <span style="color:var(--text-muted); font-weight:700; margin-right:6px;">#${i + 1}</span>
+                    <strong>${e.ejecutivo}</strong> 
+                    <span style="color:#38bdf8; font-size:11px; font-weight:700; margin-left:4px;">(${e.meses} m)</span> 
+                    ${mxtBadge} 
+                    <span style="color:var(--text-muted); font-size:11px; margin-left:4px;">[${e.agencia}]</span>
+                  </td>
+                  <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
+                  <td class="tar">${e.clientes}</td>
+                  <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(2)}%</td>
+                </tr>
+              `;
+            }).join("");
           }
         }
 
@@ -1439,10 +1452,9 @@
                 <thead>
                   <tr>
                     <th>Ejecutivo</th>
-                    <th>Antigüedad</th>
-                    <th>Agencia</th>
                     <th class="tar">CARTERA</th>
                     <th class="tar">Clientes</th>
+                    <th class="tar">Normalidad</th>
                   </tr>
                 </thead>
                 <tbody>${filasEjecs}</tbody>
