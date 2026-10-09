@@ -48,22 +48,42 @@
     }
 
     /* BARRA FIJA SUPERIOR STICKY */
+    /* CABECERA PERMANENTE Y FIJA EN PC Y MÓVIL */
     .sticky-header {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 1000;
-      background: rgba(11, 17, 32, 0.95);
-      backdrop-filter: blur(10px);
+      left: 0;
+      right: 0;
+      z-index: 10000;
+      background: #0b1120;
       border-bottom: 1px solid var(--card-border);
-      padding: 8px 10px;
-      margin: -10px -10px 10px -10px;
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
 
+    #appContainer {
+      width: 100%;
+      max-width: 100%;
+      padding-top: 60px; /* Evita que la barra tape el contenido al hacer scroll */
+    }
+
+    .date-banner-fixed {
+      background: rgba(2, 132, 199, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 480px;
+    }
     .brand-group {
       display: flex;
       align-items: center;
@@ -716,7 +736,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQOU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuQZ3s9bdzK/exec";
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
 
     let DB = {
       ejecutivos: [],
@@ -730,8 +750,9 @@
       },
       rangosProductividad: [
         { desde: 0, hasta: 300000, etiqueta: "$0 a $300,000" },
-        { desde: 300001, hasta: 600000, etiqueta: "$300,001 a $600,000" },
-        { desde: 600001, hasta: 99999999, etiqueta: "$600,001 en adelante" }
+        { desde: 300001, hasta: 500000, etiqueta: "$300,001 a $500,000" },
+        { desde: 500001, hasta: 725000, etiqueta: "$500,001 a $725,000" },
+        { desde: 725001, hasta: 9999999, etiqueta: "$725,001 en adelante" }
       ],
       users: [],
       fecha: ""
