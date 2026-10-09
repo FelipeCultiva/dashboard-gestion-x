@@ -12,12 +12,10 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --primary: #2563eb;
+      --primary-hover: #1d4ed8;
       --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.2);
       --warning: #f59e0b;
-      --warning-glow: rgba(245, 158, 11, 0.2);
       --danger: #ef4444;
-      --danger-glow: rgba(239, 68, 68, 0.2);
     }
 
     * { 
@@ -38,7 +36,7 @@
     body { 
       background: var(--bg); 
       color: var(--text); 
-      padding: 12px; 
+      padding: 10px; 
       min-height: 100vh; 
       -webkit-text-size-adjust: 100%;
     }
@@ -49,74 +47,218 @@
       overflow-x: hidden;
     }
 
-    #pantallaLogin {
-      position: fixed; inset: 0; background: rgba(11, 17, 32, 0.96); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center; z-index: 9999;
-    }
-    .login-box {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
-      padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center;
-    }
-    .login-icon {
-      width: 50px; height: 50px; background: var(--primary); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; margin: 0 auto 16px;
-    }
-    .input-login {
-      width: 100%; background: #0b1120; border: 1px solid var(--card-border); border-radius: 8px;
-      padding: 12px; color: #fff; margin-bottom: 12px; font-size: 14px;
-    }
-    .btn-login {
-      width: 100%; background: var(--primary); color: #fff; border: none; border-radius: 8px;
-      padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+    /* BARRA FIJA SUPERIOR STICKY */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(11, 17, 32, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 8px 10px;
+      margin: -10px -10px 10px -10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
-    .brand h1 { font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-    .badge-scope { font-size: 11px; background: rgba(37,99,235,0.25); color: #93c5fd; padding: 2px 8px; border-radius: 99px; }
-    .corte-lbl { font-size: 12px; color: var(--text-muted); }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
-    .user-actions { display: flex; align-items: center; gap: 10px; }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-scope {
+      font-size: 10px;
+      background: rgba(37, 99, 235, 0.25);
+      color: #93c5fd;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+
+    .date-banner-fixed {
+      background: rgba(2, 132, 199, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .btn-sync {
-      background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px;
-      font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
-    }
-    .btn-logout { background: #334155; color: #f8fafc; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-
-    .security-banner {
-      background: rgba(30, 41, 59, 0.7); border: 1px solid var(--card-border);
-      padding: 8px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; color: var(--text-muted);
-    }
-
-    .filters-box {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
-      padding: 16px; margin-bottom: 20px;
-    }
-    .filters-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
-    .btn-reset { color: #38bdf8; background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 700; }
-    .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-    .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight: 700; }
-    .form-select, .form-input {
-      width: 100%; background: #0b1120; border: 1px solid var(--card-border); border-radius: 8px;
-      padding: 8px 10px; color: #fff; font-size: 13px;
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .card-kpi { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; position: relative; }
-    .kpi-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+    .btn-logout {
+      background: #334155;
+      color: #f8fafc;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    /* SEGMENTO ACTIVO Y ROL */
+    .context-segment-bar {
+      background: linear-gradient(90deg, #1e293b, #0f172a);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .segment-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-reset-segment {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* GRILLA DE 6 TARJETAS */
+    .kpis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 900px) {
+      .kpis-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .card-kpi {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kpi-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-right: 45px;
+      line-height: 1.2;
+    }
+
     .kpi-pct {
-      position: absolute; right: 14px; top: 14px; font-size: 11px; font-weight: 800;
-      padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 5px;
     }
+
+    .kpi-val {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 6px 0 2px;
+      color: #ffffff;
+    }
+
+    .kpi-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .kpi-gap {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .gap-falta {
+      background: rgba(239, 68, 68, 0.22);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+
+    .gap-supero {
+      background: rgba(16, 185, 129, 0.22);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+
     .badge-verde {
       background: rgba(16, 185, 129, 0.2) !important;
       color: #10b981 !important;
       border: 1px solid rgba(16, 185, 129, 0.5);
     }
+
     .badge-amarillo {
       background: rgba(245, 158, 11, 0.2) !important;
       color: #f59e0b !important;
       border: 1px solid rgba(245, 158, 11, 0.5);
     }
+
     .badge-rojo {
       background: rgba(239, 68, 68, 0.2) !important;
       color: #ef4444 !important;
@@ -127,41 +269,62 @@
       background: rgba(168, 85, 247, 0.25) !important;
       color: #d8b4fe !important;
       border: 1px solid rgba(168, 85, 247, 0.5);
-      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
-      margin-left: 6px; display: inline-block;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: 4px;
     }
 
-    .kpi-val { font-size: 1.6rem; font-weight: 800; margin: 6px 0 4px; }
-    .kpi-meta { font-size: 11px; color: var(--text-muted); }
-    .prog-bar { width: 100%; height: 4px; background: #334155; border-radius: 2px; margin-top: 8px; overflow: hidden; }
-    .prog-fill { height: 100%; border-radius: 2px; }
+    .prog-bar {
+      width: 100%;
+      height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
 
+    .prog-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    /* PESTAÑAS HORIZONTALES */
     .view-tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      overflow-x: auto; /* Permite deslizar las pestañas con el dedo en móvil */
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
       white-space: nowrap;
       padding-bottom: 4px;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; /* Oculta barra tosca en móvil */
+      scrollbar-width: none;
     }
+
     .view-tabs::-webkit-scrollbar {
       display: none;
     }
+
     .tab-btn {
-      flex-shrink: 0; /* Evita que los botones se aplasten */
+      flex-shrink: 0;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 8px 14px;
+      padding: 7px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
     }
-    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    /* TABLA DINÁMICA ÁRBOL */
     .table-responsive {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -171,147 +334,248 @@
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
     }
+
     table {
       width: 100%;
-      min-width: 580px; /* La tabla puede deslizarse dentro de su caja sin estirar la pantalla */
+      min-width: 580px;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12.5px;
       text-align: left;
     }
-    th { background: #111a2e; padding: 10px 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
-    td { padding: 10px 12px; border-top: 1px solid #1e293b; }
-    .tar { text-align: right; }
-    .row-region { background: rgba(30, 41, 59, 0.4); font-weight: 700; }
-    .row-agencia { background: rgba(15, 23, 42, 0.3); font-weight: 600; }
-    .badge-kpi { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
 
-    #progressModal {
-      position: fixed; inset: 0; background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(4px);
-      display: none; align-items: center; justify-content: center; z-index: 10000;
-    }
-    .modal-content {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
-      padding: 24px; width: 320px; text-align: center;
-    }
-
-    /* Notificación Emergente Temporal */
-    #toastNotification {
-      position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid #38bdf8;
-      color: #fff; padding: 12px 20px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-      display: none; align-items: center; gap: 10px; z-index: 10001; font-size: 13px; font-weight: 600;
-      animation: slideIn 0.3s ease-out;
-    }
-    @keyframes slideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* Estilos del Logo y Copyright en Login */
-    .login-logo-img {
-      max-width: 140px;
-      height: auto;
-      margin: 0 auto 12px;
-      display: block;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    .login-footer-copy {
-      margin-top: 24px;
-      font-size: 11px;
+    th {
+      background: #111a2e;
+      padding: 9px 10px;
       color: var(--text-muted);
-      line-height: 1.4;
-      border-top: 1px solid var(--card-border);
-      padding-top: 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
     }
 
-    /* Animación fluida de la barra de progreso */
-    .prog-fill-animated {
-      background: linear-gradient(90deg, #0284c7, #38bdf8, #0284c7);
-      background-size: 200% 100%;
-      animation: gradientMove 1.5s linear infinite;
+    td {
+      padding: 8px 10px;
+      border-top: 1px solid #1e293b;
     }
-    @keyframes gradientMove {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
+
+    .tar {
+      text-align: right;
     }
-    
-    /* Pastillas de Brecha en Metas */
-    .kpi-gap {
-      display: inline-block;
-      font-size: 10px;
+
+    /* BOTÓN TOGGLE ÁRBOL */
+    .tree-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
       font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 5px;
-      margin-left: 6px;
-      vertical-align: middle;
-      letter-spacing: 0.3px;
-    }
-    .gap-falta {
-      background: rgba(239, 68, 68, 0.22);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.5);
-    }
-    .gap-supero {
-      background: rgba(16, 185, 129, 0.22);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.5);
+      margin-right: 6px;
+      user-select: none;
     }
 
-    /* Módulo Top 10 / Bottom 10 */
-    .ranking-split-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 10px;
+    .tree-toggle-btn:hover {
+      background: rgba(56, 189, 248, 0.35);
     }
-    .ranking-card {
+
+    .tree-name-link {
+      cursor: pointer;
+      color: #f8fafc;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .tree-name-link:hover {
+      color: #38bdf8;
+      text-decoration: underline;
+    }
+
+    .tree-name-selected {
+      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .row-terr {
+      background: rgba(30, 41, 59, 0.65);
+      font-weight: 800;
+    }
+
+    .row-reg {
+      background: rgba(15, 23, 42, 0.5);
+      font-weight: 700;
+    }
+
+    .row-ag {
+      background: rgba(15, 23, 42, 0.25);
+      font-weight: 600;
+    }
+
+    .row-ejec {
+      background: transparent;
+    }
+
+    /* VISTA PRODUCTIVIDAD (ESTRATIFICACIÓN) */
+    .rango-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 16px;
-    }
-    .ranking-card-header {
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .rango-header {
+      padding: 12px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      cursor: pointer;
+      background: #111a2e;
     }
-    .badge-rank-score {
-      font-size: 11px;
+
+    .rango-title {
+      font-size: 13px;
       font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rango-meta-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    /* LOGIN MODAL */
+    #pantallaLogin {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, 0.96);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px 22px;
+      width: 100%;
+      max-width: 370px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .login-logo-img {
+      max-width: 110px;
+      height: auto;
+      margin: 0 auto 10px;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .input-login {
+      width: 100%;
+      background: #0b1120;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 11px;
+      color: #fff;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .btn-login {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .login-footer-copy {
+      margin-top: 18px;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      border-top: 1px solid var(--card-border);
+      padding-top: 12px;
+    }
+
+    /* MODAL PROGRESO */
+    #progressModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px;
+      width: 300px;
+      text-align: center;
+    }
+
+    #toastNotification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 10001;
+      font-size: 11.5px;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
   <!-- LOGIN -->
-  <!-- LOGIN -->
-  <!-- LOGIN -->
-  <!-- LOGIN -->
   <div id="pantallaLogin">
     <div class="login-box">
-      <!-- LOGO MÁS CON MENOS 2026 (BASE64 COMPACTO 3.6KB) -->
-      <img src="data:image/jpeg;base64,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" alt="Más con Menos" class="login-logo-img">
-      
-      <h2 style="margin-bottom:4px; font-size:1.4rem; font-weight:800;">INDICADORES CLAVE</h2>
-      <p style="color:var(--text-muted); font-size:12px; margin-bottom:20px;">Más con Menos (McM)</p>
-      
+      <img src="data:image/jpeg;base64,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" alt="Más con Menos" class="login-logo-img">
+      <h2 style="font-size:1.35rem; font-weight:800; margin-bottom:3px;">GESTIÓN X</h2>
+      <p style="color:var(--text-muted); font-size:11.5px; margin-bottom:18px;">Microfinanciera Más con Menos (McM)</p>
+
       <div id="loginErrorMsg" style="display:none; color:var(--danger); font-size:12px; margin-bottom:12px;">Usuario o contraseña incorrectos.</div>
 
       <form id="formLogin">
-        <input type="text" id="txtUser" class="input-login" placeholder="Usuario" required autocomplete="username" autocapitalize="none" autocorrect="off">
-        <input type="password" id="txtPass" class="input-login" placeholder="Contraseña" required autocomplete="current-password" autocapitalize="none" autocorrect="off">
+        <input type="text" id="txtUser" class="input-login" placeholder="Usuario" required autocomplete="username">
+        <input type="password" id="txtPass" class="input-login" placeholder="Contraseña" required autocomplete="current-password">
         <button type="submit" class="btn-login" id="btnLogin">Ingresar al Dashboard</button>
       </form>
 
       <div class="login-footer-copy">
-        © 2026 Más con Menos.<br>
+        © 2026 Financiera Más con Menos S.A. de C.V. SOFOM E.N.R.<br>
         Todos los derechos reservados. Uso exclusivo interno.
       </div>
     </div>
@@ -319,63 +583,35 @@
 
   <!-- APLICACIÓN PRINCIPAL -->
   <div id="appContainer" style="display:none;">
-    <div class="top-bar">
-      <div class="brand">
-        <h1>INDICADORES CLAVE <span class="badge-scope">McM</span></h1>
-        <div class="corte-lbl" id="lblCorte">Corte: Conectando...</div>
+    
+    <!-- BARRA PERMANENTE STICKY -->
+    <header class="sticky-header">
+      <div class="brand-group">
+        <div class="brand-title">GESTIÓN X <span class="badge-scope">McM</span></div>
+        <div class="date-banner-fixed" id="lblCorteSticky">
+          <span>📅</span> <span id="lblFechaCorteTexto">Corte: Conectando...</span>
+        </div>
       </div>
       <div class="user-actions">
-        <button class="btn-sync" onclick="forzarSincronizacion()"><span>🔄 Sincronizar Drive</span></button>
+        <button class="btn-sync" onclick="forzarSincronizacion()"><span>🔄 Sincronizar</span></button>
         <button class="btn-logout" onclick="cerrarSesion()">Salir ↩</button>
       </div>
-    </div>
+    </header>
 
-    <div class="security-banner" id="bannerSeguridad">Cargando credenciales...</div>
-
-    <!-- FILTROS DINÁMICOS -->
-    <div class="filters-box">
-      <div class="filters-header">
-        <span>FILTROS DINÁMICOS</span>
-        <button class="btn-reset" onclick="resetFiltros()">REESTABLECER</button>
+    <!-- BANNER DE CONTEXTO Y SELECCIÓN ACTIVA -->
+    <div class="context-segment-bar">
+      <div class="segment-title" id="lblSegmentoActivo">
+        <span>📍 Segmento Activo:</span> <strong>Consolidado General</strong>
       </div>
-      <div class="filters-grid">
-        <div class="form-group">
-          <label>Territorio</label>
-          <select id="selTerritorio" class="form-select">
-            <option value="ALL">Todos los Territorios</option>
-            <option value="Territorio 1">Territorio 1</option>
-            <option value="Territorio 2">Territorio 2</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Región</label>
-          <select id="selRegion" class="form-select">
-            <option value="ALL">Todas las Regiones</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Agencia</label>
-          <select id="selAgencia" class="form-select">
-            <option value="ALL">Todas las Agencias</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Producto</label>
-          <select id="selProducto" class="form-select">
-            <option value="ALL">Consolidado (Todos)</option>
-            <option value="TRAD">MCM Tradicional</option>
-            <option value="MXT">MXT (Más Por Ti)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Buscar Ejecutivo</label>
-          <input type="text" id="txtBuscar" class="form-input" placeholder="Nombre...">
-        </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="lblRolContexto" style="font-size:11px; color:#38bdf8; font-weight:600;"></span>
+        <button class="btn-reset-segment" id="btnRestablecerSegmento" onclick="restablecerSegmentoRaiz()" style="display:none;">Ver Total</button>
       </div>
     </div>
 
-    <!-- TARJETAS KPIS -->
+    <!-- 6 TARJETAS DE INDICADORES -->
     <div class="kpis-grid">
+      <!-- 1. Cartera Colocada -->
       <div class="card-kpi">
         <span class="kpi-title">Cartera Colocada</span>
         <span class="kpi-pct badge-kpi" id="kpiPctCartera">0%</span>
@@ -384,6 +620,7 @@
         <div class="prog-bar"><div class="prog-fill" id="kpiFillCartera" style="width:0%;"></div></div>
       </div>
 
+      <!-- 2. Clientes Vigentes -->
       <div class="card-kpi">
         <span class="kpi-title">Clientes Vigentes</span>
         <span class="kpi-pct badge-kpi" id="kpiPctClientes">0%</span>
@@ -392,14 +629,16 @@
         <div class="prog-bar"><div class="prog-fill" id="kpiFillClientes" style="width:0%;"></div></div>
       </div>
 
+      <!-- 3. Cartera Promedio por cliente -->
       <div class="card-kpi">
-        <span class="kpi-title">Promedio Cartera</span>
+        <span class="kpi-title">Cartera Promedio por cliente</span>
         <span class="kpi-pct badge-kpi" id="kpiPctPromedio">0%</span>
         <div class="kpi-val" id="kpiValPromedio">$0</div>
         <div class="kpi-meta" id="kpiMetaPromedio">Meta: $0</div>
         <div class="prog-bar"><div class="prog-fill" id="kpiFillPromedio" style="width:0%;"></div></div>
       </div>
 
+      <!-- 4. Normalidad -->
       <div class="card-kpi">
         <span class="kpi-title">Normalidad</span>
         <span class="kpi-pct badge-kpi" id="kpiPctNormalidad">0.00%</span>
@@ -407,105 +646,77 @@
         <div class="kpi-meta" id="kpiMetaNormalidad">Meta: >=95%</div>
         <div class="prog-bar"><div class="prog-fill" id="kpiFillNormalidad" style="width:0%;"></div></div>
       </div>
+
+      <!-- 5. Cartera Promedio por Ejecutivo (Meta fija: $725,000) -->
+      <div class="card-kpi">
+        <span class="kpi-title">Cartera Promedio p/Ejecutivo</span>
+        <span class="kpi-pct badge-kpi" id="kpiPctPromEjec">0%</span>
+        <div class="kpi-val" id="kpiValPromEjec">$0</div>
+        <div class="kpi-meta" id="kpiMetaPromEjec">Meta: $725,000</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillPromEjec" style="width:0%;"></div></div>
+      </div>
+
+      <!-- 6. Clientes Promedio por Ejecutivo (Meta fija: 50) -->
+      <div class="card-kpi">
+        <span class="kpi-title">Clientes Promedio p/Ejecutivo</span>
+        <span class="kpi-pct badge-kpi" id="kpiPctCliEjec">0%</span>
+        <div class="kpi-val" id="kpiValCliEjec">0</div>
+        <div class="kpi-meta" id="kpiMetaCliEjec">Meta: 50</div>
+        <div class="prog-bar"><div class="prog-fill" id="kpiFillCliEjec" style="width:0%;"></div></div>
+      </div>
     </div>
 
-    <!-- TABS DE VISTA -->
-    <!-- PESTAÑAS DE VISTA -->
+    <!-- PESTAÑAS DE VISTAS -->
     <div class="view-tabs">
-      <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Jerárquica</button>
+      <button class="tab-btn active" id="btnTabJerarquia" onclick="cambiarVista('jerarquia')">Estructura Dinámica</button>
+      <button class="tab-btn" id="btnTabProductividad" onclick="cambiarVista('productividad')">📊 Productividad por Rango</button>
       <button class="tab-btn" id="btnTabRanking" onclick="cambiarVista('ranking')">Ranking Ejecutivos</button>
-      <button class="tab-btn" id="btnTabTop10" onclick="cambiarVista('top10')">🏆 Top 10 Mejor Rendimiento</button>
+      <button class="tab-btn" id="btnTabTop10" onclick="cambiarVista('top10')">🏆 Top 10 Rendimiento</button>
       <button class="tab-btn" id="btnTabBottom10" onclick="cambiarVista('bottom10')">⚠️ Top 10 Menor Rendimiento</button>
       <button class="tab-btn" id="btnTabMix" onclick="cambiarVista('mxt')">Mix MCM vs MXT</button>
     </div>
 
-    <!-- TABLA -->
-    <!-- 1. TABLA GENERAL (Jerárquica, Ranking Ejecutivos y Mix MCM vs MXT) -->
-    <div id="contenedorTablaGeneral" class="table-responsive">
+    <!-- VISTA 1: TABLA PRINCIPAL (Estructura, Rankings, Mix) -->
+    <div class="table-responsive" id="contenedorTablaGeneral">
       <table>
         <thead>
           <tr>
-            <th>Estructura / Ejecutivo</th>
-            <th class="tar">Colocación</th>
+            <th id="thColNombre">Estructura / Ejecutivo</th>
+            <th class="tar">CARTERA</th>
             <th class="tar">Clientes</th>
             <th class="tar">Promedio</th>
             <th class="tar">Normalidad</th>
-            <th style="text-align:center;">Estado</th>
+            <th style="text-align:center;">Estado / Score</th>
           </tr>
         </thead>
         <tbody id="tablaCuerpo"></tbody>
       </table>
     </div>
 
-    <!-- 2. CONTENEDOR TOP 10 / BOTTOM 10 DE RENDIMIENTO -->
-    <div id="contenedorTopBottom" class="ranking-split-grid" style="display:none;">
-      <!-- TOP 10 MEJOR -->
-      <div class="ranking-card" style="border-top: 4px solid var(--success);">
-        <div class="ranking-card-header" style="color:var(--success);">
-          <span>🏆 Top 10 Mejor Rendimiento</span>
-          <span style="font-size:10px; color:var(--text-muted); font-weight:600;">(50% Cart + 25% Prom + 25% Norm)</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ejecutivo</th>
-                <th class="tar">Score</th>
-                <th class="tar">Colocación</th>
-                <th class="tar">Norm.</th>
-              </tr>
-            </thead>
-            <tbody id="tablaTop10"></tbody>
-          </table>
-        </div>
-      </div>
+    <!-- VISTA 2: PRODUCTIVIDAD POR TAMAÑO DE CARTERA -->
+    <div id="contenedorProductividad" style="display:none;"></div>
 
-      <!-- TOP 10 MENOR (BOTTOM) -->
-      <div class="ranking-card" style="border-top: 4px solid var(--danger);">
-        <div class="ranking-card-header" style="color:var(--danger);">
-          <span>⚠️ Top 10 Menor Rendimiento</span>
-          <span style="font-size:10px; color:var(--text-muted); font-weight:600;">(Requiere Atención)</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ejecutivo</th>
-                <th class="tar">Score</th>
-                <th class="tar">Colocación</th>
-                <th class="tar">Norm.</th>
-              </tr>
-            </thead>
-            <tbody id="tablaBottom10"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  </div>
 
-  <!-- MODAL DE PROGRESO -->
-  <!-- MODAL DE PROGRESO CON CONTADOR DE SEGUNDOS -->
+  <!-- MODAL DE PROGRESO CON CRONÓMETRO -->
   <div id="progressModal">
     <div class="modal-content">
-      <h3 id="modalProgTitulo" style="font-size:16px; margin-bottom:8px;">Sincronizando con Drive</h3>
-      <div id="modalProgSegundos" style="font-size:26px; font-weight:800; color:#38bdf8; margin-bottom:12px;">0.0 s</div>
-      <div class="prog-bar" style="height:6px; margin-bottom:12px;">
-        <div id="modalProgFill" class="prog-fill prog-fill-animated" style="width:100%;"></div>
+      <h3 id="modalProgTitulo" style="font-size:15px; margin-bottom:6px;">Sincronizando con Drive</h3>
+      <div id="modalProgSegundos" style="font-size:24px; font-weight:800; color:#38bdf8; margin-bottom:10px;">0.0 s</div>
+      <div class="prog-bar" style="height:5px; margin-bottom:10px;">
+        <div id="modalProgFill" class="prog-fill" style="width:8%; background:#0284c7; transition: width 0.1s linear;"></div>
       </div>
-      <div id="modalProgSub" style="font-size:12px; color:var(--text-muted);">Consultando datos frescos del servidor...</div>
+      <div id="modalProgSub" style="font-size:11.5px; color:var(--text-muted);">Consultando datos frescos...</div>
     </div>
   </div>
-    
-  <!-- NOTIFICACIÓN EMERGENTE TEMPORAL (TOAST) -->
+
+  <!-- TOAST -->
   <div id="toastNotification">
-    <span style="font-size:18px;">📅</span>
-    <span id="toastMsg">Base de datos sincronizada</span>
+    <span>📅</span> <span id="toastMsg">Base de datos sincronizada</span>
   </div>
 
   <script>
-    // PEGA AQUÍ TU URL COPIADA DE APPS SCRIPT
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQOU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuQZ3s9bdzK/exec";
 
     let DB = {
       ejecutivos: [],
@@ -517,21 +728,28 @@
         promedio: { verde: 1.00, amarillo: 0.90 },
         normalidad: { verde: 0.95, amarillo: 0.90 }
       },
+      rangosProductividad: [
+        { desde: 0, hasta: 300000, etiqueta: "$0 a $300,000" },
+        { desde: 300001, hasta: 600000, etiqueta: "$300,001 a $600,000" },
+        { desde: 600001, hasta: 99999999, etiqueta: "$600,001 en adelante" }
+      ],
       users: [],
       fecha: ""
     };
+
     let usuarioActual = null;
     let vistaActual = "jerarquia";
+    let segmentoSeleccionado = null; // { tipo: 'TODO'|'TERRITORIO'|'REGION'|'AGENCIA', id: '...' }
+    let arbolEstado = {}; // Guarda qué nodos están abiertos { 'terr_Territorio 1': true, ... }
+    let rangosAbiertos = {}; // Para la vista de productividad
+    let cronometroInterval = null;
+    let tiempoInicioSinc = 0;
 
-    // CARGA INICIAL: DESCARGA USUARIOS ANTES DE MOSTRAR EL LOGIN
+    // INICIO
     document.addEventListener("DOMContentLoaded", async () => {
-      // Prellenar usuario recordado
       const savedUser = localStorage.getItem("mcm_saved_username") || "";
-      if (savedUser) {
-        document.getElementById("txtUser").value = savedUser;
-      }
+      if (savedUser) document.getElementById("txtUser").value = savedUser;
 
-      // Verificar si ya hay una sesión activa guardada
       const sesion = sessionStorage.getItem("mcm_user_session") || localStorage.getItem("mcm_user_session");
       if (sesion) {
         try {
@@ -541,34 +759,23 @@
         } catch(e) {}
       }
 
-      // Mostrar pantalla de login y precargar credenciales frescas de Drive
       document.getElementById("pantallaLogin").style.display = "flex";
       document.getElementById("appContainer").style.display = "none";
       cargarCopiaLocal();
-
-      // Consultar usuarios de Drive en vivo con la barra de progreso
       await precargarUsuariosDesdeDrive();
     });
 
-    // FUNCIÓN DE PRECARGA PREVIA AL LOGIN
     async function precargarUsuariosDesdeDrive() {
       iniciarCronometroModal("Conectando con Drive", "Actualizando usuarios y permisos en vivo...");
-
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
-        const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`, {
-          cache: "no-store"
-        });
+        const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`, { cache: "no-store" });
         const d = await res.json();
-
         if (d && d.status === "success" && Array.isArray(d.users) && d.users.length > 0) {
           DB.users = d.users;
-          try {
-            localStorage.setItem("mcm_users_cache", JSON.stringify(d.users));
-          } catch(e) {}
+          try { localStorage.setItem("mcm_users_cache", JSON.stringify(d.users)); } catch(e) {}
         }
       } catch (err) {
-        console.warn("Demora o fallo al precargar usuarios en vivo, usando respaldo local:", err);
         try {
           const cached = localStorage.getItem("mcm_users_cache");
           if (cached) DB.users = JSON.parse(cached);
@@ -578,7 +785,6 @@
       }
     }
 
-    // ENVÍO DEL FORMULARIO DE LOGIN
     document.getElementById("formLogin").addEventListener("submit", async (e) => {
       e.preventDefault();
       const u = document.getElementById("txtUser").value.trim().toLowerCase();
@@ -601,7 +807,7 @@
         } catch(e) {}
       }
 
-      const found = DB.users.find(acc => acc.user.toLowerCase() === u && String(acc.pass) === p);
+      const found = (DB.users || []).find(acc => acc.user.toLowerCase() === u && String(acc.pass) === p);
       btn.disabled = false;
       btn.textContent = "Ingresar al Dashboard";
 
@@ -618,253 +824,194 @@
     function iniciarAplicacion() {
       document.getElementById("pantallaLogin").style.display = "none";
       document.getElementById("appContainer").style.display = "block";
-      
-      cargarCopiaLocal();
-      aplicarSeguridadRol();
-      vincularEventosFiltros();
 
-      // 2. SINCRONIZACIÓN INICIAL CON BARRA DE PROGRESO
+      cargarCopiaLocal();
+      definirSegmentoInicialPorRol();
       sincronizarConDrive(true);
     }
 
-    function vincularEventosFiltros() {
-      const selTerr = document.getElementById("selTerritorio");
-      const selReg = document.getElementById("selRegion");
-      const selAg = document.getElementById("selAgencia");
-      const selProd = document.getElementById("selProducto");
-      const txtB = document.getElementById("txtBuscar");
-
-      selTerr.addEventListener("change", () => {
-        actualizarOpcionesRegion(false);
-        actualizarOpcionesAgencia(false);
-        renderizar();
-      });
-
-      selReg.addEventListener("change", () => {
-        actualizarOpcionesAgencia(false);
-        renderizar();
-      });
-
-      selAg.addEventListener("change", () => renderizar());
-      if (selProd) selProd.addEventListener("change", () => renderizar());
-      txtB.addEventListener("input", () => renderizar());
-    }
-
-    function actualizarOpcionesRegion(forzarReset = false) {
-      const selTerrVal = document.getElementById("selTerritorio").value;
-      const selReg = document.getElementById("selRegion");
-      const regActual = forzarReset ? "ALL" : selReg.value;
-
-      if (usuarioActual && usuarioActual.rol === "GTE_REGIONAL") {
-        selReg.innerHTML = `<option value="${usuarioActual.region}">${usuarioActual.region}</option>`;
-        selReg.value = usuarioActual.region;
-        selReg.disabled = true;
-        return;
-      }
-
-      let lista = DB.ejecutivos;
-      if (selTerrVal !== "ALL") {
-        lista = lista.filter(e => e.territorio === selTerrVal);
-      }
-
-      const regiones = [...new Set(lista.map(e => e.region))].filter(Boolean).sort();
-      selReg.innerHTML = '<option value="ALL">Todas las Regiones</option>' +
-        regiones.map(r => `<option value="${r}">${r}</option>`).join("");
-
-      selReg.value = (regiones.includes(regActual) && !forzarReset) ? regActual : "ALL";
-    }
-
-    function actualizarOpcionesAgencia(forzarReset = false) {
-      const selTerrVal = document.getElementById("selTerritorio").value;
-      const selRegVal = document.getElementById("selRegion").value;
-      const selAg = document.getElementById("selAgencia");
-      const agActual = forzarReset ? "ALL" : selAg.value;
-
-      if (usuarioActual && usuarioActual.rol === "GTE_AGENCIA") {
-        selAg.innerHTML = `<option value="${usuarioActual.agencia}">${usuarioActual.agencia}</option>`;
-        selAg.value = usuarioActual.agencia;
-        selAg.disabled = true;
-        return;
-      }
-
-      let lista = DB.ejecutivos;
-      if (selTerrVal !== "ALL") lista = lista.filter(e => e.territorio === selTerrVal);
-      if (selRegVal !== "ALL") lista = lista.filter(e => e.region === selRegVal);
-
-      const agencias = [...new Set(lista.map(e => e.agencia))].filter(Boolean).sort();
-      selAg.innerHTML = '<option value="ALL">Todas las Agencias</option>' +
-        agencias.map(a => `<option value="${a}">${a}</option>`).join("");
-
-      selAg.value = (agencias.includes(agActual) && !forzarReset) ? agActual : "ALL";
-    }
-
-    // 4. BOTÓN REESTABLECER FILTROS CORREGIDO
-    function resetFiltros() {
-      const selTerr = document.getElementById("selTerritorio");
-      if (!selTerr.disabled) selTerr.value = "ALL";
-
-      actualizarOpcionesRegion(true);
-      actualizarOpcionesAgencia(true);
-
-      const p = document.getElementById("selProducto");
-      if (p) p.value = "ALL";
-      document.getElementById("txtBuscar").value = "";
-      renderizar();
-    }
-
-    function aplicarSeguridadRol() {
-      const b = document.getElementById("bannerSeguridad");
-      const selTerr = document.getElementById("selTerritorio");
-      const selReg = document.getElementById("selRegion");
+    function definirSegmentoInicialPorRol() {
+      const lblRol = document.getElementById("lblRolContexto");
       const nombreColab = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : "Colaborador";
 
       if (usuarioActual.rol === "SUBDIR_TERRITORIAL") {
-        selTerr.value = usuarioActual.territorio;
-        selTerr.disabled = true;
-        b.innerHTML = `🏢 Subdirección Territorial: <strong>${usuarioActual.territorio}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
+        segmentoSeleccionado = { tipo: "TERRITORIO", id: usuarioActual.territorio, label: usuarioActual.territorio };
+        arbolEstado[`terr_${usuarioActual.territorio}`] = true;
+        lblRol.textContent = `🏢 ${usuarioActual.territorio} — ${nombreColab}`;
       } else if (usuarioActual.rol === "GTE_REGIONAL") {
-        selTerr.value = usuarioActual.territorio;
-        selTerr.disabled = true;
-        selReg.value = usuarioActual.region;
-        selReg.disabled = true;
-        b.innerHTML = `🏛️ Gerencia Regional: <strong>${usuarioActual.region}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
+        segmentoSeleccionado = { tipo: "REGION", id: usuarioActual.region, label: `Región ${usuarioActual.region}` };
+        arbolEstado[`reg_${usuarioActual.region}`] = true;
+        lblRol.textContent = `🏛️ Región ${usuarioActual.region} — ${nombreColab}`;
       } else if (usuarioActual.rol === "GTE_AGENCIA") {
-        selTerr.value = usuarioActual.territorio;
-        selTerr.disabled = true;
-        selReg.value = usuarioActual.region;
-        selReg.disabled = true;
-        b.innerHTML = `📍 Gerencia de Agencia: <strong>${usuarioActual.agencia}</strong> <span style="color:#38bdf8; margin-left:8px;">— ${nombreColab}</span>`;
+        segmentoSeleccionado = { tipo: "AGENCIA", id: usuarioActual.agencia, label: `Agencia ${usuarioActual.agencia}` };
+        arbolEstado[`ag_${usuarioActual.agencia}`] = true;
+        lblRol.textContent = `📍 Agencia ${usuarioActual.agencia} — ${nombreColab}`;
       } else {
-        selTerr.disabled = false;
-        selReg.disabled = false;
-        b.innerHTML = `🔓 Acceso Directivo / Admin: <strong>${nombreColab}</strong>`;
+        segmentoSeleccionado = { tipo: "TODO", id: "TODO", label: "Consolidado General" };
+        lblRol.textContent = `🔓 Acceso Directivo — ${nombreColab}`;
       }
-
-      actualizarOpcionesRegion(false);
-      actualizarOpcionesAgencia(false);
     }
 
-    function evaluarColorEstado(actual, meta, tipoIndicador) {
-      const reglas = (DB.reglasColor && DB.reglasColor[tipoIndicador])
-        ? DB.reglasColor[tipoIndicador]
+    function restablecerSegmentoRaiz() {
+      definirSegmentoInicialPorRol();
+      renderizarTodo();
+    }
+
+    function seleccionarSegmento(tipo, id, label) {
+      segmentoSeleccionado = { tipo: tipo, id: id, label: label };
+      renderizarTodo();
+    }
+
+    function toggleArbol(claveNodo) {
+      arbolEstado[claveNodo] = !arbolEstado[claveNodo];
+      renderizarTodo();
+    }
+
+    function toggleRango(idx) {
+      rangosAbiertos[idx] = !rangosAbiertos[idx];
+      renderizarProductividad();
+    }
+
+    // OBTENCIÓN DE DATOS DEL SEGMENTO ASIGNADO AL USUARIO
+    function obtenerDatosBaseUsuario() {
+      let data = DB.ejecutivos || [];
+      if (!usuarioActual) return data;
+
+      if (usuarioActual.rol === "SUBDIR_TERRITORIAL") {
+        data = data.filter(e => e.territorio === usuarioActual.territorio);
+      } else if (usuarioActual.rol === "GTE_REGIONAL") {
+        data = data.filter(e => e.region === usuarioActual.region);
+      } else if (usuarioActual.rol === "GTE_AGENCIA") {
+        data = data.filter(e => e.agencia === usuarioActual.agencia);
+      }
+      return data;
+    }
+
+    // OBTENCIÓN DE DATOS FILTRADOS POR EL SEGMENTO ACTIVO (CLIC EN EL NOMBRE)
+    function obtenerDatosSegmentoActivo() {
+      const base = obtenerDatosBaseUsuario();
+      if (!segmentoSeleccionado || segmentoSeleccionado.tipo === "TODO") return base;
+
+      if (segmentoSeleccionado.tipo === "TERRITORIO") {
+        return base.filter(e => e.territorio === segmentoSeleccionado.id);
+      }
+      if (segmentoSeleccionado.tipo === "REGION") {
+        return base.filter(e => e.region === segmentoSeleccionado.id);
+      }
+      if (segmentoSeleccionado.tipo === "AGENCIA") {
+        return base.filter(e => e.agencia === segmentoSeleccionado.id);
+      }
+      return base;
+    }
+
+    function evaluarColor(actual, meta, tipo) {
+      const reglas = (DB.reglasColor && DB.reglasColor[tipo])
+        ? DB.reglasColor[tipo]
         : { verde: 1.00, amarillo: 0.85 };
 
-      const valorAComparar = (tipoIndicador === "normalidad")
-        ? Number(actual)
-        : (meta > 0 ? (actual / meta) : 0);
+      const val = (tipo === "normalidad") ? Number(actual) : (meta > 0 ? (actual / meta) : 0);
 
-      if (valorAComparar >= reglas.verde) {
-        return { color: "#10b981", css: "badge-verde", txt: "VERDE" };
-      }
-      if (valorAComparar >= reglas.amarillo) {
-        return { color: "#f59e0b", css: "badge-amarillo", txt: "AMARILLO" };
-      }
+      if (val >= reglas.verde) return { color: "#10b981", css: "badge-verde", txt: "VERDE" };
+      if (val >= reglas.amarillo) return { color: "#f59e0b", css: "badge-amarillo", txt: "AMARILLO" };
       return { color: "#ef4444", css: "badge-rojo", txt: "ROJO" };
     }
 
-    function obtenerDatosFiltrados() {
-      const terr = document.getElementById("selTerritorio").value;
-      const reg = document.getElementById("selRegion").value;
-      const ag = document.getElementById("selAgencia").value;
-      const prodEl = document.getElementById("selProducto");
-      const prod = prodEl ? prodEl.value : "ALL";
-      const search = document.getElementById("txtBuscar").value.toLowerCase().trim();
-
-      return DB.ejecutivos.map(e => {
-        let cart = Number(e.cartera) || 0;
-        let cli = Number(e.clientes) || 0;
-
-        if (prod === "MXT") {
-          cart = Number(e.carteraMxt) || 0;
-          cli = Number(e.clientesMxt) || 0;
-        } else if (prod === "TRAD") {
-          cart = Number(e.carteraTrad) || (cart - (Number(e.carteraMxt) || 0));
-          cli = Number(e.clientesTrad) || (cli - (Number(e.clientesMxt) || 0));
-        }
-
-        const prom = cli > 0 ? Math.round(cart / cli) : 0;
-        return { ...e, carteraActiva: cart, clientesActivos: cli, promedioActivo: prom };
-      }).filter(e => {
-        if (terr !== "ALL" && e.territorio !== terr) return false;
-        if (reg !== "ALL" && e.region !== reg) return false;
-        if (ag !== "ALL" && e.agencia !== ag) return false;
-        if (prod === "MXT" && e.carteraActiva <= 0) return false;
-        if (search && !e.ejecutivo.toLowerCase().includes(search)) return false;
-        return true;
-      });
+    function renderizarTodo() {
+      renderizarTarjetas();
+      if (vistaActual === "productividad") {
+        document.getElementById("contenedorTablaGeneral").style.display = "none";
+        document.getElementById("contenedorProductividad").style.display = "block";
+        renderizarProductividad();
+      } else {
+        document.getElementById("contenedorTablaGeneral").style.display = "block";
+        document.getElementById("contenedorProductividad").style.display = "none";
+        renderizarTablaGeneral();
+      }
     }
 
-    function renderizar() {
-      const data = obtenerDatosFiltrados();
-      const regVal = document.getElementById("selRegion").value;
-      const agVal = document.getElementById("selAgencia").value;
-      const prodEl = document.getElementById("selProducto");
-      const prodVal = prodEl ? prodEl.value : "ALL";
+    // RENDERIZADO DE LAS 6 TARJETAS
+    function renderizarTarjetas() {
+      const data = obtenerDatosSegmentoActivo();
+      const seg = segmentoSeleccionado || { tipo: "TODO", label: "Consolidado General" };
 
-      const cartReal = data.reduce((s, e) => s + e.carteraActiva, 0);
-      const cliReal = data.reduce((s, e) => s + e.clientesActivos, 0);
+      // Actualizar Título del Segmento Activo
+      const lblSeg = document.getElementById("lblSegmentoActivo");
+      lblSeg.innerHTML = `<span>📍 Segmento Activo:</span> <strong>${seg.label}</strong>`;
+
+      const btnReset = document.getElementById("btnRestablecerSegmento");
+      btnReset.style.display = (seg.tipo !== "TODO" && (!usuarioActual || usuarioActual.rol === "DIRECTIVO" || usuarioActual.rol === "ADMIN")) ? "inline-block" : "none";
+
+      const cartReal = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+      const cliReal = data.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
+      const numEjecs = data.length;
 
+      // Metas
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
       let normVal = 0;
 
-      if (prodVal === "ALL") {
-        if (agVal !== "ALL" && DB.agencias[agVal]) {
-          metaCart = DB.agencias[agVal].metaCartera;
-          metaCli = DB.agencias[agVal].metaClientes;
-          metaProm = DB.agencias[agVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
-          normVal = DB.agencias[agVal].normalidad;
-        } else if (regVal !== "ALL" && DB.regiones[regVal]) {
-          metaCart = DB.regiones[regVal].metaCartera;
-          metaCli = DB.regiones[regVal].metaClientes;
-          metaProm = DB.regiones[regVal].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
-          normVal = DB.regiones[regVal].normalidad;
-        } else {
-          metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
-          metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
-          metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
-          const sumCartOrig = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
-          normVal = sumCartOrig > 0 
-            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartOrig) 
-            : 0.95;
-        }
+      if (seg.tipo === "AGENCIA" && DB.agencias[seg.id]) {
+        metaCart = DB.agencias[seg.id].metaCartera;
+        metaCli = DB.agencias[seg.id].metaClientes;
+        metaProm = DB.agencias[seg.id].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+        normVal = DB.agencias[seg.id].normalidad;
+      } else if (seg.tipo === "REGION" && DB.regiones[seg.id]) {
+        metaCart = DB.regiones[seg.id].metaCartera;
+        metaCli = DB.regiones[seg.id].metaClientes;
+        metaProm = DB.regiones[seg.id].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+        normVal = DB.regiones[seg.id].normalidad;
       } else {
         metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
         metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
-        normVal = 0.95;
+        const sumCartOrig = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+        normVal = sumCartOrig > 0 
+          ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartOrig) 
+          : 0.95;
       }
 
-      if (!metaProm && metaCli > 0) metaProm = Math.round(metaCart / metaCli);
+      // Metas Fijas Institucionales
+      const metaPromEjec = 725000;
+      const metaCliEjec = 50;
+      const promEjecReal = numEjecs > 0 ? Math.round(cartReal / numEjecs) : 0;
+      const cliEjecReal = numEjecs > 0 ? Math.round(cliReal / numEjecs) : 0;
 
-      const stCart = evaluarColorEstado(cartReal, metaCart, "cartera");
-      const stCli  = evaluarColorEstado(cliReal, metaCli, "clientes");
-      const stProm = evaluarColorEstado(promReal, metaProm, "promedio");
-      const stNorm = evaluarColorEstado(normVal, 0.95, "normalidad");
-
-      // --- CÁLCULO DE BRECHAS VISUALES ---
+      // Brechas
       const diffCart = cartReal - metaCart;
       const gapCartHtml = metaCart > 0 
-        ? (diffCart >= 0 
-            ? `<span class="kpi-gap gap-supero">+Superó: $${diffCart.toLocaleString("es-MX")}</span>` 
-            : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffCart).toLocaleString("es-MX")}</span>`)
+        ? (diffCart >= 0 ? `<span class="kpi-gap gap-supero">+Superó: $${diffCart.toLocaleString("es-MX")}</span>` : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffCart).toLocaleString("es-MX")}</span>`)
         : "";
 
       const diffCli = cliReal - metaCli;
       const gapCliHtml = metaCli > 0 
-        ? (diffCli >= 0 
-            ? `<span class="kpi-gap gap-supero">+Superó: ${diffCli.toLocaleString("es-MX")}</span>` 
-            : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffCli).toLocaleString("es-MX")}</span>`)
+        ? (diffCli >= 0 ? `<span class="kpi-gap gap-supero">+Superó: ${diffCli.toLocaleString("es-MX")}</span>` : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffCli).toLocaleString("es-MX")}</span>`)
         : "";
 
       const diffProm = promReal - metaProm;
       const gapPromHtml = metaProm > 0 
-        ? (diffProm >= 0 
-            ? `<span class="kpi-gap gap-supero">+Superó: $${diffProm.toLocaleString("es-MX")}</span>` 
-            : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffProm).toLocaleString("es-MX")}</span>`)
+        ? (diffProm >= 0 ? `<span class="kpi-gap gap-supero">+Superó: $${diffProm.toLocaleString("es-MX")}</span>` : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffProm).toLocaleString("es-MX")}</span>`)
         : "";
+
+      const diffNorm = (normVal - 0.95) * 100;
+      const gapNormHtml = diffNorm >= 0
+        ? `<span class="kpi-gap gap-supero">+Superó: ${diffNorm.toFixed(2)}%</span>`
+        : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffNorm).toFixed(2)}%</span>`;
+
+      const diffPromEjec = promEjecReal - metaPromEjec;
+      const gapPromEjecHtml = `<span class="kpi-gap ${diffPromEjec >= 0 ? 'gap-supero' : 'gap-falta'}">${diffPromEjec >= 0 ? '+Superó: $' + diffPromEjec.toLocaleString("es-MX") : 'Faltan: $' + Math.abs(diffPromEjec).toLocaleString("es-MX")}</span>`;
+
+      const diffCliEjec = cliEjecReal - metaCliEjec;
+      const gapCliEjecHtml = `<span class="kpi-gap ${diffCliEjec >= 0 ? 'gap-supero' : 'gap-falta'}">${diffCliEjec >= 0 ? '+Superó: ' + diffCliEjec : 'Faltan: ' + Math.abs(diffCliEjec)}</span>`;
+
+      // Estados
+      const stCart = evaluarColor(cartReal, metaCart, "cartera");
+      const stCli  = evaluarColor(cliReal, metaCli, "clientes");
+      const stProm = evaluarColor(promReal, metaProm, "promedio");
+      const stNorm = evaluarColor(normVal, 0.95, "normalidad");
+      const stPromEjec = evaluarColor(promEjecReal, metaPromEjec, "promEjecutivo");
+      const stCliEjec = evaluarColor(cliEjecReal, metaCliEjec, "cliEjecutivo");
 
       // 1. CARTERA
       const pctC = metaCart > 0 ? Math.round((cartReal / metaCart) * 100) : 0;
@@ -873,9 +1020,8 @@
       const bCart = document.getElementById("kpiPctCartera");
       bCart.textContent = pctC + "%";
       bCart.className = "kpi-pct badge-kpi " + stCart.css;
-      const fCart = document.getElementById("kpiFillCartera");
-      fCart.style.width = Math.min(100, pctC) + "%";
-      fCart.style.background = stCart.color;
+      document.getElementById("kpiFillCartera").style.width = Math.min(100, pctC) + "%";
+      document.getElementById("kpiFillCartera").style.background = stCart.color;
 
       // 2. CLIENTES
       const pctCl = metaCli > 0 ? Math.round((cliReal / metaCli) * 100) : 0;
@@ -884,180 +1030,71 @@
       const bCli = document.getElementById("kpiPctClientes");
       bCli.textContent = pctCl + "%";
       bCli.className = "kpi-pct badge-kpi " + stCli.css;
-      const fCli = document.getElementById("kpiFillClientes");
-      fCli.style.width = Math.min(100, pctCl) + "%";
-      fCli.style.background = stCli.color;
+      document.getElementById("kpiFillClientes").style.width = Math.min(100, pctCl) + "%";
+      document.getElementById("kpiFillClientes").style.background = stCli.color;
 
-      // 3. PROMEDIO CARTERA
+      // 3. CARTERA PROMEDIO POR CLIENTE
       const pctP = metaProm > 0 ? Math.round((promReal / metaProm) * 100) : 0;
       document.getElementById("kpiValPromedio").textContent = "$" + promReal.toLocaleString("es-MX");
       document.getElementById("kpiMetaPromedio").innerHTML = metaProm > 0 ? `Meta: $${metaProm.toLocaleString("es-MX")} ${gapPromHtml}` : "Meta: $0";
       const bProm = document.getElementById("kpiPctPromedio");
       bProm.textContent = pctP + "%";
       bProm.className = "kpi-pct badge-kpi " + stProm.css;
-      const fProm = document.getElementById("kpiFillPromedio");
-      fProm.style.width = Math.min(100, pctP) + "%";
-      fProm.style.background = stProm.color;
+      document.getElementById("kpiFillPromedio").style.width = Math.min(100, pctP) + "%";
+      document.getElementById("kpiFillPromedio").style.background = stProm.color;
 
       // 4. NORMALIDAD
-      // --- CÁLCULO DE BRECHA DE NORMALIDAD ---
-      const metaNormBase = 0.95;
-      const diffNorm = (normVal - metaNormBase) * 100;
-      const gapNormHtml = diffNorm >= 0
-        ? `<span class="kpi-gap gap-supero">+Superó: ${diffNorm.toFixed(2)}%</span>`
-        : `<span class="kpi-gap gap-falta">Faltan: ${Math.abs(diffNorm).toFixed(2)}%</span>`;
-
-      // Inyección en la tarjeta 4: Normalidad
       const normPctText = (normVal * 100).toFixed(2) + "%";
       const lblNormVal = document.getElementById("kpiValNormalidad");
       lblNormVal.textContent = normPctText;
       lblNormVal.style.color = stNorm.color;
-
       const bNorm = document.getElementById("kpiPctNormalidad");
       bNorm.textContent = normPctText;
       bNorm.className = "kpi-pct badge-kpi " + stNorm.css;
-
-      // Meta con el badge de falta/superó
       document.getElementById("kpiMetaNormalidad").innerHTML = `Meta: >=95% ${gapNormHtml}`;
+      document.getElementById("kpiFillNormalidad").style.width = Math.min(100, normVal * 100) + "%";
+      document.getElementById("kpiFillNormalidad").style.background = stNorm.color;
 
-      const fNorm = document.getElementById("kpiFillNormalidad");
-      fNorm.style.width = Math.min(100, normVal * 100) + "%";
-      fNorm.style.background = stNorm.color;
+      // 5. CARTERA PROMEDIO POR EJECUTIVO
+      const pctPE = Math.round((promEjecReal / metaPromEjec) * 100);
+      document.getElementById("kpiValPromEjec").textContent = "$" + promEjecReal.toLocaleString("es-MX");
+      document.getElementById("kpiMetaPromEjec").innerHTML = `Meta: $${metaPromEjec.toLocaleString("es-MX")} ${gapPromEjecHtml}`;
+      const bPE = document.getElementById("kpiPctPromEjec");
+      bPE.textContent = pctPE + "%";
+      bPE.className = "kpi-pct badge-kpi " + stPromEjec.css;
+      document.getElementById("kpiFillPromEjec").style.width = Math.min(100, pctPE) + "%";
+      document.getElementById("kpiFillPromEjec").style.background = stPromEjec.color;
 
-      // Renderizar Vistas según selección
-      if (vistaActual === "topbottom") {
-        renderizarTopBottom(data);
-      } else {
-        renderizarTabla(data);
-      }
+      // 6. CLIENTES PROMEDIO POR EJECUTIVO
+      const pctCE = Math.round((cliEjecReal / metaCliEjec) * 100);
+      document.getElementById("kpiValCliEjec").textContent = cliEjecReal.toLocaleString("es-MX");
+      document.getElementById("kpiMetaCliEjec").innerHTML = `Meta: ${metaCliEjec} ${gapCliEjecHtml}`;
+      const bCE = document.getElementById("kpiPctCliEjec");
+      bCE.textContent = pctCE + "%";
+      bCE.className = "kpi-pct badge-kpi " + stCliEjec.css;
+      document.getElementById("kpiFillCliEjec").style.width = Math.min(100, pctCE) + "%";
+      document.getElementById("kpiFillCliEjec").style.background = stCliEjec.color;
     }
 
-    // RENDERIZADO DEL TOP 10 MEJOR Y PEOR (Ponderado 50/25/25)
-    function renderizarTopBottom(data) {
-      // Filtrar ejecutivos con meta asignada mayor a 0
-      const calificados = data.filter(e => Number(e.metaCartera) > 0).map(e => {
-        const cCart = Number(e.carteraActiva) / Number(e.metaCartera);
-        const mProm = Number(e.metaPromedio) || (Number(e.metaClientes) > 0 ? Number(e.metaCartera) / Number(e.metaClientes) : 14500);
-        const cProm = mProm > 0 ? (Number(e.promedioActivo) / mProm) : 1;
-        const cNorm = (Number(e.normalidad) || 0) / 0.95; // Meta institucional 95%
-
-        // SCORE INTEGRAL PONDERADO: 50% Cartera + 25% Promedio + 25% Normalidad
-        const score = (0.50 * cCart) + (0.25 * cProm) + (0.25 * cNorm);
-        return { ...e, score: score, cCartPct: Math.round(cCart * 100) };
-      });
-
-      const top10 = [...calificados].sort((a, b) => b.score - a.score).slice(0, 10);
-      const bottom10 = [...calificados].sort((a, b) => a.score - b.score).slice(0, 10);
-
-      const renderFilas = (lista, tbodyId, esTop) => {
-        const tbody = document.getElementById(tbodyId);
-        if (!tbody) return;
-        tbody.innerHTML = "";
-        if (!lista.length) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:16px; color:var(--text-muted);">Sin datos con meta para evaluar.</td></tr>`;
-          return;
-        }
-        lista.forEach((e, idx) => {
-          const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
-          const scoreColor = esTop ? "var(--success)" : "var(--danger)";
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td style="font-weight:800; color:${scoreColor};">${idx + 1}</td>
-            <td><strong>${e.ejecutivo}</strong> <span style="font-size:10px; color:var(--text-muted);">(${e.agencia})</span> ${mxtBadge}</td>
-            <td class="tar fw-bold" style="color:${scoreColor};">${Math.round(e.score * 100)}%</td>
-            <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")} <span style="font-size:10px; color:var(--text-muted);">(${e.cCartPct}%)</span></td>
-            <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : 'var(--danger)'};">${(e.normalidad * 100).toFixed(2)}%</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      };
-
-      renderFilas(top10, "tablaTop10", true);
-      renderFilas(bottom10, "tablaBottom10", false);
-    }
-
-    function cambiarVista(vista) {
-      vistaActual = vista;
-      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
-      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
-      
-      const btnMix = document.getElementById("btnTabMix");
-      if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
-
-      const btnTop = document.getElementById("btnTabTopBottom");
-      if (btnTop) btnTop.classList.toggle("active", vista === "topbottom");
-
-      const contGeneral = document.getElementById("contenedorTablaGeneral");
-      const contTopBottom = document.getElementById("contenedorTopBottom");
-
-      if (vista === "topbottom") {
-        if (contGeneral) contGeneral.style.display = "none";
-        if (contTopBottom) contTopBottom.style.display = "grid";
-      } else {
-        if (contGeneral) contGeneral.style.display = "block";
-        if (contTopBottom) contTopBottom.style.display = "none";
-      }
-
-      renderizar();
-    }
-
-    function cambiarVista(vista) {
-      vistaActual = vista;
-      document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
-      document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
-      
-      const bTop = document.getElementById("btnTabTop10");
-      if (bTop) bTop.classList.toggle("active", vista === "top10");
-
-      const bBot = document.getElementById("btnTabBottom10");
-      if (bBot) bBot.classList.toggle("active", vista === "bottom10");
-
-      const bMix = document.getElementById("btnTabMix");
-      if (bMix) bMix.classList.toggle("active", vista === "mxt");
-
-      renderizar();
-    }
-
-    function renderizarTabla(data) {
-      const tbody = document.getElementById("tablaCuerpo") || document.getElementById("tableBody");
-      if (!tbody) return;
+    // RENDERIZADO DE TABLA GENERAL (Árbol Jerárquico o Rankings)
+    function renderizarTablaGeneral() {
+      const tbody = document.getElementById("tablaCuerpo");
       tbody.innerHTML = "";
+      const baseData = obtenerDatosBaseUsuario();
 
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No se encontraron registros para los filtros seleccionados.</td></tr>`;
-        return;
-      }
-
-      // --- VISTA 1: TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO ---
-      // --- VISTA TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO ---
-      // --- VISTA TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO (VOLÚMENES ABSOLUTOS) ---
-      // --- VISTA TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO (VOLÚMENES REALES SIN 0 CLIENTES) ---
-      // --- VISTA TOP 10 MEJOR Y TOP 10 MENOR RENDIMIENTO (EXCLUYE < 1 MES Y 0 CLIENTES) ---
+      // VISTA TOP 10 Y BOTTOM 10 (INCLUSIÓN UNIVERSAL: PARTICIPAN TODOS)
       if (vistaActual === "top10" || vistaActual === "bottom10") {
         const esTop = (vistaActual === "top10");
+        const evaluados = [...baseData];
 
-        // 1. FILTRO ESTRICTO: Clientes activos > 0 Y Antigüedad >= 1 mes cumplido
-        const participantes = data.filter(e => {
-          const cli = Number(e.clientesActivos) || 0;
-          const meses = Number(e.meses) || 0;
-          return cli > 0 && meses >= 1;
-        });
+        const maxCart = Math.max(...evaluados.map(e => Number(e.cartera) || 0), 1);
+        const maxCli = Math.max(...evaluados.map(e => Number(e.clientes) || 0), 1);
+        const maxProm = Math.max(...evaluados.map(e => Number(e.promedio) || 0), 1);
 
-        if (!participantes.length) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No hay ejecutivos con al menos 1 mes de antigüedad y clientes activos para evaluar en este filtro.</td></tr>`;
-          return;
-        }
-
-        // 2. Máximos del grupo filtrado para normalizar magnitudes relativas
-        const maxCart = Math.max(...participantes.map(e => Number(e.carteraActiva) || 0), 1);
-        const maxCli = Math.max(...participantes.map(e => Number(e.clientesActivos) || 0), 1);
-        const maxProm = Math.max(...participantes.map(e => Number(e.promedioActivo) || 0), 1);
-
-        // 3. Score ponderado de magnitud real: 30% Cartera + 30% Clientes + 20% Promedio + 20% Normalidad
-        const evaluados = participantes.map(e => {
-          const cartVal = Number(e.carteraActiva) || 0;
-          const cliVal = Number(e.clientesActivos) || 0;
-          const promVal = Number(e.promedioActivo) || 0;
+        const conScore = evaluados.map(e => {
+          const cartVal = Number(e.cartera) || 0;
+          const cliVal = Number(e.clientes) || 0;
+          const promVal = Number(e.promedio) || 0;
           const normVal = Math.min(1.0, Math.max(0, Number(e.normalidad) || 0));
 
           const relCart = cartVal / maxCart;
@@ -1066,18 +1103,12 @@
           const relNorm = normVal;
 
           const score = (0.30 * relCart) + (0.30 * relCli) + (0.20 * relProm) + (0.20 * relNorm);
-
-          return { 
-            ...e, 
-            scoreVal: score, 
-            scorePct: Math.round(score * 100)
-          };
+          return { ...e, scoreVal: score, scorePct: Math.round(score * 100) };
         });
 
-        // 4. Ordenar Top (Mayor volumen) vs Bottom (Menor volumen entre los consolidados)
         const lista = esTop 
-          ? evaluados.sort((a, b) => b.scoreVal - a.scoreVal).slice(0, 10)
-          : evaluados.sort((a, b) => a.scoreVal - b.scoreVal).slice(0, 10);
+          ? conScore.sort((a, b) => b.scoreVal - a.scoreVal).slice(0, 10)
+          : conScore.sort((a, b) => a.scoreVal - b.scoreVal).slice(0, 10);
 
         lista.forEach((e, idx) => {
           const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
@@ -1085,15 +1116,15 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>
-              <span style="font-weight:900; margin-right:8px; color:${esTop ? 'var(--success)' : 'var(--danger)'};">#${idx + 1}</span>
+              <span style="font-weight:900; margin-right:6px; color:${esTop ? 'var(--success)' : 'var(--danger)'};">#${idx + 1}</span>
               <strong>${e.ejecutivo}</strong> 
               <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> 
               ${mxtBadge} 
               <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span>
             </td>
-            <td class="tar fw-bold">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
-            <td class="tar">${e.clientesActivos}</td>
-            <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
+            <td class="tar">${e.clientes}</td>
+            <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
             <td class="tar fw-bold" style="color:${e.normalidad >= 0.95 ? 'var(--success)' : (e.normalidad >= 0.90 ? 'var(--warning)' : 'var(--danger)')};">${(e.normalidad * 100).toFixed(2)}%</td>
             <td style="text-align:center;"><span class="badge-kpi ${badgeClass}">Score: ${e.scorePct}%</span></td>
           `;
@@ -1102,50 +1133,24 @@
         return;
       }
 
-      // --- VISTA 2: MIX MCM VS MXT ---
-      if (vistaActual === "mxt") {
-        const resumenMix = {
-          "MCM Tradicional": { cartera: 0, clientes: 0 },
-          "MXT (Más Por Ti)": { cartera: 0, clientes: 0 }
-        };
-
-        data.forEach(e => {
-          resumenMix["MCM Tradicional"].cartera += (Number(e.carteraTrad) || (Number(e.cartera) - (Number(e.carteraMxt) || 0)));
-          resumenMix["MCM Tradicional"].clientes += (Number(e.clientesTrad) || (Number(e.clientes) - (Number(e.clientesMxt) || 0)));
-          resumenMix["MXT (Más Por Ti)"].cartera += (Number(e.carteraMxt) || 0);
-          resumenMix["MXT (Más Por Ti)"].clientes += (Number(e.clientesMxt) || 0);
-        });
-
-        Object.keys(resumenMix).forEach(k => {
-          const item = resumenMix[k];
-          const prom = item.clientes > 0 ? Math.round(item.cartera / item.clientes) : 0;
-          const tr = document.createElement("tr");
-          tr.className = "row-agencia";
-          tr.innerHTML = `
-            <td><strong>${k === "MXT (Más Por Ti)" ? "🟣 " : "🔷 "} ${k}</strong></td>
-            <td class="tar">$${item.cartera.toLocaleString("es-MX")}</td>
-            <td class="tar">${item.clientes.toLocaleString("es-MX")}</td>
-            <td class="tar">$${prom.toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:var(--success);">-</td>
-            <td style="text-align:center;"><span class="badge-kpi badge-verde">ACTIVO</span></td>
-          `;
-          tbody.appendChild(tr);
-        });
-        return;
-      }
-
-      // --- VISTA 3: RANKING EJECUTIVOS ---
+      // VISTA RANKING COMPLETO (INCLUSIÓN UNIVERSAL)
       if (vistaActual === "ranking") {
-        const ordenados = [...data].sort((a, b) => b.carteraActiva - a.carteraActiva);
-        ordenados.forEach(e => {
-          const st = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
+        const ordenados = [...baseData].sort((a, b) => b.cartera - a.cartera);
+        ordenados.forEach((e, idx) => {
+          const st = evaluarColor(e.normalidad, 0.95, "normalidad");
           const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td><strong>${e.ejecutivo}</strong> <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> ${mxtBadge} <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span></td>
-            <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
-            <td class="tar">${e.clientesActivos}</td>
-            <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
+            <td>
+              <span style="color:var(--text-muted); font-weight:700; margin-right:6px;">#${idx + 1}</span>
+              <strong>${e.ejecutivo}</strong> 
+              <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> 
+              ${mxtBadge} 
+              <span style="color:var(--text-muted); font-size:11px;">[${e.agencia}]</span>
+            </td>
+            <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
+            <td class="tar">${e.clientes}</td>
+            <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
             <td class="tar fw-bold" style="color:${st.color};">${(e.normalidad * 100).toFixed(2)}%</td>
             <td style="text-align:center;"><span class="badge-kpi ${st.css}">${st.txt}</span></td>
           `;
@@ -1154,74 +1159,250 @@
         return;
       }
 
-      // --- VISTA 4: ESTRUCTURA JERÁRQUICA ---
-      const regionesUnicas = [...new Set(data.map(e => e.region))].filter(Boolean);
-      regionesUnicas.forEach(reg => {
-        const dataReg = data.filter(e => e.region === reg);
-        const rCart = dataReg.reduce((s, e) => s + e.carteraActiva, 0);
-        const rCli = dataReg.reduce((s, e) => s + e.clientesActivos, 0);
-        const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
-        const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.carteraActiva), 0) / rCart : 0.95);
-        const stReg = evaluarColorEstado(rNorm, 0.95, "normalidad");
+      // VISTA MIX MCM VS MXT
+      if (vistaActual === "mxt") {
+        const segData = obtenerDatosSegmentoActivo();
+        const cTrad = segData.reduce((s, e) => s + (Number(e.carteraTrad) || 0), 0);
+        const clTrad = segData.reduce((s, e) => s + (Number(e.clientesTrad) || 0), 0);
+        const cMxt = segData.reduce((s, e) => s + (Number(e.carteraMxt) || 0), 0);
+        const clMxt = segData.reduce((s, e) => s + (Number(e.clientesMxt) || 0), 0);
 
-        const trReg = document.createElement("tr");
-        trReg.className = "row-region";
-        trReg.innerHTML = `
-          <td>🏛️ ${reg}</td>
-          <td class="tar">$${rCart.toLocaleString("es-MX")}</td>
-          <td class="tar">${rCli}</td>
-          <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
-          <td class="tar fw-bold" style="color:${stReg.color};">${(rNorm * 100).toFixed(2)}%</td>
-          <td style="text-align:center;"><span class="badge-kpi ${stReg.css}">${stReg.txt}</span></td>
-        `;
-        tbody.appendChild(trReg);
+        const filas = [
+          { nom: "🔷 MCM Tradicional", cart: cTrad, cli: clTrad },
+          { nom: "🟣 MXT (Más Por Ti)", cart: cMxt, cli: clMxt }
+        ];
 
-        const agenciasUnicas = [...new Set(dataReg.map(e => e.agencia))].filter(Boolean);
-        agenciasUnicas.forEach(ag => {
-          const dataAg = dataReg.filter(e => e.agencia === ag);
-          const aCart = dataAg.reduce((s, e) => s + e.carteraActiva, 0);
-          const aCli = dataAg.reduce((s, e) => s + e.clientesActivos, 0);
-          const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
-          const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.carteraActiva), 0) / aCart : 0.95);
-          const stAg = evaluarColorEstado(aNorm, 0.95, "normalidad");
-
-          const trAg = document.createElement("tr");
-          trAg.className = "row-agencia";
-          trAg.innerHTML = `
-            <td style="padding-left:24px;">📍 ${ag}</td>
-            <td class="tar">$${aCart.toLocaleString("es-MX")}</td>
-            <td class="tar">${aCli}</td>
-            <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
-            <td class="tar fw-bold" style="color:${stAg.color};">${(aNorm * 100).toFixed(2)}%</td>
-            <td style="text-align:center;"><span class="badge-kpi ${stAg.css}">${stAg.txt}</span></td>
+        filas.forEach(f => {
+          const p = f.cli > 0 ? Math.round(f.cart / f.cli) : 0;
+          const tr = document.createElement("tr");
+          tr.className = "row-ag";
+          tr.innerHTML = `
+            <td><strong>${f.nom}</strong></td>
+            <td class="tar fw-bold">$${f.cart.toLocaleString("es-MX")}</td>
+            <td class="tar">${f.cli.toLocaleString("es-MX")}</td>
+            <td class="tar">$${p.toLocaleString("es-MX")}</td>
+            <td class="tar fw-bold" style="color:var(--success);">-</td>
+            <td style="text-align:center;"><span class="badge-kpi badge-verde">ACTIVO</span></td>
           `;
-          tbody.appendChild(trAg);
-
-          dataAg.forEach(e => {
-            const stEj = evaluarColorEstado(e.normalidad, 0.95, "normalidad");
-            const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
-            const trEj = document.createElement("tr");
-            trEj.innerHTML = `
-              <td style="padding-left:42px;">👤 ${e.ejecutivo} <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> ${mxtBadge}</td>
-              <td class="tar">$${Number(e.carteraActiva).toLocaleString("es-MX")}</td>
-              <td class="tar">${e.clientesActivos}</td>
-              <td class="tar">$${Number(e.promedioActivo).toLocaleString("es-MX")}</td>
-              <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(2)}%</td>
-              <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
-            `;
-            tbody.appendChild(trEj);
-          });
+          tbody.appendChild(tr);
         });
+        return;
+      }
+
+      // VISTA ESTRUCTURA DINÁMICA (ÁRBOL EXPANDIBLE + / -)
+      const territorios = [...new Set(baseData.map(e => e.territorio))].filter(Boolean).sort();
+
+      territorios.forEach(terr => {
+        const dataTerr = baseData.filter(e => e.territorio === terr);
+        const tCart = dataTerr.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+        const tCli = dataTerr.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
+        const tProm = tCli > 0 ? Math.round(tCart / tCli) : 0;
+        const tNorm = tCart > 0 ? dataTerr.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / tCart : 0.95;
+        const stTerr = evaluarColor(tNorm, 0.95, "normalidad");
+
+        const claveTerr = `terr_${terr}`;
+        const estaAbiertoTerr = !!arbolEstado[claveTerr];
+        const esSeleccionado = (segmentoSeleccionado && segmentoSeleccionado.tipo === "TERRITORIO" && segmentoSeleccionado.id === terr);
+
+        // Fila Territorio
+        const trTerr = document.createElement("tr");
+        trTerr.className = "row-terr";
+        trTerr.innerHTML = `
+          <td>
+            <span class="tree-toggle-btn" onclick="toggleArbol('${claveTerr}')">${estaAbiertoTerr ? '−' : '+'}</span>
+            <span class="tree-name-link ${esSeleccionado ? 'tree-name-selected' : ''}" onclick="seleccionarSegmento('TERRITORIO', '${terr}', '${terr}')">
+              🏢 ${terr}
+            </span>
+          </td>
+          <td class="tar fw-bold">$${tCart.toLocaleString("es-MX")}</td>
+          <td class="tar">${tCli}</td>
+          <td class="tar">$${tProm.toLocaleString("es-MX")}</td>
+          <td class="tar fw-bold" style="color:${stTerr.color};">${(tNorm * 100).toFixed(2)}%</td>
+          <td style="text-align:center;"><span class="badge-kpi ${stTerr.css}">${stTerr.txt}</span></td>
+        `;
+        tbody.appendChild(trTerr);
+
+        if (estaAbiertoTerr) {
+          const regiones = [...new Set(dataTerr.map(e => e.region))].filter(Boolean).sort();
+          regiones.forEach(reg => {
+            const dataReg = dataTerr.filter(e => e.region === reg);
+            const rCart = dataReg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+            const rCli = dataReg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
+            const rProm = rCli > 0 ? Math.round(rCart / rCli) : 0;
+            const rNorm = DB.regiones[reg] ? DB.regiones[reg].normalidad : (rCart > 0 ? dataReg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / rCart : 0.95);
+            const stReg = evaluarColor(rNorm, 0.95, "normalidad");
+
+            const claveReg = `reg_${reg}`;
+            const estaAbiertoReg = !!arbolEstado[claveReg];
+            const esSeleccionadoReg = (segmentoSeleccionado && segmentoSeleccionado.tipo === "REGION" && segmentoSeleccionado.id === reg);
+
+            // Fila Región
+            const trReg = document.createElement("tr");
+            trReg.className = "row-reg";
+            trReg.innerHTML = `
+              <td style="padding-left:24px;">
+                <span class="tree-toggle-btn" onclick="toggleArbol('${claveReg}')">${estaAbiertoReg ? '−' : '+'}</span>
+                <span class="tree-name-link ${esSeleccionadoReg ? 'tree-name-selected' : ''}" onclick="seleccionarSegmento('REGION', '${reg}', 'Región ${reg}')">
+                  🏛️ Región ${reg}
+                </span>
+              </td>
+              <td class="tar fw-bold">$${rCart.toLocaleString("es-MX")}</td>
+              <td class="tar">${rCli}</td>
+              <td class="tar">$${rProm.toLocaleString("es-MX")}</td>
+              <td class="tar fw-bold" style="color:${stReg.color};">${(rNorm * 100).toFixed(2)}%</td>
+              <td style="text-align:center;"><span class="badge-kpi ${stReg.css}">${stReg.txt}</span></td>
+            `;
+            tbody.appendChild(trReg);
+
+            if (estaAbiertoReg) {
+              const agencias = [...new Set(dataReg.map(e => e.agencia))].filter(Boolean).sort();
+              agencias.forEach(ag => {
+                const dataAg = dataReg.filter(e => e.agencia === ag);
+                const aCart = dataAg.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+                const aCli = dataAg.reduce((s, e) => s + (Number(e.clientes) || 0), 0);
+                const aProm = aCli > 0 ? Math.round(aCart / aCli) : 0;
+                const aNorm = DB.agencias[ag] ? DB.agencias[ag].normalidad : (aCart > 0 ? dataAg.reduce((s, e) => s + (e.normalidad * e.cartera), 0) / aCart : 0.95);
+                const stAg = evaluarColor(aNorm, 0.95, "normalidad");
+
+                const claveAg = `ag_${ag}`;
+                const estaAbiertoAg = !!arbolEstado[claveAg];
+                const esSeleccionadoAg = (segmentoSeleccionado && segmentoSeleccionado.tipo === "AGENCIA" && segmentoSeleccionado.id === ag);
+
+                // Fila Agencia
+                const trAg = document.createElement("tr");
+                trAg.className = "row-ag";
+                trAg.innerHTML = `
+                  <td style="padding-left:44px;">
+                    <span class="tree-toggle-btn" onclick="toggleArbol('${claveAg}')">${estaAbiertoAg ? '−' : '+'}</span>
+                    <span class="tree-name-link ${esSeleccionadoAg ? 'tree-name-selected' : ''}" onclick="seleccionarSegmento('AGENCIA', '${ag}', 'Agencia ${ag}')">
+                      📍 Agencia ${ag}
+                    </span>
+                  </td>
+                  <td class="tar fw-bold">$${aCart.toLocaleString("es-MX")}</td>
+                  <td class="tar">${aCli}</td>
+                  <td class="tar">$${aProm.toLocaleString("es-MX")}</td>
+                  <td class="tar fw-bold" style="color:${stAg.color};">${(aNorm * 100).toFixed(2)}%</td>
+                  <td style="text-align:center;"><span class="badge-kpi ${stAg.css}">${stAg.txt}</span></td>
+                `;
+                tbody.appendChild(trAg);
+
+                if (estaAbiertoAg) {
+                  dataAg.forEach(e => {
+                    const stEj = evaluarColor(e.normalidad, 0.95, "normalidad");
+                    const mxtBadge = (e.mxt && e.mxt > 0) ? `<span class="badge-mxt">${e.mxt} MXT</span>` : "";
+                    const trEj = document.createElement("tr");
+                    trEj.className = "row-ejec";
+                    trEj.innerHTML = `
+                      <td style="padding-left:64px;">
+                        👤 <strong>${e.ejecutivo}</strong> 
+                        <span style="color:#38bdf8; font-size:11px; font-weight:700;">(${e.meses} m)</span> 
+                        ${mxtBadge}
+                      </td>
+                      <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
+                      <td class="tar">${e.clientes}</td>
+                      <td class="tar">$${Number(e.promedio).toLocaleString("es-MX")}</td>
+                      <td class="tar fw-bold" style="color:${stEj.color};">${(e.normalidad * 100).toFixed(2)}%</td>
+                      <td style="text-align:center;"><span class="badge-kpi ${stEj.css}">${stEj.txt}</span></td>
+                    `;
+                    tbody.appendChild(trEj);
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // RENDERIZADO DE LA VISTA DE PRODUCTIVIDAD (ESTRATIFICACIÓN)
+    function renderizarProductividad() {
+      const cont = document.getElementById("contenedorProductividad");
+      cont.innerHTML = "";
+
+      const data = obtenerDatosSegmentoActivo();
+      const rangos = DB.rangosProductividad || [];
+      const totalEjecs = data.length;
+      const totalCart = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+
+      if (!rangos.length) {
+        cont.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">No se encontraron rangos de productividad en la hoja Metas_Nivel.</div>`;
+        return;
+      }
+
+      rangos.forEach((r, idx) => {
+        const enRango = data.filter(e => {
+          const c = Number(e.cartera) || 0;
+          return c >= r.desde && c <= r.hasta;
+        });
+
+        const sumaCartRango = enRango.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+        const pctEjecs = totalEjecs > 0 ? Math.round((enRango.length / totalEjecs) * 100) : 0;
+        const pctCart = totalCart > 0 ? Math.round((sumaCartRango / totalCart) * 100) : 0;
+        const abierto = !!rangosAbiertos[idx];
+
+        const card = document.createElement("div");
+        card.className = "rango-card";
+
+        let filasEjecs = "";
+        if (abierto) {
+          if (enRango.length === 0) {
+            filasEjecs = `<tr><td colspan="5" style="text-align:center; padding:12px; color:var(--text-muted);">Sin ejecutivos en este rango.</td></tr>`;
+          } else {
+            const ordenados = [...enRango].sort((a, b) => b.cartera - a.cartera);
+            filasEjecs = ordenados.map((e, i) => `
+              <tr>
+                <td><span style="color:var(--text-muted); font-weight:700;">#${i + 1}</span> <strong>${e.ejecutivo}</strong></td>
+                <td><span style="color:#38bdf8; font-weight:700;">${e.meses} meses</span></td>
+                <td>📍 ${e.agencia}</td>
+                <td class="tar fw-bold">$${Number(e.cartera).toLocaleString("es-MX")}</td>
+                <td class="tar">${e.clientes}</td>
+              </tr>
+            `).join("");
+          }
+        }
+
+        card.innerHTML = `
+          <div class="rango-header" onclick="toggleRango(${idx})">
+            <div class="rango-title">
+              <span class="tree-toggle-btn">${abierto ? '−' : '+'}</span>
+              <span>💼 Rango: ${r.etiqueta}</span>
+            </div>
+            <div class="rango-meta-info">
+              <span><strong>${enRango.length}</strong> ejecutivos (${pctEjecs}%)</span>
+              <span><strong>$${sumaCartRango.toLocaleString("es-MX")}</strong> (${pctCart}%)</span>
+            </div>
+          </div>
+          ${abierto ? `
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ejecutivo</th>
+                    <th>Antigüedad</th>
+                    <th>Agencia</th>
+                    <th class="tar">CARTERA</th>
+                    <th class="tar">Clientes</th>
+                  </tr>
+                </thead>
+                <tbody>${filasEjecs}</tbody>
+              </table>
+            </div>
+          ` : ''}
+        `;
+        cont.appendChild(card);
       });
     }
 
     function cambiarVista(vista) {
       vistaActual = vista;
       document.getElementById("btnTabJerarquia").classList.toggle("active", vista === "jerarquia");
+      document.getElementById("btnTabProductividad").classList.toggle("active", vista === "productividad");
       document.getElementById("btnTabRanking").classList.toggle("active", vista === "ranking");
-      const btnMix = document.getElementById("btnTabMix");
-      if (btnMix) btnMix.classList.toggle("active", vista === "mxt");
-      renderizar();
+      document.getElementById("btnTabTop10").classList.toggle("active", vista === "top10");
+      document.getElementById("btnTabBottom10").classList.toggle("active", vista === "bottom10");
+      document.getElementById("btnTabMix").classList.toggle("active", vista === "mxt");
+
+      renderizarTodo();
     }
 
     function mostrarToast(mensaje) {
@@ -1229,41 +1410,8 @@
       const msg = document.getElementById("toastMsg");
       msg.textContent = mensaje;
       toast.style.display = "flex";
-      setTimeout(() => {
-        toast.style.display = "none";
-      }, 3500);
+      setTimeout(() => { toast.style.display = "none"; }, 3500);
     }
-
-    function animarProgreso(desde, hasta, duracionMs, textoTitulo, textoSub, callback) {
-      const modal = document.getElementById("progressModal");
-      modal.style.display = "flex";
-      if (textoTitulo) document.getElementById("modalProgTitulo").textContent = textoTitulo;
-      if (textoSub) document.getElementById("modalProgSub").textContent = textoSub;
-
-      const inicio = performance.now();
-      function paso(ahora) {
-        const transcurrido = ahora - inicio;
-        const progreso = Math.min(1, transcurrido / duracionMs);
-        const actual = Math.round(desde + (hasta - desde) * progreso);
-        document.getElementById("modalProgPct").textContent = actual + "%";
-        document.getElementById("modalProgFill").style.width = actual + "%";
-        if (progreso < 1) {
-          requestAnimationFrame(paso);
-        } else if (callback) {
-          callback();
-        }
-      }
-      requestAnimationFrame(paso);
-    }
-
-    function forzarSincronizacion() {
-      sincronizarConDrive(true);
-    }
-
-    // Cronómetro en segundos para el modal de sincronización
-    // Cronómetro y Barra de Progreso Dinámica
-    let cronometroInterval = null;
-    let tiempoInicioSinc = 0;
 
     function iniciarCronometroModal(titulo, subtitulo) {
       const modal = document.getElementById("progressModal");
@@ -1275,8 +1423,8 @@
       if (lblTit && titulo) lblTit.textContent = titulo;
       if (lblSub && subtitulo) lblSub.textContent = subtitulo;
       if (lblSeg) lblSeg.textContent = "0.0 s";
-      if (barraFill) barraFill.style.width = "8%"; // Inicia con avance visible
-      
+      if (barraFill) barraFill.style.width = "8%";
+
       modal.style.display = "flex";
       tiempoInicioSinc = performance.now();
 
@@ -1284,8 +1432,6 @@
       cronometroInterval = setInterval(() => {
         const transcurrido = (performance.now() - tiempoInicioSinc) / 1000;
         if (lblSeg) lblSeg.textContent = transcurrido.toFixed(1) + " s";
-
-        // La barra avanza gradualmente conforme pasan los segundos
         if (barraFill) {
           const avance = Math.min(92, Math.round(8 + transcurrido * 28));
           barraFill.style.width = avance + "%";
@@ -1299,19 +1445,20 @@
         cronometroInterval = null;
       }
       const barraFill = document.getElementById("modalProgFill");
-      if (barraFill) barraFill.style.width = "100%"; // Llena al 100% al finalizar
+      if (barraFill) barraFill.style.width = "100%";
 
       setTimeout(() => {
         document.getElementById("progressModal").style.display = "none";
         if (callback) callback();
-      }, 450);
+      }, 400);
+    }
+
+    function forzarSincronizacion() {
+      sincronizarConDrive(true);
     }
 
     async function sincronizarConDrive(esManual = false) {
-      iniciarCronometroModal(
-        "Sincronizando con Drive",
-        "Descargando y procesando registros de BASE..."
-      );
+      iniciarCronometroModal("Sincronizando con Drive", "Descargando registros y rangos de BASE...");
 
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
@@ -1323,47 +1470,50 @@
           DB.agencias = d.agencias || {};
           DB.regiones = d.regiones || {};
           DB.reglasColor = d.reglasColor || DB.reglasColor;
+          DB.rangosProductividad = d.rangosProductividad || DB.rangosProductividad;
           DB.users = d.users || [];
           DB.fecha = d.fecha || "";
 
-          try {
-            localStorage.setItem("mcm_database", JSON.stringify(DB));
-          } catch (e) {}
+          try { localStorage.setItem("mcm_database", JSON.stringify(DB)); } catch (e) {}
 
-          const totalSegundos = ((performance.now() - tiempoInicioSinc) / 1000).toFixed(1);
-          document.getElementById("modalProgSub").textContent = `¡Listo en ${totalSegundos}s! Sincronización exitosa.`;
+          const totalSeg = ((performance.now() - tiempoInicioSinc) / 1000).toFixed(1);
+          document.getElementById("modalProgSub").textContent = `¡Listo en ${totalSeg}s! Actualizado.`;
 
           detenerCronometroModal(() => {
-            document.getElementById("lblCorte").textContent = "Corte Actualizado: " + (DB.fecha || "En vivo");
-            actualizarOpcionesRegion(false);
-            actualizarOpcionesAgencia(false);
-            renderizar();
-            mostrarToast("Base de datos sincronizada: Corte al " + (DB.fecha || "En vivo"));
+            actualizarIndicadorFecha();
+            renderizarTodo();
+            mostrarToast("Base sincronizada al corte: " + (DB.fecha || "En vivo"));
           });
 
         } else {
-          throw new Error(d.message || "Error de respuesta del servidor");
+          throw new Error(d.message || "Error al procesar");
         }
       } catch (err) {
-        console.warn("Fallo o demora en vivo, usando copia local:", err);
+        console.warn("Fallo en vivo, usando respaldo local:", err);
         cargarCopiaLocal();
-        document.getElementById("modalProgSub").textContent = "Sin conexión en vivo. Se cargó la copia local.";
+        document.getElementById("modalProgSub").textContent = "Sin conexión en vivo. Se cargó copia local.";
         detenerCronometroModal(() => {
-          actualizarOpcionesRegion(false);
-          actualizarOpcionesAgencia(false);
-          renderizar();
+          actualizarIndicadorFecha();
+          renderizarTodo();
           mostrarToast("Modo Offline: Corte local " + (DB.fecha || ""));
         });
       }
     }
-    
+
+    function actualizarIndicadorFecha() {
+      const lbl = document.getElementById("lblFechaCorteTexto");
+      if (lbl) {
+        lbl.textContent = "Corte: " + (DB.fecha || "En vivo");
+      }
+    }
+
     function cargarCopiaLocal() {
       try {
         const local = localStorage.getItem("mcm_database");
         if (local) {
           const parsed = JSON.parse(local);
           DB = parsed;
-          if (DB.fecha) document.getElementById("lblCorte").textContent = "Corte Local: " + DB.fecha;
+          actualizarIndicadorFecha();
         }
       } catch(e) {}
     }
