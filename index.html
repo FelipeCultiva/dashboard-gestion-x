@@ -28,29 +28,25 @@
     html, body {
       width: 100%;
       max-width: 100vw;
-      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
       margin: 0;
       padding: 0;
+      -webkit-text-size-adjust: 100%;
     }
 
     body { 
-      background: var(--bg); 
-      color: var(--text); 
       padding: 10px; 
       min-height: 100vh; 
-      -webkit-text-size-adjust: 100%;
     }
 
     #appContainer {
       width: 100%;
       max-width: 100%;
-      overflow-x: hidden;
+      padding-top: 0;
     }
 
-    /* BARRA FIJA SUPERIOR STICKY */
-    /* CABECERA PERMANENTE Y FIJA EN PC Y MÓVIL */
-    /* BARRA SUPERIOR (FLUJO NATURAL, NO TAPA NADA) */
-    /* BARRA SUPERIOR ADAPTABLE (PC Y MÓVIL) */
+    /* BARRA SUPERIOR ADAPTABLE */
     .sticky-header {
       background: var(--bg);
       border-bottom: 1px solid var(--card-border);
@@ -61,12 +57,6 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-    }
-
-    #appContainer {
-      width: 100%;
-      max-width: 100%;
-      padding-top: 0;
     }
 
     .brand-group {
@@ -84,6 +74,15 @@
       gap: 6px;
     }
 
+    .badge-scope {
+      font-size: 10px;
+      background: rgba(37, 99, 235, 0.25);
+      color: #93c5fd;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+
     /* FECHA SIEMPRE COMPLETA Y VISIBLE */
     .date-banner-fixed {
       background: rgba(2, 132, 199, 0.15);
@@ -96,7 +95,7 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      white-space: normal; /* Permite mostrar la fecha completa sin cortarla con '...' */
+      white-space: normal;
       line-height: 1.3;
     }
 
@@ -323,16 +322,14 @@
       border-color: var(--primary);
     }
 
-    /* TABLA DINÁMICA ÁRBOL */
-    /* TABLA CON ENCABEZADOS CONGELADOS AL HACER SCROLL */
     /* TABLA CON ENCABEZADOS PERMANENTES CONGELADOS */
     .table-responsive {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       overflow-x: auto;
-      overflow-y: auto;       /* Habilita el anclaje sticky del encabezado */
-      max-height: 72vh;       /* Mantiene visible el encabezado al hacer scroll vertical */
+      overflow-y: auto;
+      max-height: 72vh;
       width: 100%;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
@@ -342,19 +339,18 @@
     table {
       width: 100%;
       min-width: 580px;
-      border-collapse: separate; /* Permite adherencia estricta en navegadores web */
+      border-collapse: separate;
       border-spacing: 0;
       font-size: 12.5px;
       text-align: left;
     }
 
-    /* ENCABEZADOS DE COLUMNA SIEMPRE VISIBLES */
     thead th {
       position: -webkit-sticky;
       position: sticky;
-      top: 0;                  /* Se congela en el tope del área visible de la tabla */
+      top: 0;
       z-index: 50;
-      background: #0b1120 !important; /* Fondo opaco sólido para que no trasluzcan las filas */
+      background: #0b1120 !important;
       padding: 10px 10px;
       color: var(--text-muted);
       font-size: 11px;
@@ -363,7 +359,6 @@
       border-bottom: 2px solid #334155;
     }
 
-    /* Borde entre celdas al usar border-collapse: separate */
     td {
       padding: 8px 10px;
       border-top: 1px solid #1e293b;
@@ -433,7 +428,7 @@
       background: transparent;
     }
 
-    /* VISTA PRODUCTIVIDAD (ESTRATIFICACIÓN) */
+    /* VISTA PRODUCTIVIDAD */
     .rango-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -470,31 +465,23 @@
     #pantallaLogin {
       position: fixed;
       inset: 0;
-      background: rgba(11, 17, 32, 0.96);
-      backdrop-filter: blur(8px);
+      background: rgba(11, 17, 32, 0.98);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
+      padding: 16px;
     }
 
     .login-box {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 28px 22px;
+      padding: 26px 20px;
       width: 100%;
-      max-width: 370px;
+      max-width: 360px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       text-align: center;
-    }
-
-    .login-logo-img {
-      max-width: 110px;
-      height: auto;
-      margin: 0 auto 10px;
-      display: block;
-      border-radius: 12px;
     }
 
     .input-login {
@@ -592,29 +579,25 @@
               <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
             </filter>
           </defs>
-          <!-- Cabeza Roja Superior -->
           <circle cx="100" cy="32" r="24" fill="url(#redGrad)" filter="url(#dropGlow)"/>
           <ellipse cx="94" cy="24" rx="7" ry="4" fill="#ffffff" opacity="0.6"/>
           
-          <!-- Esfera Izquierda (+) -->
           <circle cx="46" cy="74" r="26" fill="url(#redGrad)" filter="url(#dropGlow)"/>
           <ellipse cx="40" cy="64" rx="7" ry="4" fill="#ffffff" opacity="0.6"/>
           <path d="M46 62 V86 M34 74 H58" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
 
-          <!-- Letra C Central Cromada -->
           <path d="M124 54 C85 46 68 70 76 96 C82 118 112 124 126 102 L115 95 C104 108 88 104 85 91 C82 76 95 62 116 66 Z" fill="url(#silverGrad)" filter="url(#dropGlow)"/>
 
-          <!-- Esfera Derecha (-) -->
           <circle cx="154" cy="80" r="24" fill="url(#redGrad)" filter="url(#dropGlow)"/>
           <ellipse cx="148" cy="72" rx="6" ry="3.5" fill="#ffffff" opacity="0.6"/>
           <path d="M142 80 H166" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
 
-          <!-- Tipografía "Más con Menos" -->
           <text x="100" y="148" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="19" fill="#ef4444" stroke="#7f1d1d" stroke-width="0.6" letter-spacing="-0.5">
             Más con Menos
           </text>
         </svg>
       </div>
+
       <h2 style="font-size:1.35rem; font-weight:800; margin-bottom:3px;">GESTIÓN X</h2>
       <p style="color:var(--text-muted); font-size:11.5px; margin-bottom:18px;">Microfinanciera Más con Menos (McM)</p>
 
@@ -636,8 +619,6 @@
   <!-- APLICACIÓN PRINCIPAL -->
   <div id="appContainer" style="display:none;">
     
-    <!-- BARRA PERMANENTE STICKY -->
-    <!-- BARRA PERMANENTE SUPERIOR -->
     <!-- BARRA PERMANENTE SUPERIOR -->
     <header class="sticky-header">
       <div class="brand-group">
@@ -770,6 +751,7 @@
   </div>
 
   <script>
+    // URL DE LA API DE GOOGLE APPS SCRIPT
     const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxaPQoU2Jk1acDe3VmiT8GQcnZT6t_RgUHOZYgb5wPQVYWvLX8VGKRWDzwuOKmvGvBL/exec";
 
     let DB = {
@@ -795,15 +777,13 @@
     let usuarioActual = null;
     let vistaActual = "jerarquia";
     let segmentoSeleccionado = null; // { tipo: 'TODO'|'TERRITORIO'|'REGION'|'AGENCIA', id: '...' }
-    let arbolEstado = {}; // Guarda qué nodos están abiertos { 'terr_Territorio 1': true, ... }
-    let rangosAbiertos = {}; // Para la vista de productividad
+    let arbolEstado = {}; // Guarda qué nodos están abiertos
+    let rangosAbiertos = {};
     let cronometroInterval = null;
     let tiempoInicioSinc = 0;
 
-    // INICIO
     // INICIO BLINDADO PARA IN-APP BROWSERS (WHATSAPP, SAFARI IOS, CHROME)
     document.addEventListener("DOMContentLoaded", () => {
-      // 1. Manejo seguro de Storage (evita colapso si WhatsApp bloquea cookies/almacenamiento)
       let savedUser = "";
       let sesion = null;
       try {
@@ -818,7 +798,6 @@
         if (txtU) txtU.value = savedUser;
       }
 
-      // 2. Verificar si ya había sesión iniciada
       if (sesion) {
         try {
           usuarioActual = JSON.parse(sesion);
@@ -827,7 +806,6 @@
         } catch(e) {}
       }
 
-      // 3. Forzar visibilidad inmediata de la pantalla de login
       const pLogin = document.getElementById("pantallaLogin");
       const pApp = document.getElementById("appContainer");
       if (pLogin) pLogin.style.display = "flex";
@@ -835,7 +813,6 @@
 
       cargarCopiaLocal();
 
-      // 4. Ejecutar la sincronización de usuarios con retraso seguro para no congelar el render inicial
       setTimeout(() => {
         precargarUsuariosDesdeDrive();
       }, 250);
@@ -844,9 +821,8 @@
     async function precargarUsuariosDesdeDrive() {
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
-        // Timeout de seguridad de 5 segundos para que WhatsApp nunca se quede colgado en blanco
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
 
         const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`, {
           cache: "no-store",
@@ -879,7 +855,9 @@
       btn.textContent = "Validando...";
       err.style.display = "none";
 
-      localStorage.setItem("mcm_saved_username", u);
+      try {
+        localStorage.setItem("mcm_saved_username", u);
+      } catch (errStorage) {}
 
       if (!DB.users || !DB.users.length) {
         try {
@@ -896,8 +874,12 @@
 
       if (found) {
         usuarioActual = found;
-        sessionStorage.setItem("mcm_user_session", JSON.stringify(found));
-        localStorage.setItem("mcm_user_session", JSON.stringify(found));
+        try {
+          sessionStorage.setItem("mcm_user_session", JSON.stringify(found));
+          localStorage.setItem("mcm_user_session", JSON.stringify(found));
+        } catch (errStorage) {
+          console.warn("Storage restringido por el navegador, continuando en memoria:", errStorage);
+        }
         iniciarAplicacion();
       } else {
         err.style.display = "block";
@@ -970,7 +952,7 @@
       return data;
     }
 
-    // OBTENCIÓN DE DATOS FILTRADOS POR EL SEGMENTO ACTIVO (CLIC EN EL NOMBRE)
+    // OBTENCIÓN DE DATOS FILTRADOS POR EL SEGMENTO ACTIVO
     function obtenerDatosSegmentoActivo() {
       const base = obtenerDatosBaseUsuario();
       if (!segmentoSeleccionado || segmentoSeleccionado.tipo === "TODO") return base;
@@ -1017,7 +999,6 @@
       const data = obtenerDatosSegmentoActivo();
       const seg = segmentoSeleccionado || { tipo: "TODO", label: "Consolidado General" };
 
-      // Actualizar Título del Segmento Activo
       const lblSeg = document.getElementById("lblSegmentoActivo");
       lblSeg.innerHTML = `<span>📍 Segmento Activo:</span> <strong>${seg.label}</strong>`;
 
@@ -1029,7 +1010,6 @@
       const promReal = cliReal > 0 ? Math.round(cartReal / cliReal) : 0;
       const numEjecs = data.length;
 
-      // Metas
       let metaCart = 0;
       let metaCli = 0;
       let metaProm = 0;
@@ -1055,13 +1035,11 @@
           : 0.95;
       }
 
-      // Metas Fijas Institucionales
       const metaPromEjec = 725000;
       const metaCliEjec = 50;
       const promEjecReal = numEjecs > 0 ? Math.round(cartReal / numEjecs) : 0;
       const cliEjecReal = numEjecs > 0 ? Math.round(cliReal / numEjecs) : 0;
 
-      // Brechas
       const diffCart = cartReal - metaCart;
       const gapCartHtml = metaCart > 0 
         ? (diffCart >= 0 ? `<span class="kpi-gap gap-supero">+Superó: $${diffCart.toLocaleString("es-MX")}</span>` : `<span class="kpi-gap gap-falta">Faltan: $${Math.abs(diffCart).toLocaleString("es-MX")}</span>`)
@@ -1088,7 +1066,6 @@
       const diffCliEjec = cliEjecReal - metaCliEjec;
       const gapCliEjecHtml = `<span class="kpi-gap ${diffCliEjec >= 0 ? 'gap-supero' : 'gap-falta'}">${diffCliEjec >= 0 ? '+Superó: ' + diffCliEjec : 'Faltan: ' + Math.abs(diffCliEjec)}</span>`;
 
-      // Estados
       const stCart = evaluarColor(cartReal, metaCart, "cartera");
       const stCli  = evaluarColor(cliReal, metaCli, "clientes");
       const stProm = evaluarColor(promReal, metaProm, "promedio");
@@ -1164,7 +1141,6 @@
       const tbody = document.getElementById("tablaCuerpo");
       tbody.innerHTML = "";
       
-      // FILTRO POR SEGMENTO ACTIVO (Territorio, Región o Agencia seleccionada en Estructura)
       const dataActiva = obtenerDatosSegmentoActivo();
 
       if (!dataActiva || dataActiva.length === 0) {
@@ -1172,7 +1148,7 @@
         return;
       }
 
-      // VISTA TOP 10 Y BOTTOM 10 (DEL SEGMENTO ACTIVO)
+      // VISTA TOP 10 Y BOTTOM 10
       if (vistaActual === "top10" || vistaActual === "bottom10") {
         const esTop = (vistaActual === "top10");
         const evaluados = [...dataActiva];
@@ -1223,7 +1199,7 @@
         return;
       }
 
-      // VISTA RANKING COMPLETO (DEL SEGMENTO ACTIVO)
+      // VISTA RANKING COMPLETO
       if (vistaActual === "ranking") {
         const ordenados = [...dataActiva].sort((a, b) => b.cartera - a.cartera);
         ordenados.forEach((e, idx) => {
@@ -1249,7 +1225,7 @@
         return;
       }
 
-      // VISTA MIX MCM VS MXT (DEL SEGMENTO ACTIVO)
+      // VISTA MIX MCM VS MXT
       if (vistaActual === "mxt") {
         const cTrad = dataActiva.reduce((s, e) => s + (Number(e.carteraTrad) || 0), 0);
         const clTrad = dataActiva.reduce((s, e) => s + (Number(e.clientesTrad) || 0), 0);
@@ -1278,7 +1254,7 @@
         return;
       }
 
-      // VISTA ESTRUCTURA DINÁMICA (ÁRBOL EXPANDIBLE + / -)
+      // VISTA ESTRUCTURA DINÁMICA (ÁRBOL EXPANDIBLE)
       const baseData = obtenerDatosBaseUsuario();
       const territorios = [...new Set(baseData.map(e => e.territorio))].filter(Boolean).sort();
 
@@ -1401,7 +1377,7 @@
       });
     }
 
-    // RENDERIZADO DE LA VISTA DE PRODUCTIVIDAD (ESTRATIFICACIÓN)
+    // RENDERIZADO DE PRODUCTIVIDAD (COMPACTO)
     function renderizarProductividad() {
       const cont = document.getElementById("contenedorProductividad");
       cont.innerHTML = "";
@@ -1614,8 +1590,10 @@
     }
 
     function cerrarSesion() {
-      sessionStorage.removeItem("mcm_user_session");
-      localStorage.removeItem("mcm_user_session");
+      try {
+        sessionStorage.removeItem("mcm_user_session");
+        localStorage.removeItem("mcm_user_session");
+      } catch(e) {}
       location.reload();
     }
   </script>
