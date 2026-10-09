@@ -572,7 +572,7 @@
 <body>
 
   <!-- LOGIN -->
-  <div id="pantallaLogin">
+  <div id="pantallaLogin" style="display: flex;">
     <div class="login-box">
       <!-- LOGO CORPORATIVO MCM OFICIAL (SVG NATIVO DIRECTO) -->
       <div style="margin: 0 auto 12px; display: flex; justify-content: center;">
@@ -801,11 +801,24 @@
     let tiempoInicioSinc = 0;
 
     // INICIO
-    document.addEventListener("DOMContentLoaded", async () => {
-      const savedUser = localStorage.getItem("mcm_saved_username") || "";
-      if (savedUser) document.getElementById("txtUser").value = savedUser;
+    // INICIO BLINDADO PARA IN-APP BROWSERS (WHATSAPP, SAFARI IOS, CHROME)
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Manejo seguro de Storage (evita colapso si WhatsApp bloquea cookies/almacenamiento)
+      let savedUser = "";
+      let sesion = null;
+      try {
+        savedUser = localStorage.getItem("mcm_saved_username") || "";
+        sesion = sessionStorage.getItem("mcm_user_session") || localStorage.getItem("mcm_user_session");
+      } catch (errStorage) {
+        console.warn("Storage restringido por el navegador embebido:", errStorage);
+      }
 
-      const sesion = sessionStorage.getItem("mcm_user_session") || localStorage.getItem("mcm_user_session");
+      if (savedUser) {
+        const txtU = document.getElementById("txtUser");
+        if (txtU) txtU.value = savedUser;
+      }
+
+      // 2. Verificar si ya había sesión iniciada
       if (sesion) {
         try {
           usuarioActual = JSON.parse(sesion);
@@ -814,29 +827,44 @@
         } catch(e) {}
       }
 
-      document.getElementById("pantallaLogin").style.display = "flex";
-      document.getElementById("appContainer").style.display = "none";
+      // 3. Forzar visibilidad inmediata de la pantalla de login
+      const pLogin = document.getElementById("pantallaLogin");
+      const pApp = document.getElementById("appContainer");
+      if (pLogin) pLogin.style.display = "flex";
+      if (pApp) pApp.style.display = "none";
+
       cargarCopiaLocal();
-      await precargarUsuariosDesdeDrive();
+
+      // 4. Ejecutar la sincronización de usuarios con retraso seguro para no congelar el render inicial
+      setTimeout(() => {
+        precargarUsuariosDesdeDrive();
+      }, 250);
     });
 
     async function precargarUsuariosDesdeDrive() {
-      iniciarCronometroModal("Conectando con Drive", "Actualizando usuarios y permisos en vivo...");
       try {
         const sep = APPS_SCRIPT_WEBAPP_URL.includes("?") ? "&" : "?";
-        const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`, { cache: "no-store" });
+        // Timeout de seguridad de 5 segundos para que WhatsApp nunca se quede colgado en blanco
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const res = await fetch(`${APPS_SCRIPT_WEBAPP_URL}${sep}action=getUsers&_t=${Date.now()}`, {
+          cache: "no-store",
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
         const d = await res.json();
         if (d && d.status === "success" && Array.isArray(d.users) && d.users.length > 0) {
           DB.users = d.users;
           try { localStorage.setItem("mcm_users_cache", JSON.stringify(d.users)); } catch(e) {}
         }
       } catch (err) {
+        console.warn("Consulta inicial de usuarios no completada en visor WhatsApp, usando respaldo:", err);
         try {
           const cached = localStorage.getItem("mcm_users_cache");
           if (cached) DB.users = JSON.parse(cached);
         } catch(e) {}
-      } finally {
-        detenerCronometroModal();
       }
     }
 
