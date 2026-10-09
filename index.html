@@ -50,61 +50,54 @@
     /* BARRA FIJA SUPERIOR STICKY */
     /* CABECERA PERMANENTE Y FIJA EN PC Y MÓVIL */
     /* BARRA SUPERIOR (FLUJO NATURAL, NO TAPA NADA) */
+    /* BARRA SUPERIOR ADAPTABLE (PC Y MÓVIL) */
     .sticky-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 48px;
-      z-index: 1000;
-      background: rgba(11, 17, 32, 0.98);
-      backdrop-filter: blur(8px);
+      background: var(--bg);
       border-bottom: 1px solid var(--card-border);
-      padding: 6px 12px;
+      padding: 8px 10px 10px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    /* Espacio superior para que la barra fija no tape la primera tarjeta */
     #appContainer {
       width: 100%;
       max-width: 100%;
-      padding-top: 54px;
+      padding-top: 0;
     }
 
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 6px;
-      overflow: hidden;
-      white-space: nowrap;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .brand-title {
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
-    /* FECHA SIEMPRE VISIBLE Y COMPACTA */
+    /* FECHA SIEMPRE COMPLETA Y VISIBLE */
     .date-banner-fixed {
       background: rgba(2, 132, 199, 0.15);
       border: 1px solid rgba(56, 189, 248, 0.35);
       color: #38bdf8;
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      max-width: 180px;
-    }
-    @media (min-width: 600px) {
-      .date-banner-fixed { max-width: 450px; }
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: normal; /* Permite mostrar la fecha completa sin cortarla con '...' */
+      line-height: 1.3;
     }
 
     .user-actions {
@@ -118,7 +111,7 @@
       background: #0284c7;
       color: white;
       border: none;
-      padding: 5px 8px;
+      padding: 6px 10px;
       border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
@@ -132,7 +125,7 @@
       background: #334155;
       color: #f8fafc;
       border: none;
-      padding: 5px 8px;
+      padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 11px;
@@ -332,41 +325,45 @@
 
     /* TABLA DINÁMICA ÁRBOL */
     /* TABLA CON ENCABEZADOS CONGELADOS AL HACER SCROLL */
+    /* TABLA CON ENCABEZADOS PERMANENTES CONGELADOS */
     .table-responsive {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       overflow-x: auto;
-      overflow-y: visible;
+      overflow-y: auto;       /* Habilita el anclaje sticky del encabezado */
+      max-height: 72vh;       /* Mantiene visible el encabezado al hacer scroll vertical */
       width: 100%;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
+      position: relative;
     }
 
     table {
       width: 100%;
-      min-width: 560px;
-      border-collapse: collapse;
+      min-width: 580px;
+      border-collapse: separate; /* Permite adherencia estricta en navegadores web */
+      border-spacing: 0;
       font-size: 12.5px;
       text-align: left;
     }
 
-    /* ENCABEZADO PERSISTENTE EN LA TABLA */
+    /* ENCABEZADOS DE COLUMNA SIEMPRE VISIBLES */
     thead th {
       position: -webkit-sticky;
       position: sticky;
-      top: 48px; /* Se ancla exactamente debajo de los 48px de la barra superior */
-      z-index: 900;
-      background: #0f172a !important; /* Fondo sólido oscuro para tapar las filas que pasan debajo */
-      padding: 9px 10px;
+      top: 0;                  /* Se congela en el tope del área visible de la tabla */
+      z-index: 50;
+      background: #0b1120 !important; /* Fondo opaco sólido para que no trasluzcan las filas */
+      padding: 10px 10px;
       color: var(--text-muted);
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 700;
       border-bottom: 2px solid #334155;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
     }
 
+    /* Borde entre celdas al usar border-collapse: separate */
     td {
       padding: 8px 10px;
       border-top: 1px solid #1e293b;
@@ -640,6 +637,7 @@
   <div id="appContainer" style="display:none;">
     
     <!-- BARRA PERMANENTE STICKY -->
+    <!-- BARRA PERMANENTE SUPERIOR -->
     <!-- BARRA PERMANENTE SUPERIOR -->
     <header class="sticky-header">
       <div class="brand-group">
