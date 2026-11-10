@@ -1031,11 +1031,10 @@
         metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
         
-        // Si Drive nos envió la normalidad oficial directa de la fila de totales (celda G12), se usa directamente
+        // Prioridad estricta al valor directo de G12 en Drive
         if (DB.normalidadInstitucional && DB.normalidadInstitucional > 0) {
           normVal = DB.normalidadInstitucional;
         } else {
-          // Respaldo ponderado solo si la celda viniera vacía
           const sumCartOrig = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
           normVal = sumCartOrig > 0 
             ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartOrig) 
