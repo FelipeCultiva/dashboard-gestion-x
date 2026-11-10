@@ -1016,6 +1016,7 @@
       let metaProm = 0;
       let normVal = 0;
 
+      // CÁLCULO DE METAS Y NORMALIDAD SEGÚN EL NIVEL SELECCIONADO
       if (seg.tipo === "AGENCIA" && DB.agencias[seg.id]) {
         metaCart = DB.agencias[seg.id].metaCartera;
         metaCli = DB.agencias[seg.id].metaClientes;
@@ -1026,12 +1027,21 @@
         metaCli = DB.regiones[seg.id].metaClientes;
         metaProm = DB.regiones[seg.id].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
         normVal = DB.regiones[seg.id].normalidad;
+      } else if (seg.tipo === "TERRITORIO") {
+        // NIVEL TERRITORIAL: Suma sus metas y calcula la normalidad de ese territorio específico
+        metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
+        metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
+        metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
+        const sumCartTerr = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
+        normVal = sumCartTerr > 0 
+          ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartTerr) 
+          : 0.95;
       } else {
+        // CONSOLIDADO GENERAL (TODO): Usa el valor directo institucional de Drive (G12: 93.96%)
         metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
         metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
         metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
         
-        // Prioridad estricta al valor directo de G12 en Drive
         if (DB.normalidadInstitucional && DB.normalidadInstitucional > 0) {
           normVal = DB.normalidadInstitucional;
         } else {
