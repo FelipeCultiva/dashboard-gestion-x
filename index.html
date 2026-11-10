@@ -1038,16 +1038,39 @@
           : 0.95;
       } else {
         // CONSOLIDADO GENERAL (TODO): Usa el valor directo institucional de Drive (G12: 93.96%)
-        metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
-        metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
-        metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
-        
-        if (DB.normalidadInstitucional && DB.normalidadInstitucional > 0) {
-          normVal = DB.normalidadInstitucional;
+        // CÁLCULO ESTRICTO POR NIVEL DE SEGMENTACIÓN
+        if (!seg || seg.tipo === "TODO") {
+          // 1. CONSOLIDADO GENERAL: Normalidad directa institucional de Drive (G12: 93.96%)
+          metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
+          metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
+          metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
+          
+          if (DB.normalidadInstitucional && DB.normalidadInstitucional > 0) {
+            normVal = DB.normalidadInstitucional;
+          } else {
+            normVal = cartReal > 0 
+              ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / cartReal) 
+              : 0.95;
+          }
+        } else if (seg.tipo === "AGENCIA" && DB.agencias[seg.id]) {
+          // 2. NIVEL AGENCIA
+          metaCart = DB.agencias[seg.id].metaCartera;
+          metaCli = DB.agencias[seg.id].metaClientes;
+          metaProm = DB.agencias[seg.id].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+          normVal = DB.agencias[seg.id].normalidad;
+        } else if (seg.tipo === "REGION" && DB.regiones[seg.id]) {
+          // 3. NIVEL REGIÓN
+          metaCart = DB.regiones[seg.id].metaCartera;
+          metaCli = DB.regiones[seg.id].metaClientes;
+          metaProm = DB.regiones[seg.id].metaPromedio || (metaCli > 0 ? Math.round(metaCart / metaCli) : 0);
+          normVal = DB.regiones[seg.id].normalidad;
         } else {
-          const sumCartOrig = data.reduce((s, e) => s + (Number(e.cartera) || 0), 0);
-          normVal = sumCartOrig > 0 
-            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / sumCartOrig) 
+          // 4. NIVEL TERRITORIO (Territorio 1, Territorio 2, etc.):
+          metaCart = data.reduce((s, e) => s + (Number(e.metaCartera) || 0), 0);
+          metaCli = data.reduce((s, e) => s + (Number(e.metaClientes) || 0), 0);
+          metaProm = metaCli > 0 ? Math.round(metaCart / metaCli) : 0;
+          normVal = cartReal > 0 
+            ? (data.reduce((s, e) => s + ((Number(e.normalidad) || 0) * (Number(e.cartera) || 0)), 0) / cartReal) 
             : 0.95;
         }
       }
